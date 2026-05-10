@@ -1,0 +1,52 @@
+---
+// Site footer: name, external profile links, and build credit.
+import { profile } from '../lib/facts';
+import { withBase } from '../lib/paths';
+
+// Hardcoded, not new Date(): a static build should not silently roll the year
+// forward on a rebuild in some later year.
+const year = '2026';
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__meta mono">
+      <span>{profile.name}</span>
+      <span class="site-footer__links">
+        <a class="link" href={profile.links.github} target="_blank" rel="noopener">GitHub</a>
+        <a class="link" href={profile.links.linkedin} target="_blank" rel="noopener">LinkedIn</a>
+        <a class="link" href={`mailto:${profile.links.email}`}>Email</a>
+        <a class="link" href={withBase('/now/')}>Now</a>
+      </span>
+      <span class="site-footer__built">Built with Astro. {year}.</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-9);
+    padding-block: var(--space-6);
+    border-top: var(--border);
+  }
+  .site-footer__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-5);
+    font-size: var(--step--1);
+    color: var(--text-500);
+  }
+  .site-footer__links {
+    display: flex;
+    gap: var(--space-4);
+  }
+  .site-footer__built {
+    margin-left: auto;
+  }
+  @media (max-width: 34rem) {
+    .site-footer__built {
+      margin-left: 0;
+    }
+  }
+</style>

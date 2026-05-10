@@ -1,0 +1,270 @@
+@import './fonts.css';
+@import './tokens.css';
+@import './graph.css';
+
+/* Smooth cross-page crossfade where supported. Pure CSS, no JS. */
+@view-transition {
+  navigation: auto;
+}
+
+/* ---------- reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  background: var(--ink-900);
+}
+body {
+  min-height: 100svh;
+  background: transparent;
+  color: var(--text-100);
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
+}
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+ul,
+ol {
+  list-style: none;
+  padding: 0;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+::selection {
+  background: var(--signal-tint);
+  color: var(--text-100);
+}
+
+/* ---------- cursor-following backlight ---------- */
+/* A soft glow that trails the pointer across the whole page, behind all content.
+   Sits over the html background (body is transparent). A tiny script sets
+   --mx/--my; it moves via transform (GPU-composited, no per-frame repaint).
+   Fine pointers only; disabled under reduced motion. */
+.bg-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 52rem;
+  height: 52rem;
+  margin: -26rem 0 0 -26rem;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(126, 166, 228, 0.16),
+    rgba(126, 166, 228, 0.06) 38%,
+    transparent 64%
+  );
+  transform: translate(var(--mx, 50vw), var(--my, 24vh));
+  transition: transform 240ms var(--ease);
+  will-change: transform;
+}
+
+/* ---------- typography ---------- */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- links + focus ---------- */
+.link {
+  color: var(--text-100);
+  text-decoration: underline;
+  text-decoration-color: var(--line-500);
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.link:hover,
+.link:focus-visible {
+  text-decoration-color: var(--signal-500);
+}
+:focus-visible {
+  outline: 2px solid var(--signal-500);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ---------- skip link ---------- */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--ink-800);
+  color: var(--text-100);
+  padding: var(--space-2) var(--space-4);
+  border: var(--border-strong);
+}
+.skip-link:focus {
+  left: var(--space-4);
+  top: var(--space-4);
+}
+
+/* ---------- layout primitives ---------- */
+.container {
+  width: 100%;
+  max-width: var(--content-width);
+  margin-inline: auto;
+  padding-inline: var(--space-5);
+}
+.stack > * + * {
+  margin-top: var(--flow, var(--space-4));
+}
+
+/* ---------- mono voice ---------- */
+.mono {
+  font-family: var(--font-mono);
+  font-feature-settings: 'ss02' on;
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-500);
+}
+
+/* ---------- panel (the recurring instrument unit) ---------- */
+.panel {
+  background: var(--ink-800);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+}
+.panel__cap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-500);
+}
+
+/* ---------- category dot ---------- */
+.dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--cat, var(--text-500));
+  flex: none;
+}
+
+/* ---------- prose (MDX case-study body) ---------- */
+.prose {
+  max-width: var(--measure);
+}
+.prose > * + * {
+  margin-top: var(--space-4);
+}
+.prose h2 {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--step-0);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--signal-500);
+  margin-top: var(--space-7);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--border);
+}
+.prose h2:first-child {
+  margin-top: 0;
+}
+.prose p {
+  color: var(--text-300);
+}
+.prose strong {
+  color: var(--text-100);
+  font-weight: 600;
+}
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--ink-850);
+  border: var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  color: var(--text-100);
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: linear-gradient(180deg, #f7cd68, var(--signal-500) 62%);
+  color: #12151b;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 500;
+  border-radius: var(--radius);
+  border: 1px solid var(--signal-600);
+  transition: filter var(--dur) var(--ease), transform var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+.btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px -8px rgba(242, 193, 78, 0.5);
+}
+.btn:active {
+  transform: translateY(0);
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--text-100);
+  border: var(--border-strong);
+}
+.btn--ghost:hover {
+  background: var(--ink-700);
+  border-color: var(--line-500);
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  /* Near-zero rather than 0 keeps animationend and transitionend firing, so any
+     JS waiting on those events still runs. View transitions are cut outright below. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

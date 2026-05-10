@@ -1,0 +1,90 @@
+---
+// Base HTML shell: head meta for SEO and social cards, the js flag, and the page
+// chrome (header, footer, cursor backlight) wrapped around the routed content.
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { profile } from '../lib/facts';
+import { withBase } from '../lib/paths';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Root-relative OG image path, e.g. "/og/docket.png". Falls back to the site default. */
+  image?: string;
+}
+
+const { title, description, image = '/og/home.png' } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL(withBase(image), Astro.site).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <meta name="theme-color" content="#0e1217" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={withBase('/favicon-32.png')} type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />
+    <link rel="sitemap" href={withBase('/sitemap-index.xml')} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={profile.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Progressive enhancement flag: the evidence graph swaps in only when JS runs. -->
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body>
+    <span class="bg-glow" aria-hidden="true"></span>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <script is:inline>
+      // Cursor-following backlight: sets --mx/--my for the CSS gradient, throttled to
+      // one write per frame. Skips coarse pointers and reduced-motion users.
+      (function () {
+        if (!matchMedia('(pointer: fine)').matches) return;
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        var root = document.documentElement;
+        var x = 0, y = 0, queued = 0;
+        addEventListener(
+          'pointermove',
+          function (e) {
+            x = e.clientX;
+            y = e.clientY;
+            if (queued) return;
+            queued = requestAnimationFrame(function () {
+              root.style.setProperty('--mx', x + 'px');
+              root.style.setProperty('--my', y + 'px');
+              queued = 0;
+            });
+          },
+          { passive: true },
+        );
+      })();
+    </script>
+  </body>
+</html>

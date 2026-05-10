@@ -1,0 +1,81 @@
+/* Design tokens as CSS custom properties, the palette, type scale, and spacing.
+   Concept: a four-channel instrument, dark graphite with one reserved amber signal. */
+
+:root {
+  /* Surfaces (blue graphite, deliberately not near-black) */
+  --ink-900: #0e1217;
+  --ink-850: #0a0e13;
+  --ink-800: #151a21;
+  --ink-700: #1b212a;
+  --line-600: #232a33;
+  --line-500: #333d4a;
+
+  /* Text */
+  --text-100: #e6eaf0;
+  --text-300: #9ba6b4;
+  --text-500: #838f9e; /* Tertiary labels, at the lightness floor that still clears WCAG AA on ink-900. */
+
+  /* Category channels (category drives color, nothing else) */
+  --cat-ml: #5ac8d8;
+  --cat-systems: #7fc96f;
+  --cat-web: #ae9deb;
+  --cat-infra: #e88ab0;
+
+  /* Signal (interaction only: focus, active, link underline) */
+  --signal-500: #f2c14e;
+  --signal-600: #d9a93b;
+  --signal-tint: rgba(242, 193, 78, 0.12);
+
+  /* Typography */
+  --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', 'Consolas', monospace;
+
+  /* Fluid type scale (~1.2 minor third) */
+  --step--1: 0.833rem;
+  --step-0: 1rem;
+  --step-1: 1.2rem;
+  --step-2: 1.44rem;
+  --step-3: 1.728rem;
+  --step-4: clamp(2rem, 1.4rem + 2.4vw, 2.6rem);
+  --step-5: clamp(2.6rem, 1.6rem + 4.2vw, 4.4rem);
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+
+  /* Structure */
+  --measure: 66ch;
+  --content-width: 1080px;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --border: 1px solid var(--line-600);
+  --border-strong: 1px solid var(--line-500);
+
+  /* Motion */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1); /* Expo.out: fast start, soft settle */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --dur: 160ms;
+  --dur-slow: 280ms;
+}
+
+/* Category color as a single lookup, used by dots, ticks, and the graph. */
+[data-cat='ml'] {
+  --cat: var(--cat-ml);
+}
+[data-cat='systems'] {
+  --cat: var(--cat-systems);
+}
+[data-cat='web'] {
+  --cat: var(--cat-web);
+}
+[data-cat='infra'] {
+  --cat: var(--cat-infra);
+}
