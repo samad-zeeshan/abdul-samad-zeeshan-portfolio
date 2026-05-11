@@ -1,0 +1,261 @@
+{
+  "profile": {
+    "name": "Abdul Samad Zeeshan",
+    "shortName": "Samad",
+    "role": "AI/ML and software engineer",
+    "thesis": "LLM outputs grounded in deterministic verification layers.",
+    "headline": "I build reliable AI and software systems.",
+    "intro": "I design systems where AI outputs are validated through schemas, tests, evaluation harnesses, and deterministic checks, so the final result is not just impressive but dependable.",
+    "location": "Edmonton, Canada",
+    "relocation": "Open to relocating anywhere in Canada.",
+    "education": "BSc Computing Science, University of Alberta, 2026",
+    "links": {
+      "github": "https://github.com/samad-zeeshan",
+      "linkedin": "https://linkedin.com/in/samad-zeeshan",
+      "email": "samad.z@outlook.com",
+      "resume": "/abdul-samad-zeeshan-resume.pdf"
+    }
+  },
+  "skills": [
+    { "id": "python", "label": "Python", "category": "ml" },
+    { "id": "lora-finetuning", "label": "LoRA fine-tuning", "category": "ml" },
+    { "id": "knowledge-distillation", "label": "Knowledge distillation", "category": "ml" },
+    { "id": "model-evaluation", "label": "Model evaluation", "category": "ml" },
+    { "id": "rag", "label": "Retrieval-augmented generation", "category": "ml" },
+    { "id": "vector-search", "label": "Vector search (FAISS)", "category": "ml" },
+    { "id": "embeddings", "label": "Embeddings", "category": "ml" },
+    { "id": "schema-gated-output", "label": "Schema-gated structured output", "category": "ml" },
+    { "id": "langgraph", "label": "LangGraph", "category": "ml" },
+    { "id": "mcp", "label": "Model Context Protocol", "category": "ml" },
+    { "id": "llm-integration", "label": "LLM integration", "category": "ml" },
+    { "id": "amazon-bedrock", "label": "Amazon Bedrock", "category": "ml" },
+
+    { "id": "go", "label": "Go", "category": "systems" },
+    { "id": "concurrency", "label": "Concurrency", "category": "systems" },
+    { "id": "cpp", "label": "C++", "category": "systems" },
+    { "id": "algorithms", "label": "Algorithms", "category": "systems" },
+    { "id": "webassembly", "label": "WebAssembly", "category": "systems" },
+    { "id": "spark", "label": "Apache Spark", "category": "systems" },
+    { "id": "data-engineering", "label": "Data engineering", "category": "systems" },
+    { "id": "stream-processing", "label": "Stream processing", "category": "systems" },
+    { "id": "neo4j", "label": "Neo4j and Cypher", "category": "systems" },
+    { "id": "dimensional-modelling", "label": "Dimensional modelling (dbt)", "category": "systems" },
+    { "id": "constraint-solving", "label": "Constraint solving (CP-SAT)", "category": "systems" },
+
+    { "id": "typescript", "label": "TypeScript", "category": "web" },
+    { "id": "react", "label": "React", "category": "web" },
+    { "id": "java", "label": "Java", "category": "web" },
+    { "id": "fastapi", "label": "FastAPI", "category": "web" },
+    { "id": "rest-apis", "label": "REST APIs", "category": "web" },
+    { "id": "postgresql", "label": "PostgreSQL", "category": "web" },
+    { "id": "oauth-security", "label": "OAuth 2.1 and access control", "category": "web" },
+    { "id": "idempotency", "label": "Idempotency", "category": "web" },
+
+    { "id": "aws", "label": "AWS", "category": "infra" },
+    { "id": "aws-cdk", "label": "AWS CDK and IaC", "category": "infra" },
+    { "id": "serverless", "label": "Serverless and event-driven", "category": "infra" },
+    { "id": "ci-cd", "label": "CI/CD", "category": "infra" },
+    { "id": "testing", "label": "Automated testing", "category": "infra" },
+    { "id": "observability", "label": "Observability", "category": "infra" }
+  ],
+  "projects": [
+    {
+      "id": "docket",
+      "label": "Docket",
+      "year": "2026",
+      "repo": "https://github.com/samad-zeeshan/Docket",
+      "demo": { "url": "https://samad-zeeshan.github.io/Docket/", "label": "Demo" },
+      "oneLiner": "An event-driven serverless pipeline that turns receipt PDFs into schema-checked JSON, all AWS CDK in TypeScript, with a CI-gated accuracy eval on every push.",
+      "caseStudy": "/projects/docket/",
+      "metrics": [
+        { "label": "Field-level accuracy", "value": "0.999", "note": "Over a 42-receipt synthetic golden set (exact match plus line-item F1), CI-gated at 0.90. Real recorded model responses over synthetic receipts." },
+        { "label": "Model-call latency", "value": "p50 1.6s, p95 2.0s", "note": "The Bedrock model call only, n=42, real percentiles." },
+        { "label": "Cost per receipt", "value": "$0.001222", "note": "311 input and 182 output tokens, from the model's own token counts." },
+        { "label": "Tests", "value": "111 passing", "note": "Includes CloudFormation template assertions and cdk-nag. One LocalStack integration test is skipped by design." },
+        { "label": "Live deploy", "value": "Once, end to end", "note": "Deployed to a live AWS account and validated with a real receipt (2.82s end to end, n=1), then torn down. It never ran in production." }
+      ]
+    },
+    {
+      "id": "triage-0-6b",
+      "label": "Triage-0.6B",
+      "year": "2026",
+      "repo": "https://github.com/samad-zeeshan/Triage-0.6B",
+      "oneLiner": "A fine-tuned 0.6B model that triages support tickets into structured JSON at 87% priority accuracy on 1,200 held-out tickets versus 38% for the base model, running offline on a consumer GPU.",
+      "caseStudy": "/projects/triage-0-6b/",
+      "metrics": [
+        { "label": "Priority accuracy", "value": "38% to 87%", "note": "On 1,200 held-out tickets, base model versus the fine-tuned model." },
+        { "label": "Model", "value": "Qwen3-0.6B", "note": "LoRA fine-tuning plus knowledge distillation from a DeepSeek teacher." },
+        { "label": "Serving", "value": "Offline, GGUF", "note": "Exported to GGUF and served locally through LM Studio on an RX 6750 XT (Vulkan). No inference-time API." }
+      ]
+    },
+    {
+      "id": "tarn",
+      "label": "Tarn",
+      "year": "2026",
+      "repo": "https://github.com/samad-zeeshan/Tarn",
+      "demo": { "url": "https://samad-zeeshan.github.io/Tarn/", "label": "Demo" },
+      "oneLiner": "An identity-security lakehouse over a billion real login events. PySpark batch, a dbt star schema, Redpanda streaming, and Neo4j privilege-path graphs, with the negative results committed alongside the wins.",
+      "caseStudy": "/projects/tarn/",
+      "metrics": [
+        { "label": "Events processed", "value": "1,051,430,459", "note": "Real anonymized LANL authentication events over 58 days, counted and sha256-verified, not quoted." },
+        { "label": "Rollup", "value": "1,604,500 identity-days", "note": "Across 80,553 identities, joined to 749 labelled red-team events." },
+        { "label": "Spark optimization", "value": "22.3% faster", "note": "50.696s to 39.378s median on a 113.7M-row slice. This is scale-dependent, and the baseline wins on the small CI slice. All four variants produce byte-identical output, checked by CRC32." },
+        { "label": "Streaming", "value": "7,139 events/s", "note": "p50 12.54s and p95 15.57s end-to-end lag, which includes a deliberate 2-minute watermark hold. This is an accelerated local replay, not a production feed." },
+        { "label": "Graph blast radius", "value": "1.9x at 1 hop, saturates by 3", "note": "Compromised identities against a benign control. 1.9x reach at 1 hop, and a ratio of 1.0 (both about 98% of hosts) by 3 hops." },
+        { "label": "Vector search", "value": "406x retrieval lift, loses as a detector", "note": "As a detector it loses to four simple SQL rules. As retrieval from a known-bad day it reaches precision@10 of 4.59% against a 0.0113% base rate." },
+        { "label": "CI", "value": "33 tests, dbt build of 45 resources", "note": "The tests, the dbt build, five analytical queries, and the vector stage all run on every push." }
+      ]
+    },
+    {
+      "id": "change-gate",
+      "label": "Change-Gate",
+      "year": "2026",
+      "repo": "https://github.com/samad-zeeshan/Change-Gate",
+      "oneLiner": "An agentic change-approval gate that scores risk deterministically before any model judgment, exposed as an OAuth-guarded MCP server with a hash-chained audit trail.",
+      "caseStudy": "/projects/change-gate/",
+      "metrics": [
+        { "label": "Tests", "value": "79 passing", "note": "5 Postgres-gated skips, matching CI. They cover the risk engine, auth primitives, hash-chained audit, and agent graph, not the MCP transport." },
+        { "label": "MCP tools exposed", "value": "9", "note": "Registered as @mcp.tool() over streamable HTTP behind an OAuth 2.1 resource server." },
+        { "label": "Scoring purity", "value": "Enforced by test", "note": "A purity test fails the build if a scoring module imports anthropic, openai, langchain, langgraph, or httpx." }
+      ]
+    },
+    {
+      "id": "fulcrum",
+      "label": "Fulcrum",
+      "year": "2026",
+      "repo": "https://github.com/samad-zeeshan/Fulcrum",
+      "oneLiner": "Hybrid RAG/CAG retrieval that builds UAlberta degree plans, with a FAISS cosine index, a CP-SAT constraint solver, and a citation audit over every retrieved span.",
+      "caseStudy": "/projects/fulcrum/",
+      "metrics": [
+        { "label": "Courses scraped", "value": "954", "note": "Accuracy is never claimed over the full 954." },
+        { "label": "Eval scope", "value": "31 hand-verified courses", "note": "A SHA-1-hashed evaluation harness over a hand-verified gold set." },
+        { "label": "Retrieval index", "value": "FAISS IndexFlatIP", "note": "Cosine similarity over L2-normalised span embeddings. This is an in-process vector index, not a hosted vector database." }
+      ]
+    },
+    {
+      "id": "touchstone",
+      "label": "Touchstone",
+      "year": "2026",
+      "repo": "https://github.com/samad-zeeshan/Touchstone",
+      "demo": { "url": "https://touchstone-jade.vercel.app/", "label": "Live demo" },
+      "oneLiner": "An LLM tutoring platform where a tested Python oracle owns every number and grade. The model only rewords prose, and the app runs fully without it.",
+      "caseStudy": "/projects/touchstone/",
+      "metrics": [
+        { "label": "Backend tests", "value": "202 passing", "note": "Runs in CI, with a live demo." },
+        { "label": "Line coverage", "value": "Over 90%", "note": "On application code. Core computation modules sit at 98 to 100%. The low modules are the LLM and TTS layers, which is what oracle-first predicts." },
+        { "label": "Datastore", "value": "None", "note": "A stateless backend. A tested Python oracle owns every number and grade." }
+      ]
+    },
+    {
+      "id": "tally",
+      "label": "Tally",
+      "year": "2026",
+      "repo": "https://github.com/samad-zeeshan/Tally",
+      "oneLiner": "A banking service on a double-entry ledger with exactly-once idempotent transfers, backed by 254 JUnit tests including real-Postgres integration.",
+      "caseStudy": "/projects/tally/",
+      "metrics": [
+        { "label": "Backend tests", "value": "254 JUnit", "note": "Unit and real-Postgres integration, in CI on every push." },
+        { "label": "Web tests", "value": "31 vitest", "note": "React and TypeScript client." },
+        { "label": "Correctness", "value": "Exactly-once transfers", "note": "Backed by a DB unique constraint. Money is stored as integer minor units, and postings are balanced so they net to zero." }
+      ]
+    },
+    {
+      "id": "kvasir",
+      "label": "Kvasir",
+      "year": "2026",
+      "repo": "https://github.com/samad-zeeshan/Kvasir",
+      "oneLiner": "An in-memory key-value store in Go, a goroutine-per-connection TCP server whose shutdown path is designed to be race-free and exercised under Go's race detector.",
+      "caseStudy": "/projects/kvasir/",
+      "metrics": [
+        { "label": "Race detector", "value": "Clean", "note": "The whole suite passes under go test -race, including TestConcurrentClients (8 clients x 50 ops) and TestShutdownClosesClients." },
+        { "label": "Dependencies", "value": "Standard library only", "note": "A goroutine-per-connection TCP server over a custom line-based protocol." },
+        { "label": "Shutdown", "value": "Race-free by design", "note": "One shared critical section covers connection admission and drain, so a connection admitted mid-shutdown cannot outlive the WaitGroup." }
+      ]
+    },
+    {
+      "id": "pathfinder",
+      "label": "Pathfinder",
+      "year": "2026",
+      "repo": "https://github.com/samad-zeeshan/pathfinder",
+      "oneLiner": "A C++17 pathfinding engine with four algorithms behind one interface, checked by cross-algorithm oracle tests and shipped as an install-free WebAssembly demo.",
+      "caseStudy": "/projects/pathfinder/",
+      "metrics": [
+        { "label": "Algorithms", "value": "4", "note": "BFS, Dijkstra, Greedy Best-First, and A*, behind one interface." },
+        { "label": "Verification", "value": "Cross-algorithm oracle tests", "note": "Each algorithm is checked against the others on the same graphs." },
+        { "label": "Demo", "value": "WebAssembly", "note": "Compiled with Emscripten to an install-free browser demo." }
+      ]
+    }
+  ],
+  "edges": [
+    { "skill": "python", "project": "triage-0-6b", "evidence": "The fine-tuning and evaluation pipeline is written in Python." },
+    { "skill": "lora-finetuning", "project": "triage-0-6b", "evidence": "Fine-tuned Qwen3-0.6B with LoRA. Ticket-priority accuracy rose from 38% to 87% on 1,200 held-out tickets." },
+    { "skill": "knowledge-distillation", "project": "triage-0-6b", "evidence": "Distilled from a DeepSeek teacher model into the 0.6B student." },
+    { "skill": "model-evaluation", "project": "triage-0-6b", "evidence": "87% priority accuracy versus 38% for the base model, measured on 1,200 held-out tickets." },
+
+    { "skill": "python", "project": "change-gate", "evidence": "The agent, deterministic risk engine, and MCP server are written in Python." },
+    { "skill": "langgraph", "project": "change-gate", "evidence": "LangGraph runs a fixed fetch, validate, assess, decide, explain DAG. Deterministic risk scoring runs before any model judgment." },
+    { "skill": "mcp", "project": "change-gate", "evidence": "Exposes nine change-and-risk tools as an MCP server on the official Python SDK over streamable HTTP, with a matching MCP client." },
+    { "skill": "oauth-security", "project": "change-gate", "evidence": "An OAuth 2.1 resource server with JWKS-verified bearer tokens, per-tool scopes, and a second scope required to record a decision." },
+    { "skill": "postgresql", "project": "change-gate", "evidence": "Postgres row-level security. A local run reported 79 passed with 5 Postgres-gated skips, matching CI." },
+    { "skill": "testing", "project": "change-gate", "evidence": "79 tests cover the risk engine, auth primitives, hash-chained audit, and agent graph. A purity test fails the build if a scoring module imports a model client." },
+    { "skill": "ci-cd", "project": "change-gate", "evidence": "The 79-test suite runs in GitHub Actions on every push." },
+    { "skill": "llm-integration", "project": "change-gate", "evidence": "An optional explainer calls Claude to turn a decision into prose. The model never affects the score, band, or decision." },
+
+    { "skill": "python", "project": "fulcrum", "evidence": "The retrieval, constraint solver, and evaluation harness are written in Python." },
+    { "skill": "rag", "project": "fulcrum", "evidence": "Hybrid RAG/CAG retrieval over 954 scraped courses, with a citation audit over every retrieved span." },
+    { "skill": "vector-search", "project": "fulcrum", "evidence": "FAISS IndexFlatIP over L2-normalised span embeddings, which is cosine similarity by inner product. Every query resolves through the FAISS index." },
+    { "skill": "embeddings", "project": "fulcrum", "evidence": "Course-catalogue spans are embedded and L2-normalised before indexing." },
+    { "skill": "model-evaluation", "project": "fulcrum", "evidence": "A SHA-1-hashed evaluation harness is scoped to 31 hand-verified courses, so accuracy is never claimed over the full 954." },
+    { "skill": "constraint-solving", "project": "fulcrum", "evidence": "A CP-SAT constraint solver assembles a valid term-by-term degree plan under prerequisite and course-load constraints." },
+
+    { "skill": "typescript", "project": "touchstone", "evidence": "React and TypeScript front end with hand-rolled SVG widgets." },
+    { "skill": "react", "project": "touchstone", "evidence": "React and TypeScript client for interactive lessons where intuition fails." },
+    { "skill": "fastapi", "project": "touchstone", "evidence": "FastAPI and Pydantic backend. A tested Python oracle owns every number and grade." },
+    { "skill": "llm-integration", "project": "touchstone", "evidence": "Oracle-first, so the tested code does all computation and the model only rewords prose. Answers are never model-invented." },
+    { "skill": "testing", "project": "touchstone", "evidence": "202 backend tests with over 90% line coverage on application code. Core computation modules sit at 98 to 100%." },
+    { "skill": "ci-cd", "project": "touchstone", "evidence": "The 202-test suite runs in CI. The app is deployed and has a live demo." },
+
+    { "skill": "go", "project": "kvasir", "evidence": "An in-memory key-value store written from scratch in Go using the standard library only." },
+    { "skill": "concurrency", "project": "kvasir", "evidence": "A goroutine-per-connection TCP server. A Store interface guarded by sync.RWMutex allows concurrent reads and serialized writes." },
+    { "skill": "testing", "project": "kvasir", "evidence": "The whole suite, including TestConcurrentClients (8 clients x 50 ops) and TestShutdownClosesClients, passes under go test -race." },
+
+    { "skill": "typescript", "project": "docket", "evidence": "The entire pipeline and its infrastructure are written in TypeScript." },
+    { "skill": "aws", "project": "docket", "evidence": "S3 to EventBridge to SQS and DLQ to a Lambda to DynamoDB, plus an IAM-authed HTTP API. Deployed once to a live account and validated end to end, then torn down." },
+    { "skill": "aws-cdk", "project": "docket", "evidence": "All infrastructure defined as AWS CDK in TypeScript, with 111 tests including CloudFormation template assertions and cdk-nag." },
+    { "skill": "serverless", "project": "docket", "evidence": "An event-driven serverless pipeline with a DLQ (maxReceiveCount 3), idempotent writes, and PII redaction before anything is stored." },
+    { "skill": "schema-gated-output", "project": "docket", "evidence": "Zod-schema-gated LLM extraction with one repair retry and FAILED-versus-DLQ error routing." },
+    { "skill": "amazon-bedrock", "project": "docket", "evidence": "Extraction runs Claude Haiku 4.5 on Bedrock. CI replays recorded responses so it never makes a live model call." },
+    { "skill": "model-evaluation", "project": "docket", "evidence": "A field-level eval harness over a 42-receipt golden set (exact match plus line-item F1), CI-gated at 0.90, scores 0.999." },
+    { "skill": "idempotency", "project": "docket", "evidence": "Idempotent conditional writes keyed on sha256(bucket/key/etag) prevent double-processing." },
+    { "skill": "observability", "project": "docket", "evidence": "CloudWatch dashboard and alarms to SNS, X-Ray active tracing, and an AWS Budgets guard at $10 per month." },
+    { "skill": "ci-cd", "project": "docket", "evidence": "111 tests and the accuracy eval run in GitHub Actions. Deploys use a GitHub OIDC role with no long-lived keys." },
+    { "skill": "rest-apis", "project": "docket", "evidence": "An HTTP API with IAM auth is backed by a query Lambda and a DynamoDB status GSI." },
+
+    { "skill": "java", "project": "tally", "evidence": "Java backend on the JDK HTTP server with virtual threads and hand-written JSON." },
+    { "skill": "typescript", "project": "tally", "evidence": "React and TypeScript web client over the ledger API." },
+    { "skill": "react", "project": "tally", "evidence": "React and TypeScript client for accounts and transfers." },
+    { "skill": "postgresql", "project": "tally", "evidence": "A PostgreSQL double-entry ledger. Transfers are balanced postings that net to zero, re-derivable through a reconciliation endpoint." },
+    { "skill": "idempotency", "project": "tally", "evidence": "Exactly-once idempotent transfers backed by a DB unique constraint. A client fault toggle demonstrates a retried lost response with no double-pay." },
+    { "skill": "concurrency", "project": "tally", "evidence": "Pessimistic row locks at read committed, money stored as integer minor units, decisions recorded as ADRs." },
+    { "skill": "rest-apis", "project": "tally", "evidence": "A hand-written JSON HTTP API sits over the double-entry ledger." },
+    { "skill": "testing", "project": "tally", "evidence": "254 backend JUnit tests (unit and real-Postgres integration) plus 31 web vitest tests." },
+    { "skill": "ci-cd", "project": "tally", "evidence": "The 254 JUnit and 31 vitest tests run in CI on every push." },
+
+    { "skill": "cpp", "project": "pathfinder", "evidence": "An extensible C++17 pathfinding engine behind one object-oriented Pathfinder interface." },
+    { "skill": "algorithms", "project": "pathfinder", "evidence": "BFS, Dijkstra, Greedy Best-First, and A* implemented behind a shared interface." },
+    { "skill": "webassembly", "project": "pathfinder", "evidence": "Shipped as an install-free browser demo compiled to WebAssembly with Emscripten." },
+    { "skill": "testing", "project": "pathfinder", "evidence": "Cross-algorithm oracle tests check each algorithm against the others on the same graphs." },
+
+    { "skill": "python", "project": "tarn", "evidence": "The PySpark batch layer, dbt models, and FAISS indexing are written in Python." },
+    { "skill": "spark", "project": "tarn", "evidence": "PySpark batch over 1,051,430,459 real anonymized authentication events, parsed into a 58-partition Parquet lake." },
+    { "skill": "data-engineering", "project": "tarn", "evidence": "Reduced the event lake to 1,604,500 identity-days across 80,553 identities with window functions, joined to 749 labelled red-team events." },
+    { "skill": "stream-processing", "project": "tarn", "evidence": "Spark Structured Streaming from Redpanda with 1-minute tumbling windows, a 2-minute watermark, and a checkpoint kill-and-resume recovery test. It sustained 7,139 events per second." },
+    { "skill": "dimensional-modelling", "project": "tarn", "evidence": "A DuckDB star schema built with dbt. Fact and dimension models carry unique, not_null, and relationships tests on every key, all green in CI." },
+    { "skill": "neo4j", "project": "tarn", "evidence": "A Neo4j graph of 72,751 users, 14,540 computers, and 600,145 auth edges answers shortest-path and blast-radius questions in Cypher." },
+    { "skill": "vector-search", "project": "tarn", "evidence": "A FAISS HNSW index over 1,604,500 behavioural vectors. As retrieval it reaches precision@10 of 4.59% against a 0.0113% base rate, a 406x lift." },
+    { "skill": "embeddings", "project": "tarn", "evidence": "Each person-day is encoded as a standardised 52-dimension behavioural vector, with anti-leakage enforced by a test." },
+    { "skill": "model-evaluation", "project": "tarn", "evidence": "Signals were scored against 181 labelled attack days with a benign control group. The honest negatives (off-hours share caught 0 of 181, blast radius saturates past one hop) are committed, not hidden." },
+    { "skill": "testing", "project": "tarn", "evidence": "33 tests, a dbt build of 45 checked resources, five analytical queries, and the vector stage all run in GitHub Actions CI." },
+    { "skill": "ci-cd", "project": "tarn", "evidence": "The full pipeline, dbt build, queries, and vector stage run in CI. The demo publishes only after a site audit passes." }
+  ]
+}
