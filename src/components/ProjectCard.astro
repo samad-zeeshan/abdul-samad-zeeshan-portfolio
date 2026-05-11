@@ -1,0 +1,180 @@
+---
+// One project in the grid: title, one-liner, lead metric, category dots, and links.
+import type { Project } from '../lib/facts';
+import { categoriesForProject, leadCategory, skillCountForProject, CATEGORY_LABEL } from '../lib/facts';
+import { withBase } from '../lib/paths';
+
+interface Props {
+  project: Project;
+}
+const { project } = Astro.props;
+
+const cats = categoriesForProject(project.id);
+const lead = leadCategory(project.id);
+const skillCount = skillCountForProject(project.id);
+// Only the first metric shows on the card as a headline. The rest live on the case study.
+const headline = project.metrics?.[0];
+---
+
+<article class="card panel" data-cat={lead}>
+  <span class="card__glow" aria-hidden="true"></span>
+  <a class="card__link" href={withBase(project.caseStudy)} aria-label={`Read the ${project.label} case study`}>
+    <div class="card__head">
+      <h3 class="card__title">{project.label}</h3>
+      {project.year && <span class="card__year mono">{project.year}</span>}
+    </div>
+    <p class="card__one">{project.oneLiner}</p>
+  </a>
+
+  {
+    headline && (
+      <p class="card__metric mono">
+        <span class="card__metric-val">{headline.value}</span>
+        <span class="card__metric-label">{headline.label}</span>
+      </p>
+    )
+  }
+
+  <div class="card__foot">
+    <ul class="card__cats" aria-label="Categories">
+      {
+        cats.map((c) => (
+          <li data-cat={c} title={CATEGORY_LABEL[c]}>
+            <span class="dot" />
+          </li>
+        ))
+      }
+      <li class="card__skillcount mono">{skillCount} skills</li>
+    </ul>
+    <div class="card__links mono">
+      <a class="link" href={project.repo} target="_blank" rel="noopener">Repo</a>
+      {
+        project.demo && (
+          <a class="link" href={project.demo.url} target="_blank" rel="noopener">
+            {project.demo.label}
+          </a>
+        )
+      }
+    </div>
+  </div>
+</article>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+    isolation: isolate;
+    transition: border-color var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease),
+      box-shadow var(--dur-slow) var(--ease);
+  }
+  .card::before {
+    content: '';
+    display: block;
+    height: 3px;
+    background: var(--cat);
+    position: relative;
+    z-index: 2;
+  }
+  /* Subtle category-tinted glow that fades in on hover, at the top-right corner. */
+  .card__glow {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      75% 80% at 80% 10%,
+      color-mix(in srgb, var(--cat) 16%, transparent),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity var(--dur-slow) var(--ease);
+  }
+  /* Lift everything except the glow above it, so the tint stays behind the text. */
+  .card > :not(.card__glow) {
+    position: relative;
+    z-index: 1;
+  }
+  .card:hover,
+  .card:focus-within {
+    border-color: color-mix(in srgb, var(--cat) 45%, var(--line-500));
+    transform: translateY(-3px);
+    box-shadow: 0 14px 34px -18px color-mix(in srgb, var(--cat) 55%, black);
+  }
+  .card:hover .card__glow,
+  .card:focus-within .card__glow {
+    opacity: 1;
+  }
+  .card__link {
+    display: block;
+    flex: 1 0 auto;
+    padding: var(--space-4) var(--space-5) var(--space-3);
+  }
+  .card__link:focus-visible {
+    outline-offset: -2px;
+  }
+  .card__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+  .card__title {
+    font-size: var(--step-2);
+  }
+  .card__year {
+    font-size: var(--step--1);
+    color: var(--text-500);
+  }
+  .card__one {
+    margin-top: var(--space-2);
+    color: var(--text-300);
+    font-size: var(--step-0);
+  }
+  .card__metric {
+    padding: 0 var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+  .card__metric-val {
+    font-size: var(--step-1);
+    font-weight: 500;
+    color: var(--cat);
+  }
+  .card__metric-label {
+    font-size: var(--step--1);
+    color: var(--text-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .card__foot {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5) var(--space-5);
+  }
+  .card__cats {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .card__cats .dot {
+    width: 0.55rem;
+    height: 0.55rem;
+  }
+  .card__skillcount {
+    margin-left: var(--space-2);
+    font-size: var(--step--1);
+    color: var(--text-500);
+  }
+  .card__links {
+    display: flex;
+    gap: var(--space-4);
+    font-size: var(--step--1);
+  }
+</style>

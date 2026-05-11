@@ -1,0 +1,126 @@
+---
+// No-JS fallback for the evidence map: every skill grouped by category, each with
+// the projects that evidence it and the verbatim evidence string.
+import { skillsByCategory } from '../lib/facts';
+import { withBase } from '../lib/paths';
+
+// Built from the same facts.json as the graph, so this is the real content when
+// JS is off, not an apology for it.
+const groups = skillsByCategory();
+---
+
+<div class="skills-index">
+  {
+    groups.map((group) => (
+      <section class="skills-index__group" data-cat={group.category}>
+        <h3 class="skills-index__cat">
+          <span class="dot" aria-hidden="true" />
+          {group.label}
+          <span class="skills-index__count mono">{group.skills.length}</span>
+        </h3>
+        <ul class="skills-index__skills">
+          {group.skills.map(({ skill, projects }) => (
+            <li class="skills-index__skill">
+              <p class="skills-index__skill-name mono">{skill.label}</p>
+              <ul class="skills-index__evidence">
+                {projects.map(({ project, evidence }) => (
+                  <li>
+                    <a class="skills-index__proj mono" href={withBase(project.caseStudy)}>
+                      {project.label}
+                    </a>
+                    <span class="skills-index__ev">{evidence}</span>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</div>
+
+<style>
+  .skills-index {
+    display: grid;
+    gap: var(--space-6);
+    padding: var(--space-5);
+  }
+  .skills-index__cat {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    padding-bottom: var(--space-3);
+    border-bottom: var(--border);
+  }
+  .skills-index__cat .dot {
+    width: 0.7rem;
+    height: 0.7rem;
+  }
+  .skills-index__count {
+    margin-left: auto;
+    font-size: var(--step--1);
+    color: var(--text-500);
+  }
+  .skills-index__skills {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+  }
+  .skills-index__skill {
+    display: grid;
+    grid-template-columns: minmax(9rem, 12rem) 1fr;
+    gap: var(--space-4);
+    align-items: start;
+  }
+  .skills-index__skill-name {
+    font-size: var(--step-0);
+    font-weight: 500;
+    color: var(--text-100);
+    position: relative;
+    padding-left: var(--space-4);
+  }
+  .skills-index__skill-name::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: var(--cat);
+  }
+  .skills-index__evidence {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .skills-index__evidence li {
+    display: grid;
+    gap: var(--space-1);
+  }
+  .skills-index__proj {
+    font-size: var(--step--1);
+    color: var(--cat);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+    transition: text-decoration-color var(--dur) var(--ease);
+    justify-self: start;
+  }
+  .skills-index__proj:hover,
+  .skills-index__proj:focus-visible {
+    text-decoration-color: currentColor;
+  }
+  .skills-index__ev {
+    color: var(--text-300);
+    font-size: var(--step-0);
+  }
+  @media (max-width: 40rem) {
+    .skills-index__skill {
+      grid-template-columns: 1fr;
+      gap: var(--space-2);
+    }
+  }
+</style>

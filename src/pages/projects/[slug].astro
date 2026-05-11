@@ -1,0 +1,156 @@
+---
+// Case study page. Astro generates one per MDX entry, pairing the narrative body with facts.json data.
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import EvidencePanel from '../../components/EvidencePanel.astro';
+import {
+  getProject,
+  profile,
+  categoriesForProject,
+  skillCountForProject,
+  CATEGORY_LABEL,
+  leadCategory,
+} from '../../lib/facts';
+import { withBase } from '../../lib/paths';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('projects');
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const project = getProject(entry.id);
+// Fail the build if a case study has no matching facts.json project, so the two never drift.
+if (!project) {
+  throw new Error(`No facts.json project for case study "${entry.id}"`);
+}
+
+const cats = categoriesForProject(project.id);
+const lead = leadCategory(project.id);
+const skillCount = skillCountForProject(project.id);
+---
+
+<Base
+  title={`${project.label} · ${profile.name}`}
+  description={entry.data.description}
+  image={`/og/${project.id}.png`}
+>
+  <article class="case container">
+    <a class="case__back mono link" href={withBase('/#projects')}>&#8592; All projects</a>
+
+    <header class="case__head" data-cat={lead}>
+      <div class="case__cats" aria-label="Categories">
+        {
+          cats.map((c) => (
+            <span class="case__cat mono" data-cat={c}>
+              <span class="dot" aria-hidden="true" />
+              {CATEGORY_LABEL[c]}
+            </span>
+          ))
+        }
+      </div>
+      <h1 class="case__title">{project.label}</h1>
+      <p class="case__one">{project.oneLiner}</p>
+      <div class="case__meta mono">
+        {project.year && <span>{project.year}</span>}
+        <span>{skillCount} skills evidenced</span>
+      </div>
+      <div class="case__links mono">
+        <a class="btn" href={project.repo} target="_blank" rel="noopener">
+          View repository <span aria-hidden="true">&#8599;</span>
+        </a>
+        {
+          project.demo && (
+            <a class="btn btn--ghost" href={project.demo.url} target="_blank" rel="noopener">
+              {project.demo.label} <span aria-hidden="true">&#8599;</span>
+            </a>
+          )
+        }
+      </div>
+    </header>
+
+    <div class="case__body prose">
+      <Content />
+    </div>
+
+    <EvidencePanel project={project} />
+
+    <nav class="case__nav mono" aria-label="Case study footer">
+      <a class="link" href={withBase('/#projects')}>&#8592; Back to all projects</a>
+      <a class="link" href={withBase('/')}>Evidence map</a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .case {
+    padding-block: var(--space-6) var(--space-6);
+    max-width: 52rem;
+  }
+  .case__back {
+    display: inline-block;
+    font-size: var(--step--1);
+    color: var(--text-500);
+    margin-bottom: var(--space-6);
+  }
+  .case__head {
+    padding-bottom: var(--space-6);
+    border-bottom: var(--border);
+  }
+  .case__cats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+  .case__cat {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--step--1);
+    color: var(--text-500);
+  }
+  .case__cat .dot {
+    background: var(--cat);
+  }
+  .case__title {
+    margin-top: var(--space-4);
+    font-size: var(--step-5);
+    letter-spacing: -0.02em;
+  }
+  .case__one {
+    margin-top: var(--space-4);
+    max-width: 48ch;
+    font-size: var(--step-2);
+    color: var(--text-300);
+    line-height: 1.4;
+  }
+  .case__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    margin-top: var(--space-5);
+    font-size: var(--step--1);
+    color: var(--text-500);
+  }
+  .case__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+  }
+  .case__body {
+    margin-top: var(--space-7);
+    max-width: 42rem;
+  }
+  .case__nav {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-top: var(--space-8);
+    padding-top: var(--space-5);
+    border-top: var(--border);
+    font-size: var(--step--1);
+  }
+</style>

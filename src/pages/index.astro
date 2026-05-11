@@ -1,0 +1,111 @@
+---
+// Home page: thesis hero, the evidence map, then the project grid.
+import Base from '../layouts/Base.astro';
+import EvidenceMap from '../components/EvidenceMap.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { profile, projects } from '../lib/facts';
+
+const statusItems = [profile.location, profile.relocation, profile.education];
+---
+
+<Base
+  title={`${profile.name} · ${profile.role}`}
+  description={`${profile.thesis} ${profile.intro}`}
+  image="/og/home.png"
+>
+  <!-- Identity and thesis. The name and role sit in the sticky header above, so the
+       hero leads with the thesis. The redundant name eyebrow was cut (Chanel rule). -->
+  <section class="hero container">
+    <h1 class="hero__thesis">{profile.headline}</h1>
+    <p class="hero__intro">{profile.intro}</p>
+    <ul class="hero__status mono" aria-label="Status">
+      {
+        statusItems.map((item) => (
+          <li>
+            <span class="hero__dot" aria-hidden="true" />
+            {item}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- Signature element: the evidence map (interactive graph with a static fallback) -->
+  <EvidenceMap />
+
+  <section class="projects container" aria-labelledby="projects-h">
+    <div class="projects__head">
+      <h2 id="projects-h" class="projects__title">Projects</h2>
+      <p class="projects__sub mono">nine public repositories</p>
+    </div>
+    <div class="projects__grid">
+      {projects.map((project) => <ProjectCard project={project} />)}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-block: var(--space-5) var(--space-4);
+  }
+  .hero__thesis {
+    font-size: clamp(1.9rem, 1.4rem + 2.1vw, 2.85rem);
+    max-width: 22ch;
+    letter-spacing: -0.02em;
+  }
+  .hero__intro {
+    margin-top: var(--space-3);
+    max-width: 62ch;
+    font-size: var(--step-0);
+    color: var(--text-300);
+  }
+  .hero__status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    margin-top: var(--space-4);
+    font-size: var(--step--1);
+    color: var(--text-500);
+  }
+  .hero__status li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .hero__dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: var(--signal-500);
+  }
+
+  .projects {
+    margin-top: var(--space-8);
+  }
+  .projects__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: var(--border);
+  }
+  .projects__title {
+    font-size: var(--step-3);
+  }
+  .projects__sub {
+    font-size: var(--step--1);
+    color: var(--text-500);
+  }
+  .projects__grid {
+    margin-top: var(--space-5);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+    gap: var(--space-4);
+  }
+  @media (max-width: 34rem) {
+    .projects__sub {
+      display: none;
+    }
+  }
+</style>

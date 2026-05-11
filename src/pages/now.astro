@@ -1,0 +1,91 @@
+---
+// The /now page: a short, honest status update. Edit the lines below by hand as things change.
+import Base from '../layouts/Base.astro';
+import { profile } from '../lib/facts';
+import { withBase } from '../lib/paths';
+
+const updated = 'July 2026';
+const lines = [
+  'I recently finished my BSc in Computing Science at the University of Alberta, and I am looking for a new-grad role in AI/ML or software engineering.',
+  'The last thing I built is Tarn, an identity-security lakehouse over about a billion login events. The parts that did not work are committed right next to the parts that did.',
+  'Here is how I like to work. Let a model or a heuristic take a guess, then make a strict layer prove it is right. Schema gates, eval harnesses, oracle tests, race detectors.',
+  'I am based in Edmonton and happy to relocate anywhere in Canada. I am eligible to work in Canada.',
+];
+---
+
+<Base
+  title={`Now · ${profile.name}`}
+  description={`What ${profile.shortName} is focused on right now.`}
+  image="/og/home.png"
+>
+  <section class="now container">
+    <a class="now__back mono link" href={withBase('/')}>&#8592; Home</a>
+    <div class="panel now__panel">
+      <div class="panel__cap">
+        <span>now</span>
+        <span aria-hidden="true">updated {updated}</span>
+      </div>
+      <div class="now__body">
+        <h1 class="now__title">What I am doing now</h1>
+        <ul class="now__list">
+          {
+            lines.map((line) => (
+              <li>
+                <span class="now__dot" aria-hidden="true" />
+                {line}
+              </li>
+            ))
+          }
+        </ul>
+        <p class="now__foot mono">
+          This is a <a class="link" href="https://nownownow.com/about" target="_blank" rel="noopener">now page</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .now {
+    padding-block: var(--space-6) var(--space-6);
+    max-width: 48rem;
+  }
+  .now__back {
+    display: inline-block;
+    font-size: var(--step--1);
+    color: var(--text-500);
+    margin-bottom: var(--space-6);
+  }
+  .now__body {
+    padding: var(--space-5) var(--space-5) var(--space-6);
+  }
+  .now__title {
+    font-size: var(--step-4);
+  }
+  .now__list {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-5);
+    max-width: var(--measure);
+  }
+  .now__list li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-3);
+    color: var(--text-300);
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+  .now__dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--signal-500);
+    margin-top: 0.6em;
+  }
+  .now__foot {
+    margin-top: var(--space-6);
+    font-size: var(--step--1);
+    color: var(--text-500);
+  }
+</style>
