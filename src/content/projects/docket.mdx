@@ -1,0 +1,24 @@
+---
+title: "Docket"
+description: "Event-driven serverless receipt-extraction pipeline in AWS CDK, with a schema-gated LLM step and a field-level eval harness that gates CI."
+---
+
+## Problem
+
+Receipt data is easy to read and hard to trust. An LLM can pull vendor, date, totals, and line items out of a PDF. It also invents fields, returns malformed JSON, and gives no signal when it is wrong. Writing that output straight to a database silently corrupts records and pays to reprocess uploads that already failed. The task was to build a receipt-extraction pipeline where the model does the reading but nothing unverified reaches storage. It had to ship as infrastructure another engineer could stand up and reason about.
+
+## Approach
+
+Docket is an event-driven serverless pipeline defined entirely in AWS CDK (TypeScript). An S3 upload fires EventBridge, filtered by key suffix, into an SQS queue with a dead-letter queue at maxReceiveCount 3. An ingest Lambda extracts the receipt and writes to DynamoDB. A separate IAM-authenticated HTTP API queries a status GSI. Observability is wired in from the start. There is a CloudWatch dashboard, alarms to SNS email, X-Ray tracing, Lambda Powertools, and an AWS Budgets cap at $10/month. Deploys run through a GitHub OIDC role, so there are no long-lived keys.
+
+One decision shapes everything. Model output is never trusted directly. Extraction passes through a Zod schema gate with a single repair retry, then routes deterministically. A schema-valid record writes with an idempotent conditional put keyed on sha256(bucket/key/etag). A genuinely bad receipt is marked FAILED. An infrastructure error goes to the DLQ. PII (card numbers, emails, phones) is redacted before anything is written.
+
+## Verification
+
+Correctness is measured by a field-level eval harness over a 42-receipt synthetic golden set. It scores normalized exact match on scalar fields and set F1 on line items. It reaches 0.999, and CI gates any change at 0.90. The harness replays responses recorded from Claude Haiku 4.5 on Bedrock, so CI is deterministic, free, and never calls the model. That 0.999 is field-level accuracy over the golden set with synthetic receipts and real recorded responses. It is not a claim about real-world receipts.
+
+The infrastructure is tested the same way the extraction is. 111 tests pass, including CloudFormation template assertions and cdk-nag security checks, with one LocalStack integration test skipped by design because it needs Docker. Cost and latency are instrumented, not estimated. Each receipt costs $0.001222 at 311 input and 182 output tokens, and model-call latency is p50 1.6s and p95 2.0s across the 42 samples. The stack was deployed once to a live account, validated end to end with one real receipt PDF at 2.82 seconds (a single sample), then torn down.
+
+## What broke
+
+Six bugs surfaced only once the stack hit a live account, and no unit test caught them. The Bedrock model id had been retired, so extraction failed until it was updated. The SNS topic policy was silently dropped for not meeting the enforced TLS requirement, so alarms would never have reached anyone. The DLQ redrive CLI double-counted messages, reporting a miscount on every redrive. Each was fixed in its own commit, and the redrive path now has a runbook. Template assertions prove the shape of the infrastructure, not that it works. Only a real deploy closed that gap.
