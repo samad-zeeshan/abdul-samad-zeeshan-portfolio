@@ -1,0 +1,27 @@
+---
+title: "Triage-0.6B"
+description: "Fine-tuned a 0.6B model to turn raw support emails into structured ticket JSON, lifting priority accuracy from 38% to 87% and running fully offline."
+---
+
+## Problem
+
+Support teams triage inbound tickets by hand. Someone reads a raw email, judges its priority, and pulls out the fields that route it. It is slow, it drifts from person to person, and it does not scale. A stock small model does not fix it. Base Qwen3-0.6B got ticket priority right only 38% of the time on held-out data. That is close to unusable for anything feeding a routing queue. The goal was a model small enough to run offline on a consumer GPU that still turns a raw email into structured ticket JSON, priority included, accurately enough to act on.
+
+## Approach
+
+I fine-tuned Qwen3-0.6B to take a raw support email as input and emit structured ticket JSON with a priority field. Two techniques did the work. LoRA fine-tuning adapted the small model without retraining most of its weights. Knowledge distillation from a larger DeepSeek teacher let the 0.6B student learn to copy the teacher's triage labeling instead of learning from sparse labels alone.
+
+The main design decision was to keep the whole thing small and local. The fine-tuned model is exported to GGUF and served through LM Studio on a Radeon RX 6750 XT over Vulkan. It runs fully offline with no inference-time API cost. A 0.6B model is the constraint that makes the project interesting. It forces the accuracy to come from the training, not from scale.
+
+## Verification
+
+The main check was held-out accuracy on the field that matters most for routing, priority. On 1,200 tickets held out of training, priority accuracy rose from 38% with the base model to 87% after fine-tuning. The base number is not decoration. It is the control. Running the same 1,200 tickets through the untuned model and the fine-tuned model, with identical grading, shows the lift comes from the training rather than from the task being easy.
+
+Priority is a discrete label, so grading is exact match against the ground-truth priority, not a soft similarity score that can be talked up. A prediction counts only when the emitted priority equals the true priority. Because the 1,200 tickets were separated before any fine-tuning, the 87% reflects generalization to unseen emails rather than memorization of the training set.
+
+Distillation gives the evaluation a second anchor. The 0.6B student is trained to reproduce the larger DeepSeek teacher's labeling on the triage task, so the target is a concrete reference rather than a vague notion of quality. And because the model runs fully offline in LM Studio with no inference-time API, evaluation runs against a fixed local artifact rather than a remote model that can change underneath you. The held-out number reflects one stable system, which is what makes a figure like 87% worth quoting.
+
+## What broke
+
+The honest hazard is the output format, not the accuracy number. A 0.6B model is tiny, and a model that small emitting JSON can produce malformed or structurally invalid output that a downstream parser rejects. That is separate from whether the priority label inside it is correct. I have not measured that invalid-structure rate here, so I will not claim it is solved.
+{/* CONFIRM: a specific failure found during training or eval, e.g. a priority class the model kept confusing, or the invalid-JSON rate before constraining output */}
