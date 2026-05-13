@@ -1,0 +1,24 @@
+---
+title: "Change-Gate"
+description: "An agentic change-approval gate that scores risk deterministically before any model runs, exposed as an OAuth 2.1 MCP server with a hash-chained audit log."
+---
+
+## Problem
+
+Most outages come from a change that looked harmless on its own. A flag flip or a small config edit that lands at the wrong time. The usual approval step is either a rubber-stamp checkbox or a person reading the diff by hand, and the reasoning behind the decision is not recorded, not reproducible, and not auditable later. Adding a language model to speed this up makes it worse, because a nondeterministic component can quietly move a risk score and nobody can prove whether it did. The hard part is not scoring a change. It is keeping the model out of the part you have to trust.
+
+## Approach
+
+Change-Gate splits the work in two. A LangGraph pipeline runs a fixed sequence of fetch, validate, assess, decide, explain. The graph is a fixed DAG, not an agent loop, and the model does not pick tools or steer control flow. Deterministic risk scoring runs before any model is involved, and freeze windows are one of the checks it applies. That is the one design decision the rest follows from. The trusted core is deterministic, and the model is never allowed into the scoring path. An optional explainer calls Claude to turn a finished decision into prose, but it is environment-gated and cannot change the score, the band, or the decision.
+
+The gate is exposed as an MCP server built on the Anthropic Python SDK (FastMCP), registering nine tools over streamable HTTP. It runs as an OAuth 2.1 resource server. A custom JWTVerifier checks bearer tokens against a JWKS endpoint, every tool requires a read scope, and record_decision also requires an approve scope. Decisions append to a hash-chained audit log over Postgres row-level security with Keycloak.
+
+## Verification
+
+The boundary between model and score is enforced by a test, not a convention. A scoring-purity test fails the build if any scoring module imports anthropic, openai, langchain, langgraph, or httpx. The risk engine cannot reach a model or the network, so the claim that the model never influenced a score is checked mechanically on every run rather than asserted in a comment.
+
+The rest of the suite covers the risk engine's logic, the auth primitives, the hash-chained audit, and the agent graph. A local run reported 79 tests passing with 5 Postgres-gated skips, matching CI. The skips are the cases that need a live database, so they fail loudly rather than passing silently. Auth is checked at the primitive level. Scope enforcement and token verification run directly, so a missing read scope or an unsigned token is rejected in a test rather than in production.
+
+## What broke
+
+The MCP transport layer is the honest gap. Those 79 tests cover the risk engine, auth primitives, audit chain, and agent graph, but the FastMCP wiring itself is not in the suite. It is exercised by hand against a live server, and one client file is annotated "needs live server." So the deterministic core and its purity boundary are verified, while the transport is currently trusted to manual runs. Closing it means standing up the server in CI and driving the nine tools end to end.
