@@ -1,0 +1,26 @@
+---
+title: "Tarn"
+description: "An identity-security data lakehouse over real anonymized auth events, built end to end on one laptop, where every optimization must beat a benchmark before it ships."
+---
+
+## Problem
+
+Identity compromise hides in auth logs too large to eyeball and too noisy to grep. The Los Alamos auth dataset is 1,051,430,459 real anonymized login events over 58 days, with only 749 labelled red-team events buried inside. The task was to turn that raw stream into something a defender can query, join, and test for lateral movement, and to do it end to end on one laptop rather than a cluster.
+
+## Approach
+
+Tarn is a lakehouse built in stages. PySpark parses the billion events into a 58-partition Parquet lake. Window functions then reduce them to 1,604,500 identity-days across 80,553 identities, measuring fan-out, failure ratio, first-seen destinations, and off-hours share, joined to the 749 red-team events. From the lake and that reduced table, four consumers are built. A DuckDB star schema modelled with dbt, a Neo4j graph loaded from the raw authentication edges, a FAISS vector index over the person-days, and a Spark Structured Streaming job that replays events from Redpanda.
+
+One design decision shapes everything. No optimization is trusted because it sounds right. Each one is a hypothesis that a benchmark harness must prove against a baseline, and any change to speed must leave the output byte-for-byte identical.
+
+## Verification
+
+The rollup optimization ran as a controlled 2x2 benchmark. It crossed a broadcast join with shared-grain dedup, with one warm-up plus five timed runs per variant in a single Spark session, reported as the median. All four variants were checked for byte-identical output with an order-independent CRC32 fingerprint, so a faster run that quietly changed a row fails rather than wins. On the 113.7M-row slice the winner cut the median from 50.696s to 39.378s, a drop of 22.3%. That result is scale-dependent. On the small CI slice the baseline is fastest, so it is never claimed as a universal speedup. An AI coding assistant drafted the two competing hypotheses, but the harness, not the model, picked the winner.
+
+The warehouse checks itself. Every key carries unique, not_null, and relationships tests, and CI runs 33 tests plus a dbt build of 45 resources green. The streaming job passed a kill-and-resume recovery test from its checkpoint. It sustained 7,139 events/s at p50 lag 12.54s and p95 15.57s. That is an accelerated local replay on one machine that includes a deliberate 2-minute watermark hold, not a network number.
+
+Detection was measured against controls rather than asserted. Graph blast radius showed 1.9x reach at 1 hop versus a benign control. Vector search was scored both ways. As retrieval from an already-known bad day it reaches precision@10 of 4.59% against a 0.0113% base, a 406x lift. As a standalone detector it loses to four simple SQL rules.
+
+## What broke
+
+The best evidence here is a committed failure. The first optimization hypothesis killed the Spark Expand operator with a two-stage distinct aggregation, and it made every variant slower than doing nothing, 40.5s baseline against 50.3 to 61.1s. It lives in bench/spark_opt_rejected.json with the harness's own verdict. No win, the baseline was fastest, recorded honestly, and do not claim a speedup. The real insight was not dedupe first but share the grain. Two more negatives are committed, not hidden. The off-hours share feature caught 0 of 181 attack days, and graph blast radius saturates to a ratio of 1.0 by 3 hops, useful at one hop and meaningless by three.
