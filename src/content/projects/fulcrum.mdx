@@ -1,0 +1,26 @@
+---
+title: "Fulcrum"
+description: "A hybrid RAG and CAG system for University of Alberta CS degree plans. FAISS cosine retrieval, a citation audit over retrieved spans, and a CP-SAT solver decides plan validity."
+---
+
+## Problem
+
+University of Alberta computing science students build degree plans by hand. They track prerequisites, credit exclusions, and course-load limits across a large catalogue. Ask a language model to build such a plan and it produces something fluent and confident. But a plan that quietly breaks a prerequisite chain or invents a course is worse than no plan. The hard part is not generating text. It is making sure every recommendation traces back to the catalogue and meets every constraint.
+
+## Approach
+
+Fulcrum splits the job in two. A retrieval layer finds evidence and a solver layer enforces the rules. The language model sits in the middle. The scraper pulls 954 courses into structured records and keeps the requirement text exactly as published. Retrieval runs entirely through a FAISS IndexFlatIP over L2-normalised span embeddings, which is cosine similarity by inner product. Every query goes through that vector index, so there is a single retrieval path you can inspect.
+
+The key decision is to let a CP-SAT constraint solver (Google OR-Tools) decide plan validity, not the model. The model proposes the term-by-term structure. CP-SAT then assembles the plan under prerequisite and course-load constraints and rejects anything that fails them.
+
+## Verification
+
+A citation audit runs over the retrieved spans. It is there to catch the classic RAG failure where a retriever returns plausible text that does not answer the question, so a recommendation stays tied to spans that were actually retrieved from the catalogue rather than to text the model made up.
+
+Accuracy is measured only where it can be trusted. Verifying all 954 scraped courses by hand was not feasible, so the evaluation harness covers 31 hand-verified courses. The harness is SHA-1-hashed, so any change to the evaluation inputs is caught rather than silent. If the fixture changes, the hash changes, and a stale or edited eval cannot pass as the hand-checked one. Every accuracy figure is over those 31 courses, never one across the full 954.
+
+The solver adds a second, independent check. CP-SAT either returns a plan that satisfies all prerequisite and course-load constraints or reports infeasibility. Plan validity is decidable, not a judgement call. An invalid proposal is rejected at the solver, not left for a reader to catch.
+
+## What broke
+
+The honest limit is how much the claim covers. Hand-verifying every one of the 954 scraped courses was not feasible, so the evaluation covers only the 31 checked by hand. A course outside that slice could carry a scraping or parsing error the harness would never see. Scoping the eval this way was deliberate. A single accuracy figure over all 954 would be an unbacked number, so the harness does not produce one.
