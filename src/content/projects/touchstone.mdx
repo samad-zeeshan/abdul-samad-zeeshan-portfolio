@@ -1,0 +1,26 @@
+---
+title: "Touchstone"
+description: "An interactive LLM tutoring platform for concepts where intuition fails, built oracle-first so tested code owns every number and grade and the model only rewords prose."
+---
+
+## Problem
+
+Some computer science concepts do not yield to reading. Intuition fights them. Binary search boundaries, why merge sort beats bubble sort, minimax with alpha-beta pruning, Monte Carlo Tree Search, and frequency analysis of a cipher. A learner needs to submit a guess, hear exactly which misconception they hit, and retry. The obvious build hands that whole loop to a language model. That is where it breaks. A model asked to compute a bound or assign a grade returns a confident, wrong number, and the student graded on it leaves believing something false.
+
+## Approach
+
+Touchstone is oracle-first. A tested Python oracle does all computation, grading, and mistake diagnosis. The language model only rewords prose. It can dress a problem in a fresh scenario, but it never touches a number or a grade, and the app runs fully with the model turned off. The backend is FastAPI and Pydantic. It is stateless, with no datastore, so there is no stored state to drift. The front end is React and TypeScript with hand-rolled SVG widgets that let a learner watch the algorithm run. The LLM layer is swappable.
+
+The single design decision is the boundary. Tested code owns every value a student is graded on, and the model is confined to prose. Grading runs server-side, so answers cannot be read off the client, and a wrong submission gets named by its specific misconception rather than just rejected.
+
+## Verification
+
+202 backend tests pass, with over 90% line coverage on application code. The shape of that coverage matters more than the total. The core computation modules, the oracle that owns grading and diagnosis, measure 98 to 100%. The LLM and text-to-speech layers sit near 38%. That is the design working, not a gap. Those layers own no correctness, so there is little to assert beyond that prose passes through intact.
+
+The distribution is itself a test of the architecture. Oracle-first predicts near-exhaustive coverage of computation and a thin model layer. If the boundary had leaked, a graded number would live in the low-coverage code and the split would show it. Diagnosis is checked by feeding the oracle deliberately wrong answers, the exact mistakes learners make, and asserting it returns the matching misconception.
+
+Because the backend is stateless, every test starts from nothing, so no hidden state can mask a regression between runs. And because the graded path never calls the model, no metric a student sees depends on a nondeterministic response.
+
+## What broke
+
+The hazard the whole design exists to defeat is not a bug that slipped through. It is the tool's default behavior. A language model asked to compute a bound or assign a grade answers confidently and, often enough to matter, wrongly. I engineered against it by moving every number and grade into the tested oracle and confining the model to wording, so a model error can dull a scenario's flavor but can never corrupt a result a student is graded on. {/* CONFIRM: a specific case where the LLM produced a wrong number that the oracle-first split prevented from shipping */}
