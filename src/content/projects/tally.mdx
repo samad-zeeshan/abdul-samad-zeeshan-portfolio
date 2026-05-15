@@ -1,0 +1,24 @@
+---
+title: "Tally"
+description: "A demonstration double-entry banking service with exactly-once transfers backed by a database unique constraint, integer money, and 254 backend tests in CI."
+---
+
+## Problem
+
+Money movement punishes sloppiness. If a transfer response is lost in flight and the client retries, a naive endpoint debits the account twice. If balances are stored as floating point, fractions of a cent quietly appear or vanish. If two transfers touch the same account at once, a lost update can create or destroy money. Tally is a demonstration banking service. It is built to handle these hazards on purpose rather than hope they never happen.
+
+## Approach
+
+Tally is built on a double-entry ledger. Every transfer is a set of balanced postings that net to zero, so the books cannot silently drift. The whole ledger can be re-derived through a reconciliation endpoint that recomputes balances from the postings. The backend is Java on the JDK HTTP server with virtual threads and hand-written JSON, backed by PostgreSQL. The client is React and TypeScript. Design decisions are recorded as ADRs.
+
+One decision shapes everything else. Transfers are exactly-once and idempotent, enforced by a database unique constraint on an idempotency key rather than by application logic. Because the guarantee lives in the database, it survives process restarts. Money is stored as integer minor units, never floats. Concurrency uses pessimistic row locks at read committed, so two transfers on the same account serialize instead of racing.
+
+## Verification
+
+Correctness is checked by 254 backend JUnit tests that run in CI on every push. Not all of them are unit tests. They include real-Postgres integration tests, so the idempotency constraint, the row locks, and the reconciliation logic run against an actual database rather than a mock that would hide the exact behavior under test. The web client adds 31 vitest tests.
+
+The idempotency guarantee is checked adversarially. A client fault toggle reproduces the lost-response scenario on demand. The transfer commits, the response is dropped, and the client retries with the same idempotency key. The unique constraint turns that retry into a no-op, and the test asserts the account is debited exactly once across the pair of requests. The reconciliation endpoint gives a second, independent check. Because every transfer nets to zero and the ledger can be re-derived from its postings, a reconciliation run confirms that recomputed balances match stored balances. That catches any posting that failed to balance.
+
+## What broke
+
+The lost-response problem is the concrete failure this design exists to handle. A client submits a transfer, the response is lost in flight, the client retries, and a naive system double-pays. Tally's fault toggle reproduces exactly this. The database unique constraint on the idempotency key makes the retry a safe no-op instead of a second debit. Putting the guarantee in the database rather than an in-memory check is what makes it hold across restarts. An application-level guard would let a double-pay slip through under a crash at the wrong moment.
