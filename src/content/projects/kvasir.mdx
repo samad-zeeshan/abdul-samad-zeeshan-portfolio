@@ -1,0 +1,26 @@
+---
+title: "Kvasir"
+description: "An in-memory key-value store in Go using only the standard library, with a goroutine-per-connection TCP server and shutdown checked under Go's race detector."
+---
+
+## Problem
+
+An in-memory key-value store that serves many clients at once has two concurrency hazards that are easy to get wrong. Reads and writes can race on the same map. Connections can race against shutdown. A connection admitted at the instant shutdown begins can outlive the drain and read from a server that is already tearing down its state. Both failures are intermittent, hard to reproduce, and invisible to a single-threaded test.
+
+## Approach
+
+Kvasir is a goroutine-per-connection TCP server written from scratch in Go using only the standard library. It speaks a small line-based text protocol (SET, GET, DEL), and the data map sits behind a Store interface guarded by a sync.RWMutex, so concurrent reads run in parallel while writes serialize. The interface keeps the storage engine swappable without touching the network code.
+
+The key decision is that shutdown safety and data safety are separate concerns, built from separate primitives. The store map is guarded by the sync.RWMutex. Shutdown is guarded by a sync.Mutex, a WaitGroup, and a close(done) channel. Connection admission and shutdown share one critical section, so a connection cannot be admitted after the drain has started. Shutdown then closes live connections to unblock any goroutine parked on a blocked read, and caps the drain with a context timeout so a stuck client cannot hang the process.
+
+## Verification
+
+Correctness is checked by tooling, not by assertion. The whole suite runs under go test -race, so every interleaving a test reaches is watched by the race detector, and a single racing access to the store map or the shutdown state fails the run. This turns both hazards into pass/fail conditions instead of code-review judgment calls.
+
+TestConcurrentClients drives the store path directly. 8 clients issue 50 operations each against the shared map, forcing overlapping reads and writes through the sync.RWMutex. TestShutdownClosesClients exercises the harder boundary between connection admission and shutdown, and asserts that live connections are closed when the server drains.
+
+The race detector is dynamic. It reports races only on paths a test actually runs. So the tests drive the concurrent and shutdown paths under load rather than in isolation, and passing under -race is evidence that the reached interleavings are clean. That is why the design leans on one shared critical section for the admission and drain boundary rather than hoping tests catch a bad ordering after the fact.
+
+## What broke
+
+The interesting hazard here never became a bug, which is the point. A connection admitted at the exact moment shutdown starts could, in a naive implementation, outlive the WaitGroup drain and read from a closing server. Kvasir avoids this by construction, not by patching it later. Admission and shutdown share a single critical section, so the racing admission cannot occur, and the shutdown machinery stays separate from the sync.RWMutex that guards the data map. There was no diagnose-then-fix moment. The property was designed in up front, and go test -race with TestShutdownClosesClients keeps it honest as the code changes.
