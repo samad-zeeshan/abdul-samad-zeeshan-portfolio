@@ -1,0 +1,27 @@
+---
+title: "Pathfinder"
+description: "An extensible C++17 pathfinding engine with four algorithms behind one interface, verified by cross-algorithm oracle tests and shipped as a WebAssembly browser demo."
+---
+
+## Problem
+
+Pathfinding algorithms are short to write and easy to get subtly wrong. An A* heuristic that overestimates, a Dijkstra that pops nodes in the wrong order, a BFS used on a weighted graph. Each one still returns a path, and the path still looks plausible, so the bug survives a casual look. Checking each algorithm against a hand-written expected path is tedious. It only ever covers the few graphs you thought to write down. The harder problem is proving that four separate implementations are all correct, not just that each one runs.
+
+## Approach
+
+Pathfinder is an extensible C++17 engine with four algorithms, BFS, Dijkstra, Greedy Best-First, and A*, behind one object-oriented interface. A caller asks for a path and gets one. Which algorithm produced it stays behind the interface. Adding a fifth algorithm means implementing that interface, not editing any calling code.
+
+The key design decision is that shared interface, and it pays off twice. Once for extensibility, and once for testing. Because every algorithm is called the same way and reports its cost the same way, they can all run over the same graph and be compared directly against each other. The engine also ships as an install-free browser demo, compiled to WebAssembly with Emscripten, so it runs client-side with nothing to set up.
+
+## Verification
+
+Correctness is checked with cross-algorithm oracle tests. The idea is that the optimal algorithms must agree. On a given graph, BFS over an unweighted version, Dijkstra, and A* with an admissible heuristic all compute the same optimal path cost, so each one acts as an oracle for the others. There is no separate table of expected answers to maintain and let rot. The algorithms check each other.
+
+That turns any disagreement into a clear signal. If Dijkstra and A* return different costs on the same graph, at least one of them is wrong, and the test fails on that graph instead of showing up later as a plausible-looking wrong path. Comparing across many graphs covers far more cases than hand-written expectations would, since generating a graph is cheaper than working out its shortest path by hand.
+
+Greedy Best-First is deliberately kept out of the cost oracle. It is not optimal, so holding it to the same cost would be wrong. It is expected to return a valid path, not the cheapest one. It is checked for what it actually guarantees and left out of the equality assertion that binds the optimal three.
+
+## What broke
+
+The load-bearing risk in this whole scheme is the admissibility of the A* heuristic. If it ever overestimates the true remaining cost, A* can return a path costlier than the Dijkstra optimum. The cross-algorithm oracle is exactly the check that would catch that disagreement rather than let it ship.
+{/* CONFIRM: a specific bug the cross-algorithm oracle tests caught, e.g. an inadmissible A* heuristic on some graph, or a Greedy path that was not optimal and correctly was not expected to be */}
