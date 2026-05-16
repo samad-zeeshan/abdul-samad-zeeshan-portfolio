@@ -1,0 +1,208 @@
+/* Evidence graph island + the progressive-enhancement toggle. */
+
+/* No-JS gets the static index, JS gets the graph. The js class is set in <head>. */
+.evmap-graph {
+  display: none;
+}
+.js .evmap-graph {
+  display: block;
+}
+.js .evmap-fallback {
+  display: none;
+}
+
+/* Accessible node list: visually hidden, still focusable. The canvas draws the ring. */
+.eg__nodes {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.eg__node-btn {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Canvas takes the larger share. The panel keeps a 16rem floor so its detail
+   text stays readable until the layout drops to one column below 48rem. */
+.eg {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(16rem, 1fr);
+  gap: 1px;
+  background: var(--line-600);
+}
+.eg__canvas-wrap {
+  position: relative;
+  background: var(--ink-850);
+  height: 100%;
+  min-height: clamp(17rem, 39vh, 28rem);
+}
+.eg__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: manipulation;
+}
+
+/* The panel sizes to its content and never shows its own scrollbar. The canvas
+   fills the row, so a short panel leaves no gap and a tall one just grows. */
+.eg__panel {
+  background: var(--ink-800);
+  padding: var(--space-5);
+}
+
+/* Replay control */
+.eg__controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-4);
+}
+.eg__replay {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.3rem var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--text-300);
+  background: var(--ink-700);
+  border: var(--border);
+  border-radius: 100px;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.eg__replay:hover {
+  color: var(--signal-500);
+  border-color: var(--line-500);
+}
+.eg__replay-icon {
+  font-size: 1.1em;
+  line-height: 1;
+  transition: transform 450ms var(--ease);
+}
+.eg__replay:hover .eg__replay-icon {
+  transform: rotate(-180deg);
+}
+
+/* Hint / legend (idle state) */
+.eg__hint-lede {
+  color: var(--text-300);
+  font-size: var(--step-0);
+}
+.eg__legend {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--text-300);
+}
+.eg__legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.eg__swatch {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  flex: none;
+}
+.eg__swatch--proj {
+  border-radius: 3px;
+  background: var(--text-100);
+}
+
+/* Detail (selected state) */
+.eg__detail-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--step--1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-500);
+}
+.eg__detail-kind .dot {
+  background: var(--cat, var(--text-500));
+}
+.eg__detail-title {
+  margin-top: var(--space-2);
+  font-size: var(--step-2);
+}
+.eg__detail-sub,
+.eg__detail-one {
+  margin-top: var(--space-2);
+  color: var(--text-300);
+  font-size: var(--step-0);
+}
+.eg__detail-sub {
+  color: var(--text-500);
+  font-size: var(--step--1);
+}
+.eg__evidence {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+.eg__evidence li {
+  display: grid;
+  gap: var(--space-1);
+}
+.eg__ev-proj {
+  justify-self: start;
+  font-size: var(--step--1);
+  color: var(--signal-500);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+}
+.eg__ev-proj:hover,
+.eg__ev-proj:focus-visible {
+  text-decoration-color: currentColor;
+}
+.eg__ev-text {
+  color: var(--text-300);
+  font-size: var(--step-0);
+}
+.eg__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.eg__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.2rem var(--space-3);
+  border: var(--border);
+  border-radius: 100px;
+  font-size: var(--step--1);
+  color: var(--text-100);
+}
+.eg__chip .dot {
+  background: var(--cat, var(--text-500));
+}
+.eg__detail-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+@media (max-width: 48rem) {
+  .eg {
+    grid-template-columns: 1fr;
+  }
+  .eg__canvas-wrap {
+    height: 24rem;
+    min-height: 0;
+  }
+}

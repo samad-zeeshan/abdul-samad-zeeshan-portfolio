@@ -1,0 +1,36 @@
+---
+// Host for the evidence map. Shows the interactive graph island when JS runs and
+// the static skills index otherwise, toggled by the `js` class set in <head>.
+import EvidenceGraph from './EvidenceGraph.tsx';
+import StaticSkillsIndex from './StaticSkillsIndex.astro';
+import { skills, projects, edges } from '../lib/facts';
+---
+
+<section class="evmap container" aria-labelledby="evmap-h">
+  <div class="panel evmap__panel">
+    <div class="panel__cap">
+      <span id="evmap-h">Evidence map</span>
+      <span aria-hidden="true">{skills.length} skills · {projects.length} projects · {edges.length} edges</span>
+    </div>
+
+    <div class="evmap-graph">
+      <EvidenceGraph client:visible skills={skills} projects={projects} edges={edges} />
+    </div>
+
+    <div class="evmap-fallback">
+      <p class="evmap__lede">
+        Skills only appear here if they carry evidence. Each one links to the project
+        that backs it and the exact result that proves it.
+      </p>
+      <StaticSkillsIndex />
+    </div>
+  </div>
+</section>
+
+<style>
+  .evmap__lede {
+    padding: var(--space-4) var(--space-5) 0;
+    max-width: var(--measure);
+    color: var(--text-300);
+  }
+</style>
