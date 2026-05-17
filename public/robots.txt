@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://samad-zeeshan.github.io/abdul-samad-zeeshan-portfolio/sitemap-index.xml
