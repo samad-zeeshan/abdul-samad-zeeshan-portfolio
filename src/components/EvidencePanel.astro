@@ -41,7 +41,7 @@ const metrics = project.metrics ?? [];
 
   <div class="panel evidence__skills">
     <div class="panel__cap">
-      <span>skills, with evidence</span>
+      <span>skills</span>
       <span aria-hidden="true">{evidence.length}</span>
     </div>
     <ul class="ev-list">
@@ -135,6 +135,9 @@ const metrics = project.metrics ?? [];
     gap: var(--space-4);
     padding: var(--space-3) var(--space-4);
     border-top: var(--border);
+    /* Align the skill name to the evidence's first line. Without this the row
+       stretches to the tallest cell and the dot drops to the middle. */
+    align-items: baseline;
   }
   .ev-list__item:first-child {
     border-top: none;
