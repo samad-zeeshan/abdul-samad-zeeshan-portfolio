@@ -86,7 +86,9 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
   const simRef = useRef<Simulation<GNode, GLink> | null>(null);
   const rafRef = useRef<number>(0);
   const transformRef = useRef({ s: 1, ox: 0, oy: 0 });
-  const rotationRef = useRef(0);
+  // Start at rotation 3. It spreads the project labels out best, where rotation 0
+  // bunches Change-Gate, Docket, and Tally together in the lower middle.
+  const rotationRef = useRef(3);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
