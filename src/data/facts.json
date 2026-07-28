@@ -151,6 +151,7 @@
       "label": "Tally",
       "year": "2026",
       "repo": "https://github.com/samad-zeeshan/Tally",
+      "demo": { "url": "https://samad-zeeshan.github.io/Tally/", "label": "Demo" },
       "oneLiner": "A banking service on a double-entry ledger with exactly-once idempotent transfers, backed by 254 JUnit tests including real-Postgres integration.",
       "caseStudy": "/projects/tally/",
       "metrics": [
