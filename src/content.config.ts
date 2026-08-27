@@ -1,19 +1,46 @@
-// Content collection for the MDX case studies. Sets how they load and what
-// frontmatter is allowed.
+// Content collection for the eight projects. Each entry's frontmatter holds the
+// README text and numbers the pages render, so no page can invent a claim.
 import { defineCollection } from 'astro:content';
 import { z } from 'astro:schema';
 import { glob } from 'astro/loaders';
 
-// The filename without .mdx is the entry id and must match a project id in
-// facts.json (validate-facts.mjs enforces the pairing). Everything factual lives in
-// facts.json, so frontmatter carries only the page title and meta description.
+const number = z.object({
+  value: z.string(),
+  label: z.string(),
+  // Where the number was copied from, so a reviewer can check it against the repo.
+  source: z.string(),
+});
+
 const projects = defineCollection({
-  // The [^_] in the glob skips files whose name starts with an underscore, which are drafts.
   loader: glob({ pattern: '**/[^_]*.mdx', base: './src/content/projects' }),
   schema: z.object({
     title: z.string(),
-    // Cap matches the meta description length search engines actually show.
-    description: z.string().min(1).max(200),
+    order: z.number().int(),
+    problem: z.string(),
+    description: z.string().max(200),
+    // A project still being built has no page, demo, GIF or numbers yet.
+    status: z.enum(['shipped', 'in-progress']).default('shipped'),
+    opener: z.string().optional(),
+    repo: z.string().url().optional(),
+    demo: z.string().url().optional(),
+    demoNote: z.string().optional(),
+    gif: z
+      .object({ file: z.string(), width: z.number(), height: z.number(), alt: z.string() })
+      .optional(),
+    poster: z.string().optional(),
+    // The demo's own palette, copied from its CSS tokens, so the page keeps its tone.
+    tone: z
+      .object({
+        scheme: z.enum(['light', 'dark']),
+        bg: z.string(),
+        ink: z.string(),
+        ink2: z.string(),
+        accent: z.string(),
+        line: z.string(),
+      })
+      .optional(),
+    numbers: z.array(number).max(2).default([]),
+    papers: z.array(z.string()).default([]),
   }),
 });
 

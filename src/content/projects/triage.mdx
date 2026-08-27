@@ -1,0 +1,16 @@
+---
+title: "Triage"
+order: 6
+tone: { scheme: "light", bg: "#e9edf3", ink: "#111823", ink2: "#4c5768", accent: "#2b3fb8", line: "#c6cfdc" }
+problem: "A 600M-parameter model that sorts support emails into structured JSON, offline, with no API call."
+description: "Triage is a small distilled model that reads a support email and returns category, priority and account id as JSON, running offline."
+opener: "A 600M-parameter model that reads a support email and returns structured triage as JSON: `category`, `priority`, `account_id`. It runs locally on a consumer GPU. No API call at inference time."
+repo: "https://github.com/samad-zeeshan/Triage-0.6B"
+numbers:
+  - value: "87.3%"
+    label: "priority accuracy on 1,200 held-out tickets, against 38.3% for the base model"
+    source: "Triage-0.6B README (published main branch), headline result table, Priority accuracy row"
+  - value: "89.7%"
+    label: "category accuracy on the same tickets, against 64.2% for the base model"
+    source: "Triage-0.6B README (published main branch), headline result table, Category accuracy row"
+---
