@@ -1,87 +1,68 @@
 ---
-// Sticky site header: name and role on the left, primary nav on the right.
-import { profile } from '../lib/facts';
+// Site header, always on the ultramarine field so project pages sit inside the system.
+import { profile } from '../lib/site';
 import { withBase } from '../lib/paths';
 
-// external marks the off-site links, which get target=_blank and rel=noopener
-// below. The mailto stays in the same tab.
-const links = [
-  { label: 'GitHub', href: profile.links.github, external: true },
-  { label: 'Resume', href: withBase(profile.links.resume), external: true },
-  { label: 'Email', href: `mailto:${profile.links.email}`, external: false },
-];
+interface Props {
+  current?: string;
+}
+const { current } = Astro.props;
+const onHome = current === undefined;
 ---
 
-<header class="site-header">
-  <div class="container site-header__inner">
-    <a class="site-header__id" href={withBase('/')}>
-      <span class="site-header__name">{profile.name}</span>
-      <span class="site-header__role mono">{profile.role}</span>
+<header class="head">
+  <div class="wrap head__inner">
+    <a class="head__name" href={withBase('/')} aria-current={onHome ? 'page' : undefined}>
+      {profile.name}
     </a>
-    <nav class="site-header__nav mono" aria-label="Primary">
-      {
-        links.map((l) => (
-          <a
-            class="link"
-            href={l.href}
-            {...l.external ? { target: '_blank', rel: 'noopener' } : {}}
-          >
-            {l.label}
-          </a>
-        ))
-      }
+    <nav class="head__nav" aria-label="Primary">
+      <a href={withBase('/#work')}>Projects</a>
+      <a href={profile.github} rel="noopener">GitHub</a>
+      <a href={`mailto:${profile.email}`}>Email</a>
     </nav>
   </div>
 </header>
 
 <style>
-  .site-header {
-    border-bottom: var(--border);
-    background: var(--ink-900); /* fallback for browsers without color-mix */
-    background: color-mix(in srgb, var(--ink-900) 88%, transparent);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+  .head {
+    background: var(--field);
+    color: var(--cream);
+    border-bottom: 1px solid var(--line);
   }
-  .site-header__inner {
+  .head__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: var(--space-2) var(--space-4);
-    padding-block: var(--space-3);
+    gap: var(--space-2) var(--space-5);
+    min-height: 3.75rem;
+    padding-block: var(--space-2);
   }
-  .site-header__id {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-3);
-    min-width: 0;
-  }
-  .site-header__name {
+  .head__name {
     font-family: var(--font-display);
-    font-weight: 600;
+    font-weight: 800;
     font-size: var(--step-1);
-    letter-spacing: -0.01em;
-    white-space: nowrap;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    text-decoration: none;
   }
-  .site-header__role {
-    font-size: var(--step--1);
-    color: var(--text-500);
-    white-space: nowrap;
-  }
-  .site-header__nav {
+  .head__nav {
     display: flex;
     gap: var(--space-5);
     font-size: var(--step--1);
   }
-  @media (max-width: 34rem) {
-    .site-header__role {
-      display: none;
-    }
-    .site-header__nav {
-      gap: var(--space-4);
-    }
+  .head__nav a {
+    display: inline-block;
+    padding-block: var(--space-2);
+    text-decoration: none;
+    background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1px;
+    transition: background-size var(--dur-hover) var(--ease-out);
+  }
+  .head__nav a:hover,
+  .head__nav a:focus-visible {
+    background-size: 100% 1px;
+  }
+  .head :focus-visible {
+    outline-color: var(--cream);
   }
 </style>

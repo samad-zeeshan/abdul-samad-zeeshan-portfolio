@@ -1,52 +1,72 @@
 ---
-// Site footer: name, external profile links, and build credit.
-import { profile } from '../lib/facts';
-import { withBase } from '../lib/paths';
+// Footer on the field: the email as the last big line, then older repositories by name.
+import { profile } from '../lib/site';
 
-// Hardcoded, not new Date(): a static build should not silently roll the year
-// forward on a rebuild in some later year.
+// Fixed rather than new Date(), so a rebuild in a later year does not change the page.
 const year = '2026';
+const more = profile.moreOnGithub;
 ---
 
-<footer class="site-footer">
-  <div class="container">
-    <div class="site-footer__meta mono">
-      <span>{profile.name}</span>
-      <span class="site-footer__links">
-        <a class="link" href={profile.links.github} target="_blank" rel="noopener">GitHub</a>
-        <a class="link" href={profile.links.linkedin} target="_blank" rel="noopener">LinkedIn</a>
-        <a class="link" href={`mailto:${profile.links.email}`}>Email</a>
-        <a class="link" href={withBase('/now/')}>Now</a>
-      </span>
-      <span class="site-footer__built">Built with Astro. {year}.</span>
+<footer class="foot" id="contact">
+  <div class="wrap">
+    <a class="foot__email" href={`mailto:${profile.email}`} aria-label={`Email ${profile.email}`}>{profile.email}</a>
+    <div class="foot__meta">
+      <p>
+        Older work, including{' '}
+        {
+          more.map((r, i) => (
+            <>
+              <a class="link" href={r.url} rel="noopener">
+                {r.name}
+              </a>
+              {i < more.length - 2 ? ', ' : i === more.length - 2 ? ' and ' : ''}
+            </>
+          ))
+        }, is on <a class="link" href={profile.github} rel="noopener">GitHub</a>.
+      </p>
+      <p>{profile.name}, {year}</p>
     </div>
   </div>
 </footer>
 
 <style>
-  .site-footer {
+  .foot {
     margin-top: var(--space-9);
-    padding-block: var(--space-6);
-    border-top: var(--border);
+    padding-block: var(--space-8) var(--space-6);
+    background: var(--field);
+    color: var(--cream);
+    --tone-accent: var(--cream);
+    --tone-ink-2: var(--cream-2);
   }
-  .site-footer__meta {
+  .foot :focus-visible {
+    outline-color: var(--cream);
+  }
+  .foot__email {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.75rem, 0.2rem + 8.4vw, 9rem);
+    line-height: 0.9;
+    text-transform: uppercase;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 0.06em;
+    padding-bottom: 0.08em;
+    transition: background-size var(--dur-hover) var(--ease-out);
+  }
+  .foot__email:hover,
+  .foot__email:focus-visible {
+    background-size: 100% 0.06em;
+  }
+  .foot__meta {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-3) var(--space-5);
+    justify-content: space-between;
+    gap: var(--space-3) var(--space-6);
+    margin-top: var(--space-8);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
     font-size: var(--step--1);
-    color: var(--text-500);
-  }
-  .site-footer__links {
-    display: flex;
-    gap: var(--space-4);
-  }
-  .site-footer__built {
-    margin-left: auto;
-  }
-  @media (max-width: 34rem) {
-    .site-footer__built {
-      margin-left: 0;
-    }
+    color: var(--cream-2);
   }
 </style>

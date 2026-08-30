@@ -1,145 +1,65 @@
 #!/usr/bin/env node
-// Generates the Open Graph images (1200x630) into public/og/, one per page.
+// Generates the 1200x630 share images into public/og/, one for home and one per project.
 //
-// Text uses a system sans so renders stay stable across machines. Re-run with
-// `npm run og` if facts change.
+// Run with `npm run og` after changing a title or problem line. Uses system fonts,
+// because sharp's SVG renderer cannot load the site's web fonts.
 
-import { readFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, readdirSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import sharp from 'sharp';
+import YAML from 'yaml';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = join(__dirname, '..');
-const facts = JSON.parse(readFileSync(join(root, 'src', 'data', 'facts.json'), 'utf8'));
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = join(root, 'public', 'og');
 mkdirSync(outDir, { recursive: true });
+const facts = JSON.parse(readFileSync(join(root, 'src', 'data', 'facts.json'), 'utf8'));
 
-const CAT = { ml: '#5ac8d8', systems: '#7fc96f', web: '#ae9deb', infra: '#e88ab0' };
-const CAT_ORDER = ['ml', 'systems', 'web', 'infra'];
-const INK = '#0e1217';
-const TEXT = '#e6eaf0';
-const DIM = '#9ba6b4';
-const FAINT = '#6b7684';
-const SIGNAL = '#f2c14e';
-const FONT = 'Segoe UI, -apple-system, Arial, sans-serif';
-const MONO = 'Consolas, Menlo, monospace';
+const FIELD = '#1f2ee8';
+const CREAM = '#f4efe2';
+const DISPLAY = 'Impact, Haettenschweiler, Arial Narrow Bold, sans-serif';
+const TEXT = 'Segoe UI, Arial, sans-serif';
 
-const W = 1200;
-const H = 630;
-const PAD = 84;
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-// These strings get interpolated straight into SVG markup, so escape XML specials first.
-const esc = (s) =>
-  String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
-// Wraps by character count, not pixel width. We can't measure the system font here,
-// so maxChars is tuned per call site to the font size used there.
-function wrap(text, maxChars) {
-  const words = text.split(/\s+/);
+// Wraps by character count. The system font cannot be measured here, so the width is
+// tuned to the size used at each call site.
+function wrap(text, max) {
   const lines = [];
-  let cur = '';
-  for (const w of words) {
-    if ((cur + ' ' + w).trim().length > maxChars && cur) {
-      lines.push(cur);
-      cur = w;
-    } else {
-      cur = (cur + ' ' + w).trim();
-    }
+  let line = '';
+  for (const w of text.split(/\s+/)) {
+    if ((line + ' ' + w).trim().length > max) {
+      lines.push(line.trim());
+      line = w;
+    } else line += ' ' + w;
   }
-  if (cur) lines.push(cur);
+  if (line.trim()) lines.push(line.trim());
   return lines;
 }
 
-function tspans(lines, x, startY, lineH) {
-  return lines
-    .map((l, i) => `<tspan x="${x}" y="${startY + i * lineH}">${esc(l)}</tspan>`)
-    .join('');
-}
-
-function categoriesForProject(projectId) {
-  const present = new Set();
-  for (const e of facts.edges) {
-    if (e.project === projectId) {
-      const s = facts.skills.find((s) => s.id === e.skill);
-      if (s) present.add(s.category);
-    }
-  }
-  // Return in fixed channel order, not edge order, so the dots read the same on every card.
-  return CAT_ORDER.filter((c) => present.has(c));
-}
-
-// The four-color strip across the top is the card's signature mark, one band per skill category.
-function channelStrip() {
-  const seg = W / 4;
-  return CAT_ORDER.map(
-    (c, i) => `<rect x="${i * seg}" y="0" width="${seg}" height="8" fill="${CAT[c]}"/>`,
-  ).join('');
-}
-
-function dots(cats, x, y) {
-  return cats
-    .map((c, i) => `<circle cx="${x + i * 30}" cy="${y}" r="9" fill="${CAT[c]}"/>`)
-    .join('');
-}
-
-function baseSvg(inner) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-  <rect width="${W}" height="${H}" fill="${INK}"/>
-  ${channelStrip()}
-  <text x="${W - PAD}" y="${H - PAD + 6}" text-anchor="end" font-family="${MONO}" font-size="24" fill="${FAINT}">samad-zeeshan.github.io</text>
-  ${inner}
+function card({ title, sub, bg, ink, band }) {
+  const subLines = wrap(sub, 46).slice(0, 3);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
+  <rect width="1200" height="630" fill="${bg}"/>
+  ${band ? `<rect width="1200" height="64" fill="${FIELD}"/><text x="72" y="42" font-family="${TEXT}" font-size="22" font-weight="600" fill="${CREAM}" letter-spacing="2">${esc(facts.name.toUpperCase())}</text>` : ''}
+  <text x="64" y="${band ? 330 : 300}" font-family="${DISPLAY}" font-size="${title.length > 12 ? 150 : 220}" fill="${ink}">${esc(title.toUpperCase())}</text>
+  ${subLines
+    .map((l, i) => `<text x="72" y="${(band ? 410 : 390) + i * 46}" font-family="${TEXT}" font-size="34" fill="${ink}">${esc(l)}</text>`)
+    .join('\n  ')}
 </svg>`;
 }
 
-function homeSvg() {
-  const title = wrap(facts.profile.thesis, 26);
-  const inner = `
-  <text x="${PAD}" y="${PAD + 26}" font-family="${MONO}" font-size="24" letter-spacing="3" fill="${FAINT}">${esc(facts.profile.role.toUpperCase())}</text>
-  <text x="${PAD}" y="${PAD + 40}" font-family="${MONO}" font-size="24" fill="${SIGNAL}"> </text>
-  <text x="${PAD}" y="0" font-family="${FONT}" font-size="82" font-weight="700" fill="${TEXT}" letter-spacing="-1">
-    ${tspans([facts.profile.name], PAD, PAD + 130, 96)}
-  </text>
-  <text x="${PAD}" y="0" font-family="${FONT}" font-size="40" fill="${DIM}">
-    ${tspans(title, PAD, PAD + 240, 56)}
-  </text>
-  ${dots(CAT_ORDER, PAD + 12, H - PAD)}
-  <text x="${PAD + 12 + CAT_ORDER.length * 30 + 8}" y="${H - PAD + 8}" font-family="${MONO}" font-size="24" fill="${FAINT}">4 channels · evidence-first</text>`;
-  return baseSvg(inner);
+async function write(name, svg) {
+  await sharp(Buffer.from(svg)).png({ compressionLevel: 9, palette: true }).toFile(join(outDir, `${name}.png`));
+  console.log(`og: ${name}.png`);
 }
 
-function projectSvg(p) {
-  const cats = categoriesForProject(p.id);
-  const one = wrap(p.oneLiner, 58).slice(0, 3);
-  const metric = p.metrics && p.metrics[0];
-  // Stack the metric below the wrapped one-liner: base offset plus one line-height per line.
-  const metricY = PAD + 150 + one.length * 50 + 40;
-  const inner = `
-  <text x="${PAD}" y="${PAD + 26}" font-family="${MONO}" font-size="24" letter-spacing="3" fill="${FAINT}">CASE STUDY</text>
-  <text x="${PAD}" y="0" font-family="${FONT}" font-size="92" font-weight="700" fill="${TEXT}" letter-spacing="-1">
-    ${tspans([p.label], PAD, PAD + 118, 100)}
-  </text>
-  <text x="${PAD}" y="0" font-family="${FONT}" font-size="34" fill="${DIM}">
-    ${tspans(one, PAD, PAD + 150 + 40, 50)}
-  </text>
-  ${
-    metric
-      ? `<text x="${PAD}" y="${metricY}" font-family="${MONO}" font-size="44" font-weight="600" fill="${CAT[cats[0]] || SIGNAL}">${esc(metric.value)}</text>
-         <text x="${PAD}" y="${metricY + 34}" font-family="${MONO}" font-size="22" letter-spacing="1" fill="${FAINT}">${esc(metric.label.toUpperCase())}</text>`
-      : ''
-  }
-  ${dots(cats, PAD + 12, H - PAD)}`;
-  return baseSvg(inner);
-}
+await write('home', card({ title: 'Abdul Samad', sub: facts.role + '. Eight projects, each with a demo and its own numbers.', bg: FIELD, ink: CREAM }));
 
-async function render(name, svg) {
-  await sharp(Buffer.from(svg)).png().toFile(join(outDir, `${name}.png`));
-  console.log(`  og/${name}.png`);
+const dir = join(root, 'src', 'content', 'projects');
+for (const f of readdirSync(dir).filter((x) => x.endsWith('.mdx'))) {
+  const data = YAML.parse(readFileSync(join(dir, f), 'utf8').match(/^---\n([\s\S]*?)\n---/)[1]);
+  if (data.status === 'in-progress') continue;
+  const id = f.replace(/\.mdx$/, '');
+  await write(id, card({ title: data.title, sub: data.problem, bg: data.tone.bg, ink: data.tone.ink, band: true }));
 }
-
-console.log('generating OG images...');
-await render('home', homeSvg());
-for (const p of facts.projects) {
-  await render(p.id, projectSvg(p));
-}
-console.log('done');
