@@ -1,10 +1,9 @@
 ---
-// Footer on the field: the email as the last big line, then older repositories by name.
+// Footer on the field: the email as the last big line, then one line pointing to GitHub.
 import { profile } from '../lib/site';
 
 // Fixed rather than new Date(), so a rebuild in a later year does not change the page.
 const year = '2026';
-const more = profile.moreOnGithub;
 ---
 
 <footer class="foot" id="contact">
@@ -12,17 +11,7 @@ const more = profile.moreOnGithub;
     <a class="foot__email" href={`mailto:${profile.email}`} aria-label={`Email ${profile.email}`}>{profile.email}</a>
     <div class="foot__meta">
       <p>
-        Older work, including{' '}
-        {
-          more.map((r, i) => (
-            <>
-              <a class="link" href={r.url} rel="noopener">
-                {r.name}
-              </a>
-              {i < more.length - 2 ? ', ' : i === more.length - 2 ? ' and ' : ''}
-            </>
-          ))
-        }, is on <a class="link" href={profile.github} rel="noopener">GitHub</a>.
+        Everything else I have built is on <a class="link" href={profile.github} rel="noopener">GitHub</a>.
       </p>
       <p>{profile.name}, {year}</p>
     </div>
@@ -33,6 +22,8 @@ const more = profile.moreOnGithub;
   .foot {
     margin-top: var(--space-9);
     padding-block: var(--space-8) var(--space-6);
+    /* Room for the fixed palette picker, so it never covers the last line. */
+    padding-bottom: calc(var(--space-6) + 3.5rem);
     background: var(--field);
     color: var(--cream);
     --tone-accent: var(--cream);

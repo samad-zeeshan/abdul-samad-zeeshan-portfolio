@@ -108,11 +108,5 @@
     ]
   },
   "email": "samad.z@outlook.com",
-  "github": "https://github.com/samad-zeeshan",
-  "moreOnGithub": [
-    { "name": "Fulcrum", "url": "https://github.com/samad-zeeshan/Fulcrum" },
-    { "name": "Touchstone", "url": "https://github.com/samad-zeeshan/Touchstone" },
-    { "name": "Kvasir", "url": "https://github.com/samad-zeeshan/Kvasir" },
-    { "name": "pathfinder", "url": "https://github.com/samad-zeeshan/pathfinder" }
-  ]
+  "github": "https://github.com/samad-zeeshan"
 }

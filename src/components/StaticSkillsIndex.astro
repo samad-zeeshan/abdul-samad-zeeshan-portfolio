@@ -13,7 +13,7 @@ const groups = skillsByCategory(Astro.props.projects);
   {
     groups.map((g) => (
       <section class="si__group">
-        <h3 class="si__cat">{g.label}</h3>
+        <h3 class="si__cat" style={`border-color: var(--cat-${g.category})`}>{g.label}</h3>
         <ul class="si__list">
           {g.skills.map(({ skill, projects }) => (
             <li class="si__skill">

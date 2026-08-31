@@ -1,0 +1,121 @@
+---
+// Five swatches fixed at the bottom left that switch the site's palette. The choice
+// is kept in localStorage and in the address, and the graph repaints to match.
+const palettes = [
+  { id: 'acid', name: 'Acid, black with yellow-green', field: '#0a0a0a', accent: '#d6ff3f' },
+  { id: 'ultramarine', name: 'Ultramarine, blue with cream', field: '#1f2ee8', accent: '#ffd84d' },
+  { id: 'oxblood', name: 'Oxblood, wine red with bone', field: '#6b0f1a', accent: '#ffa46b' },
+  { id: 'forest', name: 'Forest, deep green with chalk', field: '#0f3d2e', accent: '#f5d547' },
+  { id: 'terracotta', name: 'Terracotta, burnt orange with cream', field: '#8c3210', accent: '#ffd27a' },
+];
+---
+
+<div class="pick" data-picker role="group" aria-label="Site colours">
+  {
+    palettes.map((p) => (
+      <button
+        type="button"
+        class="pick__sw"
+        data-palette-id={p.id}
+        aria-pressed="false"
+        aria-label={`${p.name} palette`}
+        title={p.name}
+        style={`--sw-field:${p.field};--sw-accent:${p.accent}`}
+      />
+    ))
+  }
+</div>
+
+<script is:inline>
+  (function () {
+    var box = document.querySelector('[data-picker]');
+    if (!box) return;
+    var root = document.documentElement;
+    var buttons = box.querySelectorAll('[data-palette-id]');
+    function mark() {
+      var cur = root.getAttribute('data-palette') || 'acid';
+      buttons.forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.getAttribute('data-palette-id') === cur));
+      });
+    }
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-palette-id');
+        root.setAttribute('data-palette', id);
+        try {
+          localStorage.setItem('palette', id);
+        } catch (e) {}
+        // Only rewrite the address when it already names a palette, so a plain link
+        // stays plain and the stored choice does the remembering.
+        var q = new URLSearchParams(location.search);
+        if (q.has('palette')) {
+          q.set('palette', id);
+          history.replaceState(null, '', location.pathname + '?' + q.toString() + location.hash);
+        }
+        mark();
+      });
+    });
+    mark();
+  })();
+</script>
+
+<style>
+  .pick {
+    position: fixed;
+    left: var(--space-3);
+    bottom: var(--space-3);
+    z-index: var(--z-skip);
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+  /* The visible dot is small, the button around it is a 32 px target. */
+  .pick__sw {
+    position: relative;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pick__sw::before {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--sw-accent) 0 30%, var(--sw-field) 33%);
+    box-shadow: 0 0 0 1px var(--line-strong);
+    transition: transform var(--dur-press) var(--ease-out), box-shadow var(--dur-press) ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .pick__sw:hover::before {
+      transform: scale(1.15);
+      box-shadow: 0 0 0 1px var(--cream);
+    }
+  }
+  .pick__sw:active::before {
+    transform: scale(0.88);
+  }
+  .pick__sw[aria-pressed='true']::before {
+    box-shadow: 0 0 0 1.5px var(--field), 0 0 0 3px var(--cream);
+  }
+  .pick__sw:focus-visible {
+    outline: 2px solid var(--cream);
+    outline-offset: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pick__sw::before {
+      transition: none;
+    }
+    .pick__sw:hover::before,
+    .pick__sw:active::before {
+      transform: none;
+    }
+  }
+</style>
