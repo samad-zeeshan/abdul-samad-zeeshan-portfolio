@@ -1,0 +1,24 @@
+---
+// Host for the skills graph in the About column. The island draws when JS runs, and the
+// static index takes its place otherwise, switched by the `js` class set in <head>.
+import EvidenceGraph from './EvidenceGraph.tsx';
+import StaticSkillsIndex from './StaticSkillsIndex.astro';
+import { skills, edges, type GraphProject } from '../lib/facts';
+import { getProjects, hasPage } from '../lib/site';
+import { withBase } from '../lib/paths';
+import '../styles/graph.css';
+
+const projects: GraphProject[] = (await getProjects())
+  .filter(hasPage)
+  .map((p) => ({ id: p.id, label: p.data.title, href: withBase(`/projects/${p.id}/`) }));
+---
+
+<figure class="evmap">
+  <div class="evmap__graph">
+    <EvidenceGraph client:visible skills={skills} projects={projects} edges={edges} />
+  </div>
+  <div class="evmap__fallback">
+    <StaticSkillsIndex projects={projects} />
+  </div>
+  <figcaption class="label evmap__cap">Skills, linked to the project that proves each one.</figcaption>
+</figure>

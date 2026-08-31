@@ -1,0 +1,73 @@
+---
+// No-JS stand-in for the skills graph: each skill by category, with links to the
+// projects that prove it and the proving sentence on hover.
+import { skillsByCategory, type GraphProject } from '../lib/facts';
+
+interface Props {
+  projects: GraphProject[];
+}
+const groups = skillsByCategory(Astro.props.projects);
+---
+
+<div class="si">
+  {
+    groups.map((g) => (
+      <section class="si__group">
+        <h3 class="si__cat">{g.label}</h3>
+        <ul class="si__list">
+          {g.skills.map(({ skill, projects }) => (
+            <li class="si__skill">
+              <span class="si__name">{skill.label}</span>
+              <span class="si__projs">
+                {projects.map(({ project, evidence }, i) => (
+                  <>
+                    <a href={project.href} title={evidence}>
+                      {project.label}
+                    </a>
+                    {i < projects.length - 1 && ', '}
+                  </>
+                ))}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</div>
+
+<style>
+  .si {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: var(--space-5) var(--space-6);
+  }
+  .si__cat {
+    font-size: var(--step-1);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: var(--space-2);
+  }
+  .si__list {
+    display: grid;
+    gap: var(--space-1);
+    font-size: var(--step--1);
+    line-height: 1.45;
+  }
+  .si__skill {
+    display: grid;
+  }
+  .si__name {
+    color: var(--cream);
+  }
+  .si__projs {
+    color: var(--cream-2);
+  }
+  .si__projs a {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-underline-offset: 0.2em;
+  }
+</style>

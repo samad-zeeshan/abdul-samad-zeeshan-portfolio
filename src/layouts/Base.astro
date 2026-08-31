@@ -56,6 +56,8 @@ const ogImage = new URL(withBase(image), Astro.site).href;
       // The entrance plays on the first page of a visit only. Later navigations and
       // reduced-motion users get the settled page straight away.
       (function () {
+        // Lets CSS swap the no-JS skills index for the graph before first paint.
+        document.documentElement.classList.add('js');
         try {
           if (sessionStorage.getItem('seen')) return;
           sessionStorage.setItem('seen', '1');

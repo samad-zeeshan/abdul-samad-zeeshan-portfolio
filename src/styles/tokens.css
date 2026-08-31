@@ -10,6 +10,8 @@
   --cream: #f4efe2;
   --cream-2: #cfd2f6;
   --cream-3: #b9bdf3;
+  /* One accent, kept for the graph: project squares and the highlighted path. */
+  --accent: #ffd84d;
   --line: rgba(244, 239, 226, 0.28);
   --line-strong: rgba(244, 239, 226, 0.6);
   --shadow: 0 24px 48px -24px rgba(6, 10, 70, 0.7);
