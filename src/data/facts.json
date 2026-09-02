@@ -2,7 +2,7 @@
   "name": "Abdul Samad Zeeshan",
   "shortName": "Samad",
   "role": "Backend, data and LLM systems",
-  "intro": "I finished my Computing Science degree at the University of Alberta in June 2026. I build backend services, data pipelines and systems with a language model somewhere inside. The part I care about is making them hold up. That means tests and evals that run on every push, retries that never count anything twice, and a record you can follow to see why a decision was made. Each project below takes one real problem and reports its numbers as they came out, including the bad ones.",
+  "intro": "I finished my Computing Science degree at the University of Alberta in June 2026. I build backend services, data pipelines and systems with a language model somewhere inside. Each project below takes one real problem and reports its numbers as they came out, including the bad ones.",
   "skills": [
     "Python",
     "Java",
