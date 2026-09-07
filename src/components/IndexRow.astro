@@ -1,6 +1,6 @@
 ---
-// One line of the project index: the name in poster type, the problem, the headline
-// number, and a still from the demo that slides in on hover.
+// One line of the project index: the name in poster type, what it does, one sentence
+// on the headline result with its figure under it, and a still from the demo on hover.
 import type { Project } from '../lib/site';
 import { hasPage, countTarget } from '../lib/site';
 import { withBase } from '../lib/paths';
@@ -24,18 +24,18 @@ const Tag = linked ? 'a' : 'div';
     {
       lead ? (
         <p class="row__num">
+          <span class="row__label">{lead.label}</span>
           <span class="row__value mono">
             <span class="visually-hidden">{lead.value}</span>
             <span aria-hidden="true" data-count={countTarget(lead.value)}>
               {lead.value}
             </span>
           </span>
-          <span class="row__label">{lead.label}</span>
         </p>
       ) : (
         <p class="row__num">
+          <span class="row__label">No demo or numbers yet.</span>
           <span class="row__value mono">In progress</span>
-          <span class="row__label">Built by hand. No demo or numbers yet.</span>
         </p>
       )
     }

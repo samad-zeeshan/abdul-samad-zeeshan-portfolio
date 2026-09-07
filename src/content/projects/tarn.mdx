@@ -2,7 +2,7 @@
 title: "Tarn"
 order: 5
 tone: { scheme: "dark", bg: "#0b0d10", ink: "#e8e6e1", ink2: "#a9adb3", accent: "#f0b340", line: "#262b33" }
-problem: "Would a login graph have caught a known attacker in a billion real records, and can an AI analyst sort the alerts?"
+problem: "Scores a billion real logins from a US national lab for signs of a known attacker, then an AI analyst sorts the alerts."
 description: "Tarn scores a billion real login records with a known attack against the lab's answer key, then tests an AI analyst on the alerts."
 opener: "Tarn takes a billion real login records from a US national lab, where 749 are a known attack, and asks one question: would this have caught the attacker? A map of who logged into which computer is scored as each login arrives and raises alerts. Then an AI analyst with map tools sorts those alerts so a person only reads the ones that matter. Every result below is checked against the lab's answer key, including the ones that came out badly."
 repo: "https://github.com/samad-zeeshan/Tarn"
@@ -12,10 +12,10 @@ gif: { file: "tarn.gif", width: 720, height: 405, alt: "One day of logins drawn 
 poster: "tarn.webp"
 numbers:
   - value: "29 of 181"
-    label: "attack account-days caught at 100 alerts a day by the graph detector fixed in advance, against 21 for v1's rules"
+    label: "Days of real attacker activity caught when an analyst reads only 100 alerts a day. The first version caught 21. Most still got through."
     source: "Tarn README, graph detector budget table, rows v2 graph detector and v1"
   - value: "5,079,642"
-    label: "point-in-time features recomputed with the future cut off, 0 mismatches"
+    label: "Detector inputs recomputed with the future hidden, to prove it never peeked ahead. Zero mismatches."
     source: "Tarn README, point-in-time check table, row v2 feature engine"
 papers:
   - "arXiv 2607.29390, fair evaluation of graph-based lateral movement detectors (the protocol)"

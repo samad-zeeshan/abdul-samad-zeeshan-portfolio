@@ -2,7 +2,7 @@
 title: "Parley"
 order: 4
 tone: { scheme: "dark", bg: "#15110e", ink: "#f1e8da", ink2: "#bcae9b", accent: "#5cc8b0", line: "#342b24" }
-problem: "A phone agent that books property viewings in English and Gulf Arabic and only states facts the listings database returned."
+problem: "Answers the phone for a property agency in English and Gulf Arabic, books viewings, and only states facts the listings database returned."
 description: "Parley answers the phone for a property agency in English, Gulf Arabic or both, books viewings, and only says facts the booking API returned."
 opener: "Parley answers the phone for a property agency, in English, Gulf Arabic or both in one sentence. It books a viewing, only ever says prices and addresses the listings database returned, and works with no internet connection."
 repo: "https://github.com/samad-zeeshan/Parley"
@@ -12,10 +12,10 @@ gif: { file: "parley.gif", width: 800, height: 450, alt: "An Arabic call in the 
 poster: "parley.webp"
 numbers:
   - value: "232 of 232"
-    label: "calls that hit a booking API fault were handled safely, with 0 false facts spoken"
+    label: "Every time the booking system failed mid-call, all 232 times, Parley said so and offered a callback instead of inventing a price or address."
     source: "Parley README, booking API faults paragraph"
   - value: "17 of 40"
-    label: "scripted calls booked end to end over audio on the offline speech stack"
+    label: "Scripted calls booked start to finish by voice with no internet. Not good enough yet. Calls that mix English and Arabic are where it fails."
     source: "Parley README, calls booked table, row All, column local"
 papers:
   - "Evaluation: arXiv 2609.20152 (MTVA-Bench), 2609.29452 (acoustic stress, TRACE), 2605.19069 (code-switching ASR), 2609.21084 (digit error rates)"

@@ -2,7 +2,7 @@
 title: "Proving"
 order: 2
 tone: { scheme: "dark", bg: "#0d1012", ink: "#e4e8e3", ink2: "#939ca1", accent: "#62d6b0", line: "#2a3238" }
-problem: "Test a new version of an AI agent on thousands of made-up customers before it meets a real one."
+problem: "Tests a new version of an AI agent on thousands of made-up customers before it meets a real one, then says ship or hold."
 description: "Proving runs thousands of simulated customers against two versions of an AI agent and says ship or hold, with the numbers behind it."
 opener: "Proving lets you test an AI agent on thousands of made-up customers before it ever meets a real one. The customers have goals, details they only give when asked, and patience that runs out. The agent's tools are recorded or faked, so nothing real is touched. At the end you get one answer, ship or hold, with the numbers behind it. It is tried here on two agents from this portfolio: Warden, which approves changes to live software, and Parley, which books property viewings by phone in English and Gulf Arabic."
 repo: "https://github.com/samad-zeeshan/Proving"
@@ -12,10 +12,10 @@ gif: { file: "proving.gif", width: 780, height: 488, alt: "Simulated customers r
 poster: "proving.webp"
 numbers:
   - value: "1.301 to 0.607"
-    label: "planted tool calls reaching Warden's server per adversarial scenario, over 336 scenarios. Verdict ship"
+    label: "Hostile fake customers got the old Warden to make 1.3 unwanted server calls per conversation. The new one made 0.6, over 336 conversations. Verdict: ship."
     source: "Proving README, results table, row Warden, resolver off to Warden as shipped"
   - value: "505 of 505"
-    label: "standard scenarios where Parley's two parsers reached the same outcome. Verdict hold"
+    label: "Parley's new way of reading a request reached the same outcome as the old one on all 505 ordinary conversations. No gain, so the verdict was hold."
     source: "Proving README, results table row Parley and the paragraph under the second table"
 papers:
   - "arXiv 2609.30137, Screen Before You Serve: simulation for production customer-experience agents"

@@ -2,7 +2,7 @@
 title: "Tally"
 order: 3
 tone: { scheme: "light", bg: "#eef1e6", ink: "#1d2a30", ink2: "#4b5a55", accent: "#2c6849", line: "#c4d3c2" }
-problem: "A ledger that never loses or doubles a cent, even when the network fails in the middle of a payment."
+problem: "A small bank on a double-entry ledger. It never loses or doubles a cent, even when the network fails in the middle of a payment."
 description: "Tally is a small bank on a double-entry ledger. Retries land once, balances rebuild from scratch, and suspicious transfers are flagged with evidence."
 opener: "Tally is a small bank that can never lose or double a cent. Every transfer is written as two entries that cancel out, a payment retried after a dropped connection lands exactly once, every balance can be rebuilt from scratch to prove nothing leaked, and suspicious transfers are flagged after they land with the evidence attached."
 repo: "https://github.com/samad-zeeshan/Tally"
@@ -12,10 +12,10 @@ gif: { file: "tally.gif", width: 800, height: 500, alt: "Tally demo: transfer, r
 poster: "tally.webp"
 numbers:
   - value: "11,054"
-    label: "transfers through 7 fault runs on Kubernetes, with 0 violations of any kind"
+    label: "Transfers pushed through 7 runs on Kubernetes while the network and database were made to fail. Not one cent lost or doubled."
     source: "Tally README, fault runs summary line (7 runs, 11,054 transfers and 1,580 retries, 0 violations)"
   - value: "0.8179"
-    label: "fraud precision on a fresh seed with the graph rules, against 0.3655 for the v1 rules"
+    label: "Of transfers flagged as fraud on data the rules had never seen, 82% really were fraud. The first version managed 37%."
     source: "Tally README, fraud table, row Precision / recall on a fresh seed (20260926)"
 papers:
   - "arXiv 2607.05076, Can Code Specify a System Precisely Enough to Formally Verify It? The model of the transfer protocol and its stated gaps."
