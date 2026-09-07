@@ -49,10 +49,11 @@ for (const e of entries) {
     continue;
   }
   const d = e.data;
-  if (d.status === 'in-progress' && (d.demo || d.numbers?.length || d.gif)) {
-    fail(`${e.id}: an in-progress project must not show a demo, GIF or numbers`);
+  const isShipped = !d.status || d.status === 'shipped';
+  if (!isShipped && (d.demo || d.numbers?.length || d.gif)) {
+    fail(`${e.id}: a project that is not shipped must not show a demo, GIF or numbers`);
   }
-  if (d.status !== 'in-progress' && !d.opener) fail(`${e.id}: missing README opener`);
+  if (isShipped && !d.opener) fail(`${e.id}: missing README opener`);
   if (d.gif && !existsSync(join(root, 'public', 'gifs', d.gif.file))) fail(`${e.id}: GIF file missing`);
   if (d.poster && !existsSync(join(root, 'public', 'posters', d.poster))) fail(`${e.id}: poster missing`);
   for (const n of d.numbers ?? []) {
@@ -78,12 +79,12 @@ if (docket && /\b(runs|running|operates|in production)\b/i.test(docket.raw)) {
 const tarn = entries.find((e) => e.id === 'tarn');
 if (tarn && /at scale/i.test(tarn.raw)) fail('tarn: Tarn is never "at scale"');
 
-// The skills graph may only link skills to shipped projects, since an in-progress one has
-// no numbers to back an edge and no page for the node to open.
+// The skills graph may only link skills to shipped projects, since any other has no
+// numbers to back an edge and no page for the node to open.
 const facts = JSON.parse(readFileSync(join(root, 'src', 'data', 'facts.json'), 'utf8'));
 const graph = facts.graph ?? { skills: [], edges: [] };
 const skillIds = new Set(graph.skills.map((s) => s.id));
-const shipped = new Set(entries.filter((e) => e.data?.status !== 'in-progress').map((e) => e.id));
+const shipped = new Set(entries.filter((e) => (e.data?.status ?? 'shipped') === 'shipped').map((e) => e.id));
 for (const edge of graph.edges) {
   if (!skillIds.has(edge.skill)) fail(`graph: edge names unknown skill ${edge.skill}`);
   if (!shipped.has(edge.project)) fail(`graph: edge to ${edge.project}, which is not a shipped project`);

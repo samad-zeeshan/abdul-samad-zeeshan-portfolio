@@ -18,8 +18,9 @@ const projects = defineCollection({
     order: z.number().int(),
     problem: z.string(),
     description: z.string().max(200),
-    // A project still being built has no page, demo, GIF or numbers yet.
-    status: z.enum(['shipped', 'in-progress']).default('shipped'),
+    // A project still being built has no page, demo, GIF or numbers yet. A hidden one
+    // is left off every page but still counts toward the eight the validator expects.
+    status: z.enum(['shipped', 'in-progress', 'hidden']).default('shipped'),
     opener: z.string().optional(),
     repo: z.string().url().optional(),
     demo: z.string().url().optional(),

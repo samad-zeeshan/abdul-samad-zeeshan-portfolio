@@ -6,12 +6,14 @@ export const profile = facts;
 
 export type Project = CollectionEntry<'projects'>;
 
+// Hidden projects stay in the collection so the validator can count them, and are
+// dropped here so the index, the rail and the graph never see them.
 export async function getProjects(): Promise<Project[]> {
   const all = await getCollection('projects');
-  return all.sort((a, b) => a.data.order - b.data.order);
+  return all.filter((p) => p.data.status !== 'hidden').sort((a, b) => a.data.order - b.data.order);
 }
 
-// Only shipped projects get a page. Bourse has nothing to show yet.
+// Only shipped projects get a page.
 export function hasPage(p: Project): boolean {
   return p.data.status === 'shipped';
 }

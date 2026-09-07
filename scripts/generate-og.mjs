@@ -56,12 +56,12 @@ async function write(name, svg) {
   console.log(`og: ${name}.png`);
 }
 
-await write('home', card({ title: 'Abdul Samad', sub: facts.role + '. Eight projects, each with a demo and its own numbers.', bg: FIELD, ink: CREAM, titleInk: ACID }));
+await write('home', card({ title: 'Abdul Samad', sub: facts.role + '. Seven projects, each with a demo and its own numbers.', bg: FIELD, ink: CREAM, titleInk: ACID }));
 
 const dir = join(root, 'src', 'content', 'projects');
 for (const f of readdirSync(dir).filter((x) => x.endsWith('.mdx'))) {
   const data = YAML.parse(readFileSync(join(dir, f), 'utf8').match(/^---\n([\s\S]*?)\n---/)[1]);
-  if (data.status === 'in-progress') continue;
+  if (data.status && data.status !== 'shipped') continue;
   const id = f.replace(/\.mdx$/, '');
   await write(id, card({ title: data.title, sub: data.problem, bg: data.tone.bg, ink: data.tone.ink, band: true }));
 }
