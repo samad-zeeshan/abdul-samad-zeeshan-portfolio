@@ -122,7 +122,8 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
           label: p.label,
           href: p.href,
           r: 4.5,
-          cr: 8 + Math.sqrt(degree.get(p.id) ?? 1) * 1.3 + 13,
+          // Wider than the first version so two project names cannot settle on top of each other.
+          cr: 8 + Math.sqrt(degree.get(p.id) ?? 1) * 1.3 + 22,
           x: 0,
           y: 0,
         })),

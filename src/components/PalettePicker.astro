@@ -1,5 +1,5 @@
 ---
-// Five swatches fixed at the bottom left that switch the site's palette. The choice
+// Five swatches fixed at the bottom left on wide screens that switch the palette. The choice
 // is kept in localStorage and in the address, and the graph repaints to match.
 const palettes = [
   { id: 'acid', name: 'Acid, black with yellow-green', field: '#0a0a0a', accent: '#d6ff3f' },
@@ -60,17 +60,24 @@ const palettes = [
 </script>
 
 <style>
+  /* Phones have no room for a fixed control that does not cover text, so the picker
+     is a desktop extra. */
   .pick {
+    display: none;
     position: fixed;
     left: var(--space-3);
     bottom: var(--space-3);
     z-index: var(--z-skip);
-    display: flex;
     gap: 2px;
     padding: 3px;
     background: var(--field);
     border: 1px solid var(--line);
     border-radius: 999px;
+  }
+  @media (min-width: 60rem) {
+    .pick {
+      display: flex;
+    }
   }
   /* The visible dot is small, the button around it is a 32 px target. */
   .pick__sw {

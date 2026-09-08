@@ -10,12 +10,16 @@
   display: none;
   min-height: 0;
 }
-.js .evmap__graph {
-  display: block;
-}
-.js .evmap__fallback,
-.js .evmap__cap {
-  display: none;
+/* The same 60rem breakpoint as client:media on the island, so the canvas only shows
+   where its script is allowed to load. */
+@media (min-width: 60rem) {
+  .js .evmap__graph {
+    display: block;
+  }
+  .js .evmap__fallback,
+  .js .evmap__cap {
+    display: none;
+  }
 }
 
 .eg {
@@ -24,11 +28,8 @@
   gap: var(--space-2);
   height: 100%;
 }
-/* Phone: the graph sits above the paragraph at about 60vw. Wider screens stretch it
-   to the paragraph's height through the About grid. */
 .eg__wrap {
   position: relative;
-  height: max(15rem, 60vw);
 }
 .eg__canvas {
   display: block;
@@ -125,8 +126,10 @@
 }
 
 @media (min-width: 60rem) {
+  /* Stretches to the paragraph's height, capped so the graph never takes a full screen. */
   .eg__wrap {
     height: 100%;
     min-height: 20rem;
+    max-height: 24rem;
   }
 }

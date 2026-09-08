@@ -22,12 +22,16 @@ const year = '2026';
   .foot {
     margin-top: var(--space-9);
     padding-block: var(--space-8) var(--space-6);
-    /* Room for the fixed palette picker, so it never covers the last line. */
-    padding-bottom: calc(var(--space-6) + 3.5rem);
     background: var(--field);
     color: var(--cream);
     --tone-accent: var(--cream);
     --tone-ink-2: var(--cream-2);
+  }
+  /* Room for the fixed palette picker, so it never covers the last line. */
+  @media (min-width: 60rem) {
+    .foot {
+      padding-bottom: calc(var(--space-6) + 3.5rem);
+    }
   }
   .foot :focus-visible {
     outline-color: var(--cream);

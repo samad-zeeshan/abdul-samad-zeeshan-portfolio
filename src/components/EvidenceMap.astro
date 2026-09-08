@@ -1,6 +1,6 @@
 ---
-// Host for the skills graph in the About column. The island draws when JS runs, and the
-// static index takes its place otherwise, switched by the `js` class set in <head>.
+// Host for the skills graph in the About column. On a wide screen with JS the island
+// draws. Phones and no-JS visitors get the static index, and phones never load the island.
 import EvidenceGraph from './EvidenceGraph.tsx';
 import StaticSkillsIndex from './StaticSkillsIndex.astro';
 import { skills, edges, type GraphProject } from '../lib/facts';
@@ -15,7 +15,7 @@ const projects: GraphProject[] = (await getProjects())
 
 <figure class="evmap">
   <div class="evmap__graph">
-    <EvidenceGraph client:visible skills={skills} projects={projects} edges={edges} />
+    <EvidenceGraph client:media="(min-width: 60rem)" skills={skills} projects={projects} edges={edges} />
   </div>
   <div class="evmap__fallback">
     <StaticSkillsIndex projects={projects} />
