@@ -17,6 +17,10 @@ numbers:
   - value: "0.8179"
     label: "Of transfers flagged as fraud on data the rules had never seen, 82% really were fraud. The first version managed 37%."
     source: "Tally README, fraud table, row Precision / recall on a fresh seed (20260926)"
+decisions:
+  - "I locked account rows in one fixed order, so two transfers crossing between the same accounts cannot block each other forever."
+  - "The first failure tests found five real bugs, now each covered by a test. A stale address cache kept the service calling a dead database for a minute."
+  - "Fraud scoring happens after each payment is saved, so a slow or broken scorer can lose a score but never a transfer."
 papers:
   - { id: "2607.05076", title: "Can Code Specify a System Precisely Enough to Formally Verify It?", change: "It warned that code and its math model can share one misreading, so real failure tests back up the model." }
   - { id: "2608.22389", title: "KONTOGRAPH", change: "It led to a checker that rebuilds every fraud score with later payments hidden, to prove no score used the future." }

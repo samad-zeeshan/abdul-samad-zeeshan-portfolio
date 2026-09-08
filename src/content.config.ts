@@ -48,6 +48,8 @@ const projects = defineCollection({
       })
       .optional(),
     numbers: z.array(number).max(2).default([]),
+    // Calls I made and bugs I chased, each sourced from the README.
+    decisions: z.array(z.string()).max(3).default([]),
     papers: z.array(paper).max(3).default([]),
   }),
 });

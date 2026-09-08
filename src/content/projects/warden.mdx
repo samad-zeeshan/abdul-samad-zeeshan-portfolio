@@ -17,6 +17,10 @@ numbers:
   - value: "35 of 84"
     label: "With the safety layers switched off, 35 of the same 84 attacks got through. That is what the layers are worth."
     source: "Warden README, prompt-injection red-team table, row Boundary layers off"
+decisions:
+  - "Each credential names one customer and one request, so the assistant cannot reach anyone else. Taking those as checked inputs instead let 50 of 56 scripted tries through."
+  - "The risk score is plain code. A language model only writes the explanation, and only after the decision is saved."
+  - "A small local model steering the assistant never finished a task properly, 0 of 80 times, so that test needs a stronger model."
 papers:
   - { id: "2609.14780", title: "The Stochastic Deputy", change: "Customer and request are fixed inside each signed credential instead of being passed in, the pattern the paper showed failing." }
   - { id: "2609.26900", title: "Ajar", change: "Its measure, how many writes a credential could still make after the task, is how the tests count what an attacker could reach." }

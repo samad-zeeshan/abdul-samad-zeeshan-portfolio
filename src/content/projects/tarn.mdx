@@ -17,6 +17,10 @@ numbers:
   - value: "5,079,642"
     label: "Detector inputs recomputed with the future hidden, to prove it never peeked ahead. Zero mismatches."
     source: "Tarn README, point-in-time check table, row v2 feature engine"
+decisions:
+  - "Everything the detectors learn comes from the first day only, and the code refuses any fit that reaches past it, so no test day leaks in."
+  - "After scoring, I found the old night-time rule pushed ordinary night logins to the top. Without it, the detector caught attacker activity on 71 of 181 days, not 29."
+  - "The analyst test stopped early when another job took over the laptop's graphics card, so only 49 of 600 alerts were scored."
 papers:
   - { id: "2607.29390", title: "Fair evaluation of graph-based lateral movement detectors", change: "Every detector learns only from the first day and gets the same 100 alerts a day, so the comparison is fair." }
   - { id: "2608.22389", title: "KONTOGRAPH", change: "It led to the checker that recomputes detector inputs with the future cut off, to prove none of them peeked ahead." }

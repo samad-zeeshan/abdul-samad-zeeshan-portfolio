@@ -17,6 +17,10 @@ numbers:
   - value: "17 of 40"
     label: "Scripted calls booked start to finish by voice with no internet. Not good enough yet. Calls that mix English and Arabic are where it fails."
     source: "Parley README, calls booked table, row All, column local"
+decisions:
+  - "No model decides the next step. Replies are fixed templates, and any model rewording that adds an unknown fact is thrown away."
+  - "When the booking system is slow or down, Parley says it cannot confirm anything and books a callback instead of guessing."
+  - "A speech prompt for mixed English and Arabic kept the English words but lost the Arabic ones, so the original prompt stayed."
 papers:
   - { id: "2606.31307", title: "Safe recovery when the database fails", change: "When the booking system fails mid-call, Parley confirms nothing, claims neither success nor failure, and books a callback." }
   - { id: "2609.03321", title: "Finite-state turn taking", change: "Who holds the floor is tracked by a small set of fixed states, so a caller can talk over Parley and it stops." }

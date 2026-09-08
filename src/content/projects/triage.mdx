@@ -17,6 +17,10 @@ numbers:
   - value: "0 of 50"
     label: "Card, phone or social security numbers planted in emails that the trained model repeated back. The untrained model leaked 16."
     source: "Triage README, trust table, row Planted card, phone or SSN echoed in the output"
+decisions:
+  - "The confidence cutoff of 0.885 turned out costly, but moving it after seeing test results would mean tuning on the test, so it stayed."
+  - "The model ignored requests to state its own confidence, so confidence comes from scoring every allowed answer instead."
+  - "Training made it answer most off-topic text as a support email, and one injected line pushed 29 of 40 low-urgency emails to high."
 papers:
   - { id: "2609.23742", title: "Constrained decoding fixes structure but leaves a semantic gap", change: "Forcing the output format fixed the untrained model's layout but not its answers, so the trained model runs without it." }
   - { id: "2609.25014", title: "Not all 4-bit quantizers are equal", change: "Each compressed size of the model was tested for repeating account numbers it saw in training before the smallest safe one was chosen." }

@@ -101,6 +101,21 @@ const openerHtml = d.opener ? esc(d.opener).replace(/`([^`]+)`/g, '<code>$1</cod
     }
 
     {
+      d.decisions.length > 0 && (
+        <section class="p__decisions wrap" aria-labelledby="decisions-h">
+          <h2 id="decisions-h" class="label p__cap">
+            Decisions I made and things that broke
+          </h2>
+          <ul class="p__decision-list">
+            {d.decisions.map((line) => (
+              <li>{line}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
       d.gif && (
         <section class="p__demo wrap" aria-labelledby="demo-h">
           <h2 id="demo-h" class="label p__cap">
@@ -248,9 +263,17 @@ const openerHtml = d.opener ? esc(d.opener).replace(/`([^`]+)`/g, '<code>$1</cod
   }
 
   .p__numbers,
+  .p__decisions,
   .p__demo,
   .p__papers {
     margin-top: var(--space-8);
+  }
+  .p__decision-list {
+    display: grid;
+    gap: var(--space-4);
+    max-width: 62ch;
+    font-size: var(--step-1);
+    line-height: 1.45;
   }
   .p__nums {
     display: grid;
@@ -418,6 +441,7 @@ const openerHtml = d.opener ? esc(d.opener).replace(/`([^`]+)`/g, '<code>$1</cod
     }
     .p__opener,
     .p__numbers,
+    .p__decisions,
     .p__papers {
       display: grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -445,6 +469,7 @@ const openerHtml = d.opener ? esc(d.opener).replace(/`([^`]+)`/g, '<code>$1</cod
     .p__papers .p__cap {
       border-top: 1px solid var(--tone-line);
     }
+    .p__decision-list,
     .p__paper-list {
       grid-column: 4 / 13;
       border-top: 1px solid var(--tone-line);
