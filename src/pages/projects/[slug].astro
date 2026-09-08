@@ -25,12 +25,6 @@ const d = entry.data;
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 // README openers mark field names in backticks. Render those as code, nothing else.
 const openerHtml = d.opener ? esc(d.opener).replace(/`([^`]+)`/g, '<code>$1</code>') : '';
-// Every arXiv id in a paper line becomes a link to its abstract.
-const paperHtml = (line: string) =>
-  esc(line).replace(
-    /\b(\d{4}\.\d{5})\b/g,
-    '<a class="link" href="https://arxiv.org/abs/$1" rel="noopener">$1</a>',
-  );
 ---
 
 <Base
@@ -88,10 +82,20 @@ const paperHtml = (line: string) =>
                     {n.value}
                   </span>
                 </dd>
-                <dd class="p__num-source">From the {n.source}.</dd>
               </div>
             ))}
           </dl>
+          <details class="p__sources" open>
+            <summary>Where these numbers come from</summary>
+            <ul>
+              {d.numbers.map((n) => (
+                <li>From the {n.source}.</li>
+              ))}
+            </ul>
+          </details>
+          {/* Open in the HTML so no-JS readers see the sources. Closed here, during parse,
+              so everyone else never sees it flash open. */}
+          <script is:inline>document.currentScript.previousElementSibling.open = false;</script>
         </section>
       )
     }
@@ -142,8 +146,13 @@ const paperHtml = (line: string) =>
             Papers
           </h2>
           <ul class="p__paper-list">
-            {d.papers.map((line) => (
-              <li set:html={paperHtml(line)} />
+            {d.papers.map((paper) => (
+              <li class="p__paper">
+                <span class="p__paper-head">
+                  <a class="link mono" href={`https://arxiv.org/abs/${paper.id}`} rel="noopener">arXiv {paper.id}</a>, <cite>{paper.title}</cite>
+                </span>
+                <span>{paper.change}</span>
+              </li>
             ))}
           </ul>
         </section>
@@ -263,10 +272,21 @@ const paperHtml = (line: string) =>
     font-size: var(--step-1);
     line-height: 1.4;
   }
-  .p__num-source {
+  .p__sources {
+    margin-top: var(--space-5);
     font-size: var(--step--1);
     color: var(--tone-ink-2);
-    max-width: 48ch;
+    max-width: 72ch;
+  }
+  .p__sources summary {
+    cursor: pointer;
+    width: fit-content;
+    padding-block: var(--space-2);
+  }
+  .p__sources ul {
+    display: grid;
+    gap: var(--space-2);
+    padding-top: var(--space-2);
   }
 
   .p__figure {
@@ -304,6 +324,16 @@ const paperHtml = (line: string) =>
     max-width: 72ch;
     font-size: var(--step--1);
     line-height: 1.55;
+  }
+  .p__paper {
+    display: grid;
+    gap: var(--space-1);
+  }
+  .p__paper-head {
+    color: var(--tone-ink-2);
+  }
+  .p__paper cite {
+    font-style: normal;
   }
 
   .p__nav {
@@ -400,6 +430,9 @@ const paperHtml = (line: string) =>
     }
     .p__cap {
       grid-column: 1 / 4;
+    }
+    .p__sources {
+      grid-column: 4 / 13;
     }
     .p__nums {
       grid-column: 4 / 13;

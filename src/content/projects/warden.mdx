@@ -18,16 +18,7 @@ numbers:
     label: "With the safety layers switched off, 35 of the same 84 attacks got through. That is what the layers are worth."
     source: "Warden README, prompt-injection red-team table, row Boundary layers off"
 papers:
-  - "arXiv 2609.14780, The Stochastic Deputy: structural tenant isolation for tool-using agents"
-  - "arXiv 2609.29345, The Last Human Gate: when automating a governance gate saves human work"
-  - "arXiv 2609.26761, A2M: trace-optimized agent hijacking in the MCP ecosystem"
-  - "arXiv 2609.28693, Progressive skill discovery as access control"
-  - "arXiv 2607.27267, FAVA: evidence-backed permission graphs"
-  - "arXiv 2609.22712, Trustworthy agentic AI: failure modes and a lifecycle framework"
-  - "arXiv 2609.24446, ActGov: policy-constrained validation with SMT-checked updates"
-  - "arXiv 2609.26900, Ajar: measuring open privilege in agent defenses"
-  - "arXiv 2609.22573, Zero-trust authorization and discovery for enterprise MCP"
-  - "arXiv 2609.18217, Measuring implicit trust in LLM tool-calling pipelines"
-  - "arXiv 2609.19425, Closed-world resolution against tool hallucination"
-  - "arXiv 2609.22949, Prompt injection in multi-agent systems (future work: the workflow has one model-driven step)"
+  - { id: "2609.14780", title: "The Stochastic Deputy", change: "Customer and request are fixed inside each signed credential instead of being passed in, the pattern the paper showed failing." }
+  - { id: "2609.26900", title: "Ajar", change: "Its measure, how many writes a credential could still make after the task, is how the tests count what an attacker could reach." }
+  - { id: "2609.22712", title: "Trustworthy agentic AI", change: "Its list of ways agents fail is how the threat model is grouped, with each failure matched to the control that handles it." }
 ---

@@ -18,14 +18,7 @@ numbers:
     label: "Of transfers flagged as fraud on data the rules had never seen, 82% really were fraud. The first version managed 37%."
     source: "Tally README, fraud table, row Precision / recall on a fresh seed (20260926)"
 papers:
-  - "arXiv 2607.05076, Can Code Specify a System Precisely Enough to Formally Verify It? The model of the transfer protocol and its stated gaps."
-  - "arXiv 2609.27571, FDE-Bench. The four deployment gates, with fault behaviour added as a fifth."
-  - "arXiv 2608.22389, KONTOGRAPH. Point-in-time features, a verifier that rewrites the future, and timed explanations."
-  - "arXiv 2608.23468, RAD. Rules combined with relational signals over the transfer graph."
-  - "arXiv 2607.27267, FAVA. Every alert carries the evidence it fired on."
-  - "arXiv 2609.24446, ActGov. SMT counterexample checks on every rule update."
-  - "arXiv 2609.28771, Agent Memory with Episodic Retrieval for Financial Decision-Making. The reflection step's memory of matured errors."
-  - "arXiv 2609.27287, SR-Fraud. A frozen scorer, offline reflection, and a deterministic gate."
-  - "arXiv 2609.18270, BENCHCOMPASS. Evidence given to the model as typed summaries, not raw records."
-  - "arXiv 2609.19928, semantic user profiling at bank scale. Reasoning over groups of similar errors rather than one account at a time."
+  - { id: "2607.05076", title: "Can Code Specify a System Precisely Enough to Formally Verify It?", change: "It warned that code and its math model can share one misreading, so real failure tests back up the model." }
+  - { id: "2608.22389", title: "KONTOGRAPH", change: "It led to a checker that rebuilds every fraud score with later payments hidden, to prove no score used the future." }
+  - { id: "2609.24446", title: "ActGov", change: "Every new fraud rule is searched by a solver for a case that breaks the stated policies before anyone can turn it on." }
 ---

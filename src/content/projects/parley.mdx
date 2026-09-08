@@ -18,8 +18,7 @@ numbers:
     label: "Scripted calls booked start to finish by voice with no internet. Not good enough yet. Calls that mix English and Arabic are where it fails."
     source: "Parley README, calls booked table, row All, column local"
 papers:
-  - "Evaluation: arXiv 2609.20152 (MTVA-Bench), 2609.29452 (acoustic stress, TRACE), 2605.19069 (code-switching ASR), 2609.21084 (digit error rates)"
-  - "Dialect and judging: arXiv 2608.29990 (Saudi dialect rubric), 2609.29431 (calibrating LLM judges), 2605.16364 (WASIL, in-the-wild Arabic turns)"
-  - "Failures and turn taking: arXiv 2608.02372 (PredAct-Bench), 2606.31307 (safe recovery when the database fails), 2609.03321 (finite-state turn taking)"
-  - "Models and data: arXiv 2609.23959, 2609.26550 (Jev decisions), 2609.25176, 2609.11892, 2609.27086, 2609.24410, 2609.03423, 2609.23955, 2608.21950, 2604.14186"
+  - { id: "2606.31307", title: "Safe recovery when the database fails", change: "When the booking system fails mid-call, Parley confirms nothing, claims neither success nor failure, and books a callback." }
+  - { id: "2609.03321", title: "Finite-state turn taking", change: "Who holds the floor is tracked by a small set of fixed states, so a caller can talk over Parley and it stops." }
+  - { id: "2605.19069", title: "Code-switching speech recognition", change: "Calls that mix English and Arabic are scored one language at a time, which showed the Arabic words are where recognition fails." }
 ---

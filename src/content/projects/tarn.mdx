@@ -18,15 +18,7 @@ numbers:
     label: "Detector inputs recomputed with the future hidden, to prove it never peeked ahead. Zero mismatches."
     source: "Tarn README, point-in-time check table, row v2 feature engine"
 papers:
-  - "arXiv 2607.29390, fair evaluation of graph-based lateral movement detectors (the protocol)"
-  - "arXiv 2608.23468, RAD, rule-augmented relational anomaly detection (v1 rules as inputs)"
-  - "arXiv 2609.18107, FoundAna (not run: needs PyTorch and pretrained weights, so LightGCN stands in)"
-  - "arXiv 2608.15559, explanation with exact preservation for dynamic graph detectors"
-  - "arXiv 2609.15614, tractable defense against advanced persistent threats (lateral movement framing)"
-  - "arXiv 2608.22389, KONTOGRAPH, verified point-in-time features (the verifier)"
-  - "arXiv 2609.04159, SENTINEL-RL, topology reasoning moved out of the LLM (graph tools)"
-  - "arXiv 2609.30055, Era by Eon, agent benchmarks on hidden knowledge (benchmark shape)"
-  - "arXiv 2609.19425, closed-world resolution against tool hallucination (the registry)"
-  - "arXiv 2609.26550, JEV-as-a-Judge, accept when confident, escalate when unsure (the cascade)"
-  - "arXiv 2609.26489, calibration as a first-class criterion in LLM evaluation"
+  - { id: "2607.29390", title: "Fair evaluation of graph-based lateral movement detectors", change: "Every detector learns only from the first day and gets the same 100 alerts a day, so the comparison is fair." }
+  - { id: "2608.22389", title: "KONTOGRAPH", change: "It led to the checker that recomputes detector inputs with the future cut off, to prove none of them peeked ahead." }
+  - { id: "2609.19425", title: "Closed-world resolution against tool hallucination", change: "The analyst can only call tools from a fixed list, so a made-up tool call is refused and counted, never run." }
 ---

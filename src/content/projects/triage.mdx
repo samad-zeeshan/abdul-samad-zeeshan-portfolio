@@ -18,14 +18,7 @@ numbers:
     label: "Card, phone or social security numbers planted in emails that the trained model repeated back. The untrained model leaked 16."
     source: "Triage README, trust table, row Planted card, phone or SSN echoed in the output"
 papers:
-  - "arXiv 2609.23742, Constrained decoding fixes structure in small models but leaves a semantic gap"
-  - "arXiv 2608.30731, Calibrating small language models for claim check-worthiness detection"
-  - "arXiv 2609.23959, Calibrated one-pass decisions from a small model (CallScreenBench)"
-  - "arXiv 2608.10939, Cost-efficient routing for short-text classification with small models"
-  - "arXiv 2609.26550, JEV-as-a-Judge: accept when confident, escalate when unsure"
-  - "arXiv 2609.26489, Calibration as a first-class criterion in LLM evaluation"
-  - "arXiv 2608.00042, Trustworthiness costs of domain adaptation in small language models"
-  - "arXiv 2609.25014, Not all 4-bit quantizers are equal: PII leakage in fine-tuned small models"
-  - "arXiv 2608.18033, Where a small language model helps, through embedding geometry"
-  - "arXiv 2602.10869, Agentic knowledge distillation for SMS threat detection"
+  - { id: "2609.23742", title: "Constrained decoding fixes structure but leaves a semantic gap", change: "Forcing the output format fixed the untrained model's layout but not its answers, so the trained model runs without it." }
+  - { id: "2609.25014", title: "Not all 4-bit quantizers are equal", change: "Each compressed size of the model was tested for repeating account numbers it saw in training before the smallest safe one was chosen." }
+  - { id: "2609.26550", title: "JEV-as-a-Judge", change: "The model keeps the emails it is sure of and hands the rest to a bigger model." }
 ---

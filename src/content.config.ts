@@ -11,6 +11,13 @@ const number = z.object({
   source: z.string(),
 });
 
+// Only papers the README cites beside a design choice, each with what it changed.
+const paper = z.object({
+  id: z.string().regex(/^\d{4}\.\d{5}$/),
+  title: z.string(),
+  change: z.string(),
+});
+
 const projects = defineCollection({
   loader: glob({ pattern: '**/[^_]*.mdx', base: './src/content/projects' }),
   schema: z.object({
@@ -41,7 +48,7 @@ const projects = defineCollection({
       })
       .optional(),
     numbers: z.array(number).max(2).default([]),
-    papers: z.array(z.string()).default([]),
+    papers: z.array(paper).max(3).default([]),
   }),
 });
 
