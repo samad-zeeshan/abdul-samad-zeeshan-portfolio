@@ -25,6 +25,9 @@ const d = entry.data;
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 // README openers mark field names in backticks. Render those as code, nothing else.
 const openerHtml = d.opener ? esc(d.opener).replace(/`([^`]+)`/g, '<code>$1</code>') : '';
+// The videos share the GIF's base name, and the poster doubles as the still.
+const clip = d.gif?.file.replace(/\.gif$/, '');
+const still = d.gif ? withBase(d.poster ? `/posters/${d.poster}` : `/gifs/${d.gif.file}`) : '';
 ---
 
 <Base
@@ -122,32 +125,44 @@ const openerHtml = d.opener ? esc(d.opener).replace(/`([^`]+)`/g, '<code>$1</cod
             The demo, recorded
           </h2>
           <figure class="p__figure">
-            <div class="frame">
-              {/* Reduced-motion visitors get the still. Everyone else can pause the loop. */}
-              <picture>
-                {d.poster && (
-                  <source media="(prefers-reduced-motion: reduce)" srcset={withBase(`/posters/${d.poster}`)} />
-                )}
-                <img
-                  class="p__gif"
-                  src={withBase(`/gifs/${d.gif.file}`)}
-                  data-gif={withBase(`/gifs/${d.gif.file}`)}
-                  data-still={d.poster ? withBase(`/posters/${d.poster}`) : undefined}
-                  alt={d.gif.alt}
-                  width={d.gif.width}
-                  height={d.gif.height}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </picture>
+            <div class="frame" data-demo>
+              <img
+                class="p__still"
+                src={still}
+                alt={d.gif.alt}
+                width={d.gif.width}
+                height={d.gif.height}
+                loading="lazy"
+                decoding="async"
+              />
+              <video
+                class="p__video"
+                muted
+                loop
+                playsinline
+                preload="none"
+                poster={still}
+                width={d.gif.width}
+                height={d.gif.height}
+                aria-label={d.gif.alt}
+                data-webm={withBase(`/videos/${clip}.webm`)}
+                data-mp4={withBase(`/videos/${clip}.mp4`)}
+                data-gif={withBase(`/gifs/${d.gif.file}`)}
+                hidden
+              />
             </div>
+            {
+              d.demo && (
+                <a class="btn btn--solid p__demo-open" href={d.demo} rel="noopener">
+                  Open the demo <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+                </a>
+              )
+            }
             <div class="p__figfoot">
               {d.demoNote && <figcaption class="p__caption">{d.demoNote}</figcaption>}
-              {d.poster && (
-                <button class="btn p__pause" type="button" aria-pressed="false" data-pause>
-                  Pause the recording
-                </button>
-              )}
+              <button class="btn p__pause" type="button" aria-pressed="false" data-pause hidden>
+                Pause the recording
+              </button>
             </div>
           </figure>
         </section>
@@ -202,16 +217,43 @@ const openerHtml = d.opener ? esc(d.opener).replace(/`([^`]+)`/g, '<code>$1</cod
 </Base>
 
 <script>
-  // A GIF cannot be paused, so pausing swaps in the still from the same moment.
-  document.querySelectorAll<HTMLButtonElement>('[data-pause]').forEach((btn) => {
-    const img = btn.closest('figure')?.querySelector<HTMLImageElement>('.p__gif');
-    if (!img || !img.dataset.still) return;
-    btn.addEventListener('click', () => {
-      const paused = btn.getAttribute('aria-pressed') === 'true';
-      img.src = paused ? img.dataset.gif! : img.dataset.still!;
-      btn.setAttribute('aria-pressed', String(!paused));
-      btn.textContent = paused ? 'Pause the recording' : 'Play the recording';
+  // Phones and reduced-motion visitors keep the still. The sources are attached here
+  // rather than in the HTML so neither ever downloads the video.
+  const wide = matchMedia('(min-width: 60rem)').matches;
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll<HTMLElement>('[data-demo]').forEach((frame) => {
+    const video = frame.querySelector<HTMLVideoElement>('video');
+    const still = frame.querySelector<HTMLImageElement>('.p__still');
+    const btn = frame.closest('figure')?.querySelector<HTMLButtonElement>('[data-pause]');
+    if (!video || !still || !btn || !wide || calm) return;
+    const { webm, mp4, gif } = video.dataset;
+    const sources = [
+      [webm, 'video/webm'],
+      [mp4, 'video/mp4'],
+    ].map(([src, type]) => Object.assign(document.createElement('source'), { src, type }));
+    // An error on the last source means every format failed, so fall back to the GIF.
+    sources[sources.length - 1].addEventListener('error', () => {
+      still.src = gif!;
+      still.hidden = false;
+      video.remove();
+      btn.hidden = true;
     });
+    video.append(...sources);
+    video.hidden = false;
+    still.hidden = true;
+    btn.hidden = false;
+    video.play().catch(() => {});
+    btn.addEventListener('click', () => {
+      if (video.paused) video.play().catch(() => {});
+      else video.pause();
+    });
+    // Driven by the element's own state, so the label stays right if playback stalls.
+    const sync = () => {
+      btn.setAttribute('aria-pressed', String(video.paused));
+      btn.textContent = video.paused ? 'Play the recording' : 'Pause the recording';
+    };
+    video.addEventListener('play', sync);
+    video.addEventListener('pause', sync);
   });
 </script>
 
@@ -322,6 +364,24 @@ const openerHtml = d.opener ? esc(d.opener).replace(/`([^`]+)`/g, '<code>$1</cod
     align-items: start;
     justify-content: space-between;
     gap: var(--space-3) var(--space-5);
+  }
+  .p__video {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .p__still[hidden],
+  .p__video[hidden],
+  .p__pause[hidden] {
+    display: none;
+  }
+  .p__demo-open {
+    justify-self: start;
+  }
+  @media (min-width: 60rem) {
+    .p__demo-open {
+      display: none;
+    }
   }
   .p__pause {
     cursor: pointer;
