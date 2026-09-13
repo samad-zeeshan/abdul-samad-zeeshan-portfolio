@@ -58,7 +58,7 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --dur-press: 120ms;
   --dur-hover: 320ms;
-  --dur-settle: 800ms;
+  --dur-settle: 600ms;
 
   --z-preview: 1;
   --z-header: 10;

@@ -236,7 +236,7 @@ code {
   }
   html.enter [data-settle] {
     animation: settle var(--dur-settle) var(--spring) both;
-    animation-delay: calc(var(--i, 0) * 55ms + 260ms);
+    animation-delay: calc(var(--i, 0) * 40ms + 260ms);
   }
 }
 @keyframes rise {
