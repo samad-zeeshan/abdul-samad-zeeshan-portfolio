@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Checks the site's claims before every build and fails loudly on a violation.
 //
-// Eight projects exactly, the fact guards, no location, plain punctuation, and each
-// README opener still matching its repo when the sibling clone is present.
+// Eight projects exactly, the fact guards, no location, plain punctuation, plain words
+// under a word cap, and each README opener still matching its repo when the sibling
+// clone is present.
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -113,6 +114,43 @@ for (const p of textFiles) {
   if (BANNED.test(t)) fail(`${rel}: uses "${t.match(BANNED)[0]}"`);
   if (/[\u200b-\u200f\u2060\ufeff]/.test(t)) fail(`${rel}: contains invisible Unicode`);
 }
+
+// README vocabulary a stranger cannot read. Openers are exempt because they quote the
+// README word for word, and number sources are exempt because they are an audit trail.
+const JARGON = new RegExp(
+  '\\b(hardened|boundary layers?|mcp|planted|adversarial|scenarios?|v1|v2|seeds?|seeded|' +
+    'account-days?|point-in-time|resolvers?|parsers?|stacks?|grammar|held-out|precision|' +
+    'recall|p95|p99|ece|lora|distill\\w*)\\b',
+  'i',
+);
+const words = (s) => s.trim().split(/\s+/).length;
+// Caps are "under N words", so N itself already fails.
+function plain(where, text, cap) {
+  if (typeof text !== 'string') return;
+  const hit = text.match(JARGON);
+  if (hit) fail(`${where}: uses README vocabulary "${hit[0]}"`);
+  if (cap && words(text) >= cap) fail(`${where}: ${words(text)} words, must be under ${cap}`);
+}
+for (const e of entries) {
+  const d = e.data;
+  if (!d || d.status === 'hidden') continue;
+  plain(`${e.id} problem`, d.problem, 24);
+  plain(`${e.id} demoNote`, d.demoNote);
+  (d.numbers ?? []).forEach((n, i) => plain(`${e.id} number ${i + 1} label`, n.label, 25));
+  (d.decisions ?? []).forEach((s, i) => plain(`${e.id} decision ${i + 1}`, s, 30));
+  if ((d.status ?? 'shipped') === 'shipped') {
+    const n = d.decisions?.length ?? 0;
+    if (n < 1 || n > 3) fail(`${e.id}: needs 1 to 3 decisions, has ${n}`);
+    if (d.gif) {
+      const clip = d.gif.file.replace(/\.gif$/, '');
+      if (!existsSync(join(root, 'public', 'videos', `${clip}.mp4`))) fail(`${e.id}: demo video missing`);
+    }
+  }
+}
+for (const edge of graph.edges) plain(`graph ${edge.skill} to ${edge.project}`, edge.evidence, 25);
+
+// The header links here, so a missing file would ship a dead link.
+if (!existsSync(join(root, 'public', 'resume.pdf'))) fail('public/resume.pdf is missing');
 
 if (errors.length) {
   console.error(`validate-facts: ${errors.length} problem(s)`);
