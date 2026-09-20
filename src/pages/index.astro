@@ -95,7 +95,9 @@ const words = profile.name.split(' ');
     display: grid;
     gap: var(--space-6);
   }
+  /* On a phone the skills index is long, so the paragraph comes first. */
   .about__text {
+    order: -1;
     max-width: 34ch;
     font-size: var(--step-2);
     line-height: 1.35;
@@ -171,6 +173,7 @@ const words = profile.name.split(' ');
       display: grid;
     }
     .about__text {
+      order: 0;
       grid-column: 6 / 13;
       grid-row: 1;
     }
