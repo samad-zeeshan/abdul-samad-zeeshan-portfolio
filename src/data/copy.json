@@ -1,0 +1,33 @@
+{
+  "stats": {
+    "projects": "projects",
+    "demos": "demos, no login",
+    "numbers": "numbers reported",
+    "bad": "reported as not good enough"
+  },
+  "eyebrows": {
+    "hero": "Report / 2026 / {count} systems tested to failure",
+    "about": "The rule",
+    "projects": "Projects / 01 to {last} / ordered by what I would show first",
+    "tools": "Tools / {n} / used in the {count}",
+    "project": "Project {index} / {total} / shipped",
+    "opener": "From the write-up",
+    "numbers": "Headline numbers / {n}",
+    "decisions": "Decisions I made and things that broke",
+    "proves": "What this proves / {n} skills",
+    "demo": "The demo, recorded",
+    "demoTimed": "The demo, recorded / {duration}",
+    "papers": "Papers / {n}",
+    "next": "Next / {index} / {total}",
+    "lost": "Page not found"
+  },
+  "footer": {
+    "voice": "Numbers as they came out, including the bad ones.",
+    "nav": ["Projects", "Resume", "GitHub"],
+    "note": "Every number on this site is copied from the project's own write-up."
+  },
+  "pill": {
+    "long": "Email me",
+    "short": "Email"
+  }
+}

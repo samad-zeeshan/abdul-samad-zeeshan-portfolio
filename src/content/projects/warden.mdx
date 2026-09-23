@@ -13,9 +13,13 @@ poster: "warden.webp"
 numbers:
   - value: "0 of 84"
     label: "Attackers tried 84 ways to trick the AI into approving a bad change. None got through."
+    verdict: "none got through"
+    tone: "good"
     source: "Warden README, prompt-injection red-team table, row Hardened, MCP over HTTP"
   - value: "35 of 84"
     label: "With the safety layers switched off, 35 of the same 84 attacks got through. That is what the layers are worth."
+    verdict: "what layers are worth"
+    tone: "good"
     source: "Warden README, prompt-injection red-team table, row Boundary layers off"
 decisions:
   - "Each credential names one customer and one request, so the assistant cannot reach anyone else. Taking those as checked inputs instead let 50 of 56 scripted tries through."

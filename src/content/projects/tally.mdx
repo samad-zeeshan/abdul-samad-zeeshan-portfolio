@@ -13,9 +13,13 @@ poster: "tally.webp"
 numbers:
   - value: "11,054"
     label: "Transfers pushed through 7 runs on Kubernetes while the network and database were made to fail. Not one cent lost or doubled."
+    verdict: "none lost"
+    tone: "good"
     source: "Tally README, fault runs summary line (7 runs, 11,054 transfers and 1,580 retries, 0 violations)"
   - value: "0.8179"
     label: "Of transfers flagged as fraud on data the rules had never seen, 82% really were fraud. The first version managed 37%."
+    verdict: "up from 37%"
+    tone: "good"
     source: "Tally README, fraud table, row Precision / recall on a fresh seed (20260926)"
 decisions:
   - "I locked account rows in one fixed order, so two transfers crossing between the same accounts cannot block each other forever."

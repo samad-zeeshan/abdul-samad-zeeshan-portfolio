@@ -13,9 +13,13 @@ poster: "triage.webp"
 numbers:
   - value: "87.2%"
     label: "Support emails given the right urgency, out of 1,200 it had never seen. The same model before training: 38.3%. Always guessing high: 42.4%."
+    verdict: "up from 38.3%"
+    tone: "good"
     source: "Triage README, headline table, row Priority"
   - value: "0 of 50"
     label: "Card, phone or social security numbers hidden in emails that the trained model repeated back. The untrained model leaked 16."
+    verdict: "none leaked"
+    tone: "good"
     source: "Triage README, trust table, row Planted card, phone or SSN echoed in the output"
 decisions:
   - "The confidence cutoff of 0.885 turned out costly, but moving it after seeing test results would mean tuning on the test, so it stayed."
