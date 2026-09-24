@@ -1,0 +1,61 @@
+---
+// The hero's row of counts. Every value is counted from the content at build time.
+import type { Stat } from '../lib/site';
+
+interface Props {
+  stats: Stat[];
+}
+const { stats } = Astro.props;
+---
+
+<dl class="rail" data-settle style={`--i:1;--cells:${stats.length}`}>
+  {
+    stats.map((s) => (
+      <div class="rail__cell" data-stat={s.key} data-value={s.value}>
+        <dt class="rail__label">{s.label}</dt>
+        <dd class="rail__num mono">
+          <span class="visually-hidden">{s.value}</span>
+          <span aria-hidden="true" data-count={String(s.value)}>
+            {s.value}
+          </span>
+        </dd>
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  .rail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-6);
+  }
+  /* The number reads first, so it is moved above its label without changing the
+     dt then dd order a definition list needs. */
+  .rail__cell {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: var(--space-1);
+    padding-block: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--tone-line);
+  }
+  .rail__num {
+    font-size: var(--step-3);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--hi);
+  }
+  .rail__label {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    line-height: 1.4;
+    color: var(--tone-ink-2);
+  }
+  @media (min-width: 60rem) {
+    .rail {
+      grid-template-columns: repeat(var(--cells, 4), minmax(0, 1fr));
+    }
+  }
+</style>

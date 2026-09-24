@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "node scripts/validate-facts.mjs && astro build",
+    "build": "node scripts/validate-facts.mjs && astro build && node scripts/validate-facts.mjs --built",
     "preview": "astro preview",
     "check": "node scripts/validate-facts.mjs && astro check",
     "validate-facts": "node scripts/validate-facts.mjs",

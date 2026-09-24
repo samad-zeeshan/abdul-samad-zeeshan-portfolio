@@ -29,13 +29,16 @@ html {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   background: var(--tone-bg);
+  color: var(--tone-ink);
+  transition:
+    background-color var(--dur-theme) ease,
+    color var(--dur-theme) ease;
 }
 /* The body stays clear so the hairline columns, which sit just above the html
    background, show through. html carries the page colour instead. */
 body {
   min-height: 100dvh;
   background: transparent;
-  color: var(--tone-ink);
   font-family: var(--font-text);
   font-size: var(--step-0);
   line-height: 1.6;
@@ -43,6 +46,106 @@ body {
   overflow-wrap: break-word;
   overflow-x: clip;
 }
+/* Twelve hairline columns on the layout grid, four on phones. The only texture. */
+.hair {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-hair);
+  pointer-events: none;
+}
+.hair__grid {
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--space-6);
+}
+.hair__grid span {
+  border-left: 1px solid var(--hair);
+  transition: border-color var(--dur-theme) ease;
+}
+.hair__grid span:nth-child(4) {
+  border-right: 1px solid var(--hair);
+}
+.hair__grid span:nth-child(n + 5) {
+  display: none;
+}
+@media (min-width: 60rem) {
+  .hair__grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+  .hair__grid span:nth-child(n + 5) {
+    display: block;
+  }
+  .hair__grid span:nth-child(4) {
+    border-right: 0;
+  }
+  .hair__grid span:nth-child(12) {
+    border-right: 1px solid var(--hair);
+  }
+}
+
+/* The one call to action, fixed top right on every page. */
+.pill {
+  position: fixed;
+  top: 20px;
+  right: var(--gutter);
+  z-index: var(--z-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  min-height: 2.5rem;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  background: var(--pill-bg);
+  color: var(--pill-ink);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    background-color var(--dur-theme) ease,
+    color var(--dur-theme) ease,
+    transform var(--dur-press) var(--ease-out);
+}
+.pill:active {
+  transform: scale(0.96);
+}
+.pill:focus-visible {
+  outline: 2px solid var(--tone-ink);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+.pill__long {
+  display: none;
+}
+@media (min-width: 60rem) {
+  .pill__icon,
+  .pill__short {
+    display: none;
+  }
+  .pill__long {
+    display: inline;
+  }
+}
+/* On the accent footer the pill would vanish, so it swaps to the field. */
+:root[data-theme='accent'] .pill {
+  background: var(--field);
+  color: var(--accent);
+}
+
+/* Verdict words: the second face, lowercase italic, beside the number they judge. */
+.verdict {
+  font-family: var(--font-verdict);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--hi);
+}
+
 img {
   display: block;
   max-width: 100%;
@@ -222,7 +325,26 @@ code {
   }
 }
 
+/* Sections rise into place once. Hidden only when motion is allowed and the script
+   that reveals them is running, so nothing stays invisible without it. */
+@media (prefers-reduced-motion: no-preference) {
+  html.js [data-reveal] {
+    transition:
+      opacity var(--dur-settle) var(--spring),
+      transform var(--dur-settle) var(--spring);
+  }
+  html.js [data-reveal]:not(.is-in) {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  html,
+  .pill,
+  .hair__grid span {
+    transition-duration: 0ms;
+  }
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) {
