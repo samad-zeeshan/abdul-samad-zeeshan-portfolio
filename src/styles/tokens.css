@@ -1,46 +1,31 @@
-/* Design tokens as CSS custom properties, the palette, type scale, and spacing.
-   Concept: a four-channel instrument, dark graphite with one reserved amber signal. */
+/* Design tokens. One dominant colour: a saturated ultramarine field with cream ink,
+   set in a condensed poster face. Project pages swap in their own demo's palette
+   through the --tone-* tokens, so each keeps its voice inside the same system. */
 
 :root {
-  /* Surfaces (blue graphite, deliberately not near-black) */
-  --ink-900: #0e1217;
-  --ink-850: #0a0e13;
-  --ink-800: #151a21;
-  --ink-700: #1b212a;
-  --line-600: #232a33;
-  --line-500: #333d4a;
+  color-scheme: dark;
 
-  /* Text */
-  --text-100: #e6eaf0;
-  --text-300: #9ba6b4;
-  --text-500: #838f9e; /* Tertiary labels, at the lightness floor that still clears WCAG AA on ink-900. */
+  --field: #1f2ee8;
+  --field-deep: #1824c4;
+  --cream: #f4efe2;
+  --cream-2: #cfd2f6;
+  --cream-3: #b9bdf3;
+  --line: rgba(244, 239, 226, 0.28);
+  --line-strong: rgba(244, 239, 226, 0.6);
+  --shadow: 0 24px 48px -24px rgba(6, 10, 70, 0.7);
 
-  /* Category channels (category drives color, nothing else) */
-  --cat-ml: #5ac8d8;
-  --cat-systems: #7fc96f;
-  --cat-web: #ae9deb;
-  --cat-infra: #e88ab0;
+  --font-display: 'Big Shoulders Display', 'Arial Narrow', 'Roboto Condensed', sans-serif-condensed, sans-serif;
+  --font-text: 'Schibsted Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
 
-  /* Signal (interaction only: focus, active, link underline) */
-  --signal-500: #f2c14e;
-  --signal-600: #d9a93b;
-  --signal-tint: rgba(242, 193, 78, 0.12);
-
-  /* Typography */
-  --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
-  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', 'Consolas', monospace;
-
-  /* Fluid type scale (~1.2 minor third) */
-  --step--1: 0.833rem;
+  --step--1: 0.8125rem;
   --step-0: 1rem;
-  --step-1: 1.2rem;
-  --step-2: 1.44rem;
-  --step-3: 1.728rem;
-  --step-4: clamp(2rem, 1.4rem + 2.4vw, 2.6rem);
-  --step-5: clamp(2.6rem, 1.6rem + 4.2vw, 4.4rem);
+  --step-1: 1.1875rem;
+  --step-2: 1.5rem;
+  --step-3: clamp(2rem, 1.3rem + 3vw, 3.25rem);
+  --step-index: clamp(3.25rem, 1.2rem + 9.5vw, 10rem);
+  --step-giant: clamp(4.25rem, 0.8rem + 16.5vw, 17rem);
 
-  /* Spacing scale */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -48,34 +33,50 @@
   --space-5: 1.5rem;
   --space-6: 2rem;
   --space-7: 3rem;
-  --space-8: 4rem;
-  --space-9: 6rem;
+  --space-8: 5rem;
+  --space-9: 8rem;
 
-  /* Structure */
-  --measure: 66ch;
-  --content-width: 1080px;
-  --radius: 6px;
-  --radius-lg: 10px;
-  --border: 1px solid var(--line-600);
-  --border-strong: 1px solid var(--line-500);
+  --gutter: clamp(1rem, 0.3rem + 3.2vw, 3.5rem);
+  --page: 96rem;
+  --measure: 62ch;
+  --radius: 3px;
 
-  /* Motion */
-  --ease: cubic-bezier(0.16, 1, 0.3, 1); /* Expo.out: fast start, soft settle */
-  --ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --dur: 160ms;
-  --dur-slow: 280ms;
+  /* Critically damped spring (response 0.45 s, no overshoot), sampled for CSS. */
+  --spring: linear(0, 0.064, 0.196, 0.345, 0.484, 0.604, 0.701, 0.777, 0.836, 0.881, 0.914,
+      0.938, 0.956, 0.968, 0.978, 0.984, 0.989, 0.992, 0.995, 0.996, 0.997, 0.998, 0.999, 1);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --dur-press: 120ms;
+  --dur-hover: 320ms;
+  --dur-settle: 800ms;
+
+  --z-preview: 1;
+  --z-header: 10;
+  --z-skip: 20;
+
+  /* Page tone defaults to the field. Project pages override these four. */
+  --tone-bg: var(--field);
+  --tone-ink: var(--cream);
+  --tone-ink-2: var(--cream-2);
+  --tone-accent: var(--cream);
+  --tone-line: var(--line);
 }
 
-/* Category color as a single lookup, used by dots, ticks, and the graph. */
-[data-cat='ml'] {
-  --cat: var(--cat-ml);
+/* Dark mode deepens the field to night blue and keeps ultramarine for fills. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --field: #0c1150;
+    --field-deep: #1f2ee8;
+    --cream-2: #c3c7ee;
+    --cream-3: #a9aee6;
+    --line: rgba(244, 239, 226, 0.22);
+    --shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.85);
+  }
 }
-[data-cat='systems'] {
-  --cat: var(--cat-systems);
-}
-[data-cat='web'] {
-  --cat: var(--cat-web);
-}
-[data-cat='infra'] {
-  --cat: var(--cat-infra);
+:root[data-theme='dark'] {
+  --field: #0c1150;
+  --field-deep: #1f2ee8;
+  --cream-2: #c3c7ee;
+  --cream-3: #a9aee6;
+  --line: rgba(244, 239, 226, 0.22);
+  --shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.85);
 }
