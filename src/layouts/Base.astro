@@ -312,6 +312,17 @@ const ogImage = new URL(withBase(image), Astro.site).href;
           };
           requestAnimationFrame(loop);
 
+          // The header slides away on the way down and comes back on the way up.
+          // Near the top it always shows, and it only takes a fill once the page moves.
+          const head = document.querySelector<HTMLElement>('.head');
+          if (head) {
+            lenis.on('scroll', ({ scroll, direction }: { scroll: number; direction: number }) => {
+              head.classList.toggle('is-stuck', scroll > 0);
+              if (scroll <= 160 || direction === -1) head.classList.remove('is-away');
+              else if (direction === 1) head.classList.add('is-away');
+            });
+          }
+
           // Same-page anchors go through Lenis, or the native jump cuts across its easing.
           document.addEventListener('click', (e) => {
             if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;

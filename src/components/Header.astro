@@ -63,6 +63,21 @@ const onHome = current === undefined;
   .head__nav a:focus-visible {
     background-size: 100% 1px;
   }
+  /* With smooth scrolling on, the header sticks so it can slide away and back. It
+     takes the page colour as a fill once scrolled, or links would sit on top of text. */
+  :global(html.lenis) .head {
+    position: sticky;
+    top: 0;
+    transition:
+      transform 0.4s var(--ease-out),
+      background-color var(--dur-theme) ease;
+  }
+  :global(html.lenis) .head.is-stuck {
+    background: var(--tone-bg);
+  }
+  :global(html.lenis) .head.is-away:not(:focus-within) {
+    transform: translateY(-100%);
+  }
   @media (min-width: 60rem) {
     .head__inner {
       padding-right: calc(var(--gutter) + 9rem);
