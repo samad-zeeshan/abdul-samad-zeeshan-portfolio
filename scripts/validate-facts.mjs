@@ -3,7 +3,7 @@
 //
 // Eight projects exactly, the fact guards, no location, plain punctuation, plain words
 // under a word cap, and each README opener still matching its repo when the sibling
-// clone is present.
+// clone is present. With --built it also checks the hero counts in dist/ after a build.
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -123,7 +123,8 @@ const JARGON = new RegExp(
     'recall|p95|p99|ece|lora|distill\\w*)\\b',
   'i',
 );
-const words = (s) => s.trim().split(/\s+/).length;
+// A word has a letter or digit in it, so the "/" separators in eyebrows do not count.
+const words = (s) => s.trim().split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
 // Caps are "under N words", so N itself already fails.
 function plain(where, text, cap) {
   if (typeof text !== 'string') return;
@@ -136,7 +137,26 @@ for (const e of entries) {
   if (!d || d.status === 'hidden') continue;
   plain(`${e.id} problem`, d.problem, 24);
   plain(`${e.id} demoNote`, d.demoNote);
-  (d.numbers ?? []).forEach((n, i) => plain(`${e.id} number ${i + 1} label`, n.label, 25));
+  (d.numbers ?? []).forEach((n, i) => {
+    const where = `${e.id} number ${i + 1}`;
+    plain(`${where} label`, n.label, 25);
+    if (d.status === 'shipped' || !d.status) {
+      if (!n.verdict) fail(`${where}: needs a verdict word`);
+      if (!['good', 'bad', 'neutral'].includes(n.tone)) fail(`${where}: tone must be good, bad or neutral`);
+    }
+    if (n.verdict) {
+      plain(`${where} verdict`, n.verdict, 5);
+      if (n.verdict !== n.verdict.toLowerCase()) fail(`${where}: verdict must be lowercase`);
+      // The verdict is lifted from the label, so at least one real word of it must
+      // appear there. A five-letter stem lets "invented" match "inventing".
+      const label = n.label.toLowerCase();
+      const anchored = n.verdict
+        .split(/\s+/)
+        .filter((w) => w.length >= 4 || /\d/.test(w))
+        .some((w) => label.includes(w.slice(0, 5)));
+      if (!anchored) fail(`${where}: verdict "${n.verdict}" does not come from its label`);
+    }
+  });
   (d.decisions ?? []).forEach((s, i) => plain(`${e.id} decision ${i + 1}`, s, 30));
   if ((d.status ?? 'shipped') === 'shipped') {
     const n = d.decisions?.length ?? 0;
@@ -149,6 +169,62 @@ for (const e of entries) {
 }
 for (const edge of graph.edges) plain(`graph ${edge.skill} to ${edge.project}`, edge.evidence, 25);
 
+// Every string in copy.json is shown to strangers. Eyebrows are labels, so they get
+// the tightest cap. Slots like {count} are filled with a stand-in before counting.
+const copy = JSON.parse(readFileSync(join(root, 'src', 'data', 'copy.json'), 'utf8'));
+const filled = (t) => t.replace(/\{\w+\}/g, '7');
+for (const [k, t] of Object.entries(copy.eyebrows)) plain(`eyebrow ${k}`, filled(t), 10);
+for (const [k, t] of Object.entries(copy.stats)) plain(`stat label ${k}`, t, 6);
+plain('footer voice', copy.footer.voice, 15);
+plain('footer note', copy.footer.note, 25);
+copy.footer.nav.forEach((t, i) => plain(`footer nav ${i + 1}`, t, 4));
+Object.entries(copy.pill).forEach(([k, t]) => plain(`pill ${k}`, t, 4));
+
+// The hero rail, counted the same way src/lib/site.ts counts it.
+const shippedEntries = entries.filter((e) => e.data && (e.data.status ?? 'shipped') === 'shipped');
+const allNumbers = shippedEntries.flatMap((e) => e.data.numbers ?? []);
+const stats = {
+  projects: shippedEntries.length,
+  demos: shippedEntries.filter((e) => e.data.demo).length,
+  numbers: allNumbers.length,
+  bad: allNumbers.filter((n) => n.tone === 'bad').length,
+};
+
+// The verdict face is for verdicts and three set lines only. Any other rule that sets
+// it fails, so the second face cannot creep into body text.
+const SERIF_OK = ['.verdict', '.role__tail', '.about__tail', '.foot__voice'];
+for (const p of walk(join(root, 'src')).filter((f) => /\.(astro|css)$/.test(f))) {
+  const rel = p.slice(root.length + 1);
+  const t = readFileSync(p, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const [, sel, body] of t.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    if (!/var\(--font-verdict\)|Instrument Serif/.test(body)) continue;
+    const selector = sel.trim();
+    if (selector.startsWith('@font-face') || selector === ':root') continue;
+    const bad = selector.split(',').map((x) => x.trim()).filter((x) => !SERIF_OK.some((c) => x.endsWith(c)));
+    if (bad.length) fail(`${rel}: "${bad.join(', ')}" sets the verdict face`);
+  }
+}
+
+// Leftovers from the removed picker, glow and graph must not come back.
+const LEFTOVER = /PalettePicker|bg-glow|EvidenceGraph|d3-force/;
+for (const p of [...walk(join(root, 'src')), join(root, 'package.json')]) {
+  const t = readFileSync(p, 'utf8');
+  if (LEFTOVER.test(t)) fail(`${p.slice(root.length + 1)}: references "${t.match(LEFTOVER)[0]}"`);
+}
+
+// After a build, the rendered rail must show exactly these counts.
+if (process.argv.includes('--built')) {
+  const html = readFileSync(join(root, 'dist', 'index.html'), 'utf8');
+  const shown = Object.fromEntries(
+    [...html.matchAll(/data-stat="(\w+)"[^>]*data-value="(\d+)"/g)].map((m) => [m[1], Number(m[2])]),
+  );
+  const want = { ...stats };
+  if (want.bad === 0) delete want.bad;
+  if (JSON.stringify(shown) !== JSON.stringify(want)) {
+    fail(`home stat rail shows ${JSON.stringify(shown)}, content counts ${JSON.stringify(want)}`);
+  }
+}
+
 // The header links here, so a missing file would ship a dead link.
 if (!existsSync(join(root, 'public', 'resume.pdf'))) fail('public/resume.pdf is missing');
 
@@ -157,4 +233,7 @@ if (errors.length) {
   for (const e of errors) console.error(`  - ${e}`);
   process.exit(1);
 }
-console.log(`validate-facts: ${entries.length} projects, ${textFiles.length} files checked`);
+console.log(
+  `validate-facts: ${entries.length} projects, ${textFiles.length} files checked, stats ${JSON.stringify(stats)}` +
+    (process.argv.includes('--built') ? ', built page matches' : ''),
+);

@@ -8,7 +8,7 @@
   "eyebrows": {
     "hero": "Report / 2026 / {count} systems tested to failure",
     "about": "The rule",
-    "projects": "Projects / 01 to {last} / ordered by what I would show first",
+    "projects": "Projects / 01 to {last} / my top pick first",
     "tools": "Tools / {n} / used in the {count}",
     "project": "Project {index} / {total} / shipped",
     "opener": "From the write-up",
