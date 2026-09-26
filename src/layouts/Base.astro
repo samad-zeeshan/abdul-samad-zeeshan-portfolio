@@ -100,6 +100,7 @@ const ogImage = new URL(withBase(image), Astro.site).href;
   </head>
   <body>
     <Smoke />
+    <div class="progress" aria-hidden="true"></div>
     <div class="hair" aria-hidden="true">
       <div class="wrap hair__grid">
         {Array.from({ length: 12 }, (_, i) => <span style={`--n:${i}`} />)}

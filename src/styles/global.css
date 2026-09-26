@@ -391,6 +391,74 @@ code {
   }
 }
 
+/* A 2px accent line across the top grows with the scroll. Driven by the scroll
+   position in CSS, so browsers without scroll timelines simply show nothing. */
+.progress {
+  display: none;
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .progress {
+      display: block;
+      position: fixed;
+      inset: 0 0 auto;
+      height: 2px;
+      z-index: calc(var(--z-skip) - 1);
+      background: var(--accent);
+      transform-origin: left;
+      pointer-events: none;
+      /* Longhands on purpose. The CSS minifier folds a shorthand plus a timeline into
+         one shorthand that Chrome rejects. */
+      animation-name: progress;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root);
+    }
+  }
+}
+@keyframes progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* The page heading sinks and fades as it leaves the top, so the page seems to slide
+   over it. Forwards fill only, so it never touches the heading before it starts to exit. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-drift] {
+      animation-name: drift;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+    /* The role line also settles on entry. Both go in one list, or the shorthand for
+       one would cancel the other. */
+    html.enter [data-drift][data-settle] {
+      animation:
+        settle var(--dur-settle) var(--spring) both,
+        drift linear forwards;
+      animation-delay: calc(var(--i, 0) * 40ms + 260ms), 0s;
+      animation-timeline: auto, view();
+      animation-range: normal, exit 0% exit 100%;
+    }
+  }
+}
+@keyframes drift {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(18%);
+    opacity: 0.25;
+  }
+}
+
 /* Sections rise into place once. Hidden only when motion is allowed and the script
    that reveals them is running, so nothing stays invisible without it. */
 @media (prefers-reduced-motion: no-preference) {

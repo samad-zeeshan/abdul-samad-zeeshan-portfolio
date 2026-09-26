@@ -35,10 +35,10 @@ const introEnd = profile.intro.slice(at + tailText.length);
 >
   <section class="hero wrap" data-theme="field" aria-labelledby="hero-name">
     <Eyebrow text={fill(copy.eyebrows.hero, { count })} class="hero__eyebrow" />
-    <h1 class="hero__name" id="hero-name">
+    <h1 class="hero__name" id="hero-name" data-drift>
       <LitName text={profile.name} rise />
     </h1>
-    <p class="hero__role" data-settle style="--i:0">
+    <p class="hero__role" data-settle data-drift style="--i:0">
       <span data-decode="paint">{roleHead}</span> <span class="role__tail">{roleTail}</span>
     </p>
     <div class="hero__rail">

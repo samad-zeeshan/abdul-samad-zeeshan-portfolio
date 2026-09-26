@@ -69,7 +69,7 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
   <article class="p" data-theme="field">
     <header class="p__head wrap">
       <Eyebrow text={fill(copy.eyebrows.project, { index: place(entry), total })} class="p__eyebrow" />
-      <h1 class="p__name" id="project-name" translate="no" style={`view-transition-name: name-${entry.id}`}>
+      <h1 class="p__name" id="project-name" data-drift translate="no" style={`view-transition-name: name-${entry.id}`}>
         <LitName text={d.title} />
       </h1>
       <div class="p__lead" data-settle style="--i:0">
@@ -105,7 +105,7 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
 
     <section class="p__opener p__sec wrap" aria-labelledby="opener-h">
       <Eyebrow as="h2" id="opener-h" text={copy.eyebrows.opener} class="p__cap" />
-      <p class="p__opener-text p__body" data-settle style="--i:1" set:html={openerHtml} />
+      <p class="p__opener-text p__body" data-settle data-drift style="--i:1" set:html={openerHtml} />
     </section>
 
     {
