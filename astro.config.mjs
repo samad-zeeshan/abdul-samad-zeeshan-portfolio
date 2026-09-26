@@ -2,7 +2,7 @@
 // Astro build config: static site output for GitHub Pages.
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
-import react from '@astrojs/react';
+import preact from '@astrojs/preact';
 import sitemap from '@astrojs/sitemap';
 
 // Pages serves this from a project repo, not a <username>.github.io root, so the
@@ -14,7 +14,7 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'ignore',
   integrations: [
-    react(),
+    preact({ compat: true }),
     mdx(),
     sitemap(),
   ],

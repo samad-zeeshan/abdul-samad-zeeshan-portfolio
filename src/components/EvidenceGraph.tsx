@@ -1,6 +1,7 @@
 // Skills graph: skills clustered by category and linked to the shipped projects that
 // prove them, settled with d3-force and drawn to a transparent canvas on the field.
-import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
+import { useRef, useEffect, useState, useMemo, useCallback } from 'preact/hooks';
+import type { JSX } from 'preact';
 import {
   forceSimulation,
   forceManyBody,
@@ -400,13 +401,13 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
     return best;
   };
 
-  const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const onPointerMove = (e: JSX.TargetedPointerEvent<HTMLCanvasElement>) => {
     if (e.pointerType === 'touch') return;
     const n = nodeAt(e.clientX, e.clientY);
     setHoverId(n ? n.id : null);
     e.currentTarget.style.cursor = n ? 'pointer' : 'default';
   };
-  const onClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const onClick = (e: JSX.TargetedMouseEvent<HTMLCanvasElement>) => {
     const n = nodeAt(e.clientX, e.clientY);
     if (n?.kind === 'project' && n.href) {
       window.location.href = n.href;
