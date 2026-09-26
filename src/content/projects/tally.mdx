@@ -1,24 +1,31 @@
 ---
 title: "Tally"
-description: "A demonstration double-entry banking service with exactly-once transfers backed by a database unique constraint, integer money, and 254 backend tests in CI."
+order: 3
+tone: { scheme: "light", bg: "#eef1e6", ink: "#1d2a30", ink2: "#4b5a55", accent: "#2c6849", line: "#c4d3c2" }
+problem: "A ledger that never loses or doubles a cent, even when the network fails in the middle of a payment."
+description: "Tally is a small bank on a double-entry ledger. Retries land once, balances rebuild from scratch, and suspicious transfers are flagged with evidence."
+opener: "Tally is a small bank that can never lose or double a cent. Every transfer is written as two entries that cancel out, a payment retried after a dropped connection lands exactly once, every balance can be rebuilt from scratch to prove nothing leaked, and suspicious transfers are flagged after they land with the evidence attached."
+repo: "https://github.com/samad-zeeshan/Tally"
+demo: "https://samad-zeeshan.github.io/Tally/"
+demoNote: "Replays runs recorded from the real service: a transfer, a retry after a lost reply, a reconciliation, a fault injection, and a mule chain being flagged."
+gif: { file: "tally.gif", width: 800, height: 500, alt: "Tally demo: transfer, retry, reconcile, break it, flag it" }
+poster: "tally.webp"
+numbers:
+  - value: "11,054"
+    label: "transfers through 7 fault runs on Kubernetes, with 0 violations of any kind"
+    source: "Tally README, fault runs summary line (7 runs, 11,054 transfers and 1,580 retries, 0 violations)"
+  - value: "0.8179"
+    label: "fraud precision on a fresh seed with the graph rules, against 0.3655 for the v1 rules"
+    source: "Tally README, fraud table, row Precision / recall on a fresh seed (20260926)"
+papers:
+  - "arXiv 2607.05076, Can Code Specify a System Precisely Enough to Formally Verify It? The model of the transfer protocol and its stated gaps."
+  - "arXiv 2609.27571, FDE-Bench. The four deployment gates, with fault behaviour added as a fifth."
+  - "arXiv 2608.22389, KONTOGRAPH. Point-in-time features, a verifier that rewrites the future, and timed explanations."
+  - "arXiv 2608.23468, RAD. Rules combined with relational signals over the transfer graph."
+  - "arXiv 2607.27267, FAVA. Every alert carries the evidence it fired on."
+  - "arXiv 2609.24446, ActGov. SMT counterexample checks on every rule update."
+  - "arXiv 2609.28771, Agent Memory with Episodic Retrieval for Financial Decision-Making. The reflection step's memory of matured errors."
+  - "arXiv 2609.27287, SR-Fraud. A frozen scorer, offline reflection, and a deterministic gate."
+  - "arXiv 2609.18270, BENCHCOMPASS. Evidence given to the model as typed summaries, not raw records."
+  - "arXiv 2609.19928, semantic user profiling at bank scale. Reasoning over groups of similar errors rather than one account at a time."
 ---
-
-## Problem
-
-Money movement punishes sloppiness. If a transfer response is lost in flight and the client retries, a naive endpoint debits the account twice. If balances are stored as floating point, fractions of a cent quietly appear or vanish. If two transfers touch the same account at once, a lost update can create or destroy money. Tally is a demonstration banking service. It is built to handle these hazards on purpose rather than hope they never happen.
-
-## Approach
-
-Tally is built on a double-entry ledger. Every transfer is a set of balanced postings that net to zero, so the books cannot silently drift. The whole ledger can be re-derived through a reconciliation endpoint that recomputes balances from the postings. The backend is Java on the JDK HTTP server with virtual threads and hand-written JSON, backed by PostgreSQL. The client is React and TypeScript. Design decisions are recorded as ADRs.
-
-One decision shapes everything else. Transfers are exactly-once and idempotent, enforced by a database unique constraint on an idempotency key rather than by application logic. Because the guarantee lives in the database, it survives process restarts. Money is stored as integer minor units, never floats. Concurrency uses pessimistic row locks at read committed, so two transfers on the same account serialize instead of racing.
-
-## Verification
-
-Correctness is checked by 254 backend JUnit tests that run in CI on every push. Not all of them are unit tests. They include real-Postgres integration tests, so the idempotency constraint, the row locks, and the reconciliation logic run against an actual database rather than a mock that would hide the exact behavior under test. The web client adds 31 vitest tests.
-
-The idempotency guarantee is checked adversarially. A client fault toggle reproduces the lost-response scenario on demand. The transfer commits, the response is dropped, and the client retries with the same idempotency key. The unique constraint turns that retry into a no-op, and the test asserts the account is debited exactly once across the pair of requests. The reconciliation endpoint gives a second, independent check. Because every transfer nets to zero and the ledger can be re-derived from its postings, a reconciliation run confirms that recomputed balances match stored balances. That catches any posting that failed to balance.
-
-## What broke
-
-The lost-response problem is the concrete failure this design exists to handle. A client submits a transfer, the response is lost in flight, the client retries, and a naive system double-pays. Tally's fault toggle reproduces exactly this. The database unique constraint on the idempotency key makes the retry a safe no-op instead of a second debit. Putting the guarantee in the database rather than an in-memory check is what makes it hold across restarts. An application-level guard would let a double-pay slip through under a crash at the wrong moment.

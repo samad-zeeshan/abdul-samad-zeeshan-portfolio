@@ -1,0 +1,33 @@
+---
+title: "Warden"
+order: 1
+tone: { scheme: "light", bg: "#f3f2ee", ink: "#17191b", ink2: "#4b4f53", accent: "#a8261d", line: "#cfccc3" }
+problem: "An automated guard for changes to live software that a tricked AI assistant cannot talk round."
+description: "Warden approves boring changes to live software, blocks dangerous ones, asks a human only when unsure and keeps an unerasable log."
+opener: "Warden is an automated security guard for changes to live software. It approves boring ones, blocks dangerous ones, asks a human only when unsure, keeps an unerasable log, and cannot be talked into a bad decision by an AI assistant that was tricked. An AI agent does the legwork on each change request, but it never holds the power to approve anything alone. Every credential it gets names one customer and one request, its tools arrive only when a step needs them, rules on the server make each decision, and the log shows any later edit."
+repo: "https://github.com/samad-zeeshan/Warden"
+demo: "https://samad-zeeshan.github.io/Warden/"
+demoNote: "Four buttons replay recorded runs: a safe change, a dangerous change, an attack picked from the test corpus, and an edit to an old log entry that the page catches in your browser."
+gif: { file: "warden.gif", width: 880, height: 550, alt: "Warden demo: a safe change approved, an attack refused, and a tampered log entry caught" }
+poster: "warden.webp"
+numbers:
+  - value: "0 of 84"
+    label: "prompt-injection attacks got through the hardened build, MCP over HTTP"
+    source: "Warden README, prompt-injection red-team table, row Hardened, MCP over HTTP"
+  - value: "35 of 84"
+    label: "got through with the boundary layers switched off"
+    source: "Warden README, prompt-injection red-team table, row Boundary layers off"
+papers:
+  - "arXiv 2609.14780, The Stochastic Deputy: structural tenant isolation for tool-using agents"
+  - "arXiv 2609.29345, The Last Human Gate: when automating a governance gate saves human work"
+  - "arXiv 2609.26761, A2M: trace-optimized agent hijacking in the MCP ecosystem"
+  - "arXiv 2609.28693, Progressive skill discovery as access control"
+  - "arXiv 2607.27267, FAVA: evidence-backed permission graphs"
+  - "arXiv 2609.22712, Trustworthy agentic AI: failure modes and a lifecycle framework"
+  - "arXiv 2609.24446, ActGov: policy-constrained validation with SMT-checked updates"
+  - "arXiv 2609.26900, Ajar: measuring open privilege in agent defenses"
+  - "arXiv 2609.22573, Zero-trust authorization and discovery for enterprise MCP"
+  - "arXiv 2609.18217, Measuring implicit trust in LLM tool-calling pipelines"
+  - "arXiv 2609.19425, Closed-world resolution against tool hallucination"
+  - "arXiv 2609.22949, Prompt injection in multi-agent systems (future work: the workflow has one model-driven step)"
+---

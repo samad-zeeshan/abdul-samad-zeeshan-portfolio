@@ -1,26 +1,32 @@
 ---
 title: "Tarn"
-description: "An identity-security data lakehouse over real anonymized auth events, built end to end on one laptop, where every optimization must beat a benchmark before it ships."
+order: 5
+tone: { scheme: "dark", bg: "#0b0d10", ink: "#e8e6e1", ink2: "#a9adb3", accent: "#f0b340", line: "#262b33" }
+problem: "Would a login graph have caught a known attacker in a billion real records, and can an AI analyst sort the alerts?"
+description: "Tarn scores a billion real login records with a known attack against the lab's answer key, then tests an AI analyst on the alerts."
+opener: "Tarn takes a billion real login records from a US national lab, where 749 are a known attack, and asks one question: would this have caught the attacker? A map of who logged into which computer is scored as each login arrives and raises alerts. Then an AI analyst with map tools sorts those alerts so a person only reads the ones that matter. Every result below is checked against the lab's answer key, including the ones that came out badly."
+repo: "https://github.com/samad-zeeshan/Tarn"
+demo: "https://samad-zeeshan.github.io/Tarn/"
+demoNote: "The page replays recorded runs, and its SQL box runs live in your browser once you scroll to it."
+gif: { file: "tarn.gif", width: 720, height: 405, alt: "One day of logins drawn as a graph, alerts arriving with the analyst's verdicts, then the agent reading first" }
+poster: "tarn.webp"
+numbers:
+  - value: "29 of 181"
+    label: "attack account-days caught at 100 alerts a day by the graph detector fixed in advance, against 21 for v1's rules"
+    source: "Tarn README, graph detector budget table, rows v2 graph detector and v1"
+  - value: "5,079,642"
+    label: "point-in-time features recomputed with the future cut off, 0 mismatches"
+    source: "Tarn README, point-in-time check table, row v2 feature engine"
+papers:
+  - "arXiv 2607.29390, fair evaluation of graph-based lateral movement detectors (the protocol)"
+  - "arXiv 2608.23468, RAD, rule-augmented relational anomaly detection (v1 rules as inputs)"
+  - "arXiv 2609.18107, FoundAna (not run: needs PyTorch and pretrained weights, so LightGCN stands in)"
+  - "arXiv 2608.15559, explanation with exact preservation for dynamic graph detectors"
+  - "arXiv 2609.15614, tractable defense against advanced persistent threats (lateral movement framing)"
+  - "arXiv 2608.22389, KONTOGRAPH, verified point-in-time features (the verifier)"
+  - "arXiv 2609.04159, SENTINEL-RL, topology reasoning moved out of the LLM (graph tools)"
+  - "arXiv 2609.30055, Era by Eon, agent benchmarks on hidden knowledge (benchmark shape)"
+  - "arXiv 2609.19425, closed-world resolution against tool hallucination (the registry)"
+  - "arXiv 2609.26550, JEV-as-a-Judge, accept when confident, escalate when unsure (the cascade)"
+  - "arXiv 2609.26489, calibration as a first-class criterion in LLM evaluation"
 ---
-
-## Problem
-
-Identity compromise hides in auth logs too large to eyeball and too noisy to grep. The Los Alamos auth dataset is 1,051,430,459 real anonymized login events over 58 days, with only 749 labelled red-team events buried inside. The task was to turn that raw stream into something a defender can query, join, and test for lateral movement, and to do it end to end on one laptop rather than a cluster.
-
-## Approach
-
-Tarn is a lakehouse built in stages. PySpark parses the billion events into a 58-partition Parquet lake. Window functions then reduce them to 1,604,500 identity-days across 80,553 identities, measuring fan-out, failure ratio, first-seen destinations, and off-hours share, joined to the 749 red-team events. From the lake and that reduced table, four consumers are built. A DuckDB star schema modelled with dbt, a Neo4j graph loaded from the raw authentication edges, a FAISS vector index over the person-days, and a Spark Structured Streaming job that replays events from Redpanda.
-
-One design decision shapes everything. No optimization is trusted because it sounds right. Each one is a hypothesis that a benchmark harness must prove against a baseline, and any change to speed must leave the output byte-for-byte identical.
-
-## Verification
-
-The rollup optimization ran as a controlled 2x2 benchmark. It crossed a broadcast join with shared-grain dedup, with one warm-up plus five timed runs per variant in a single Spark session, reported as the median. All four variants were checked for byte-identical output with an order-independent CRC32 fingerprint, so a faster run that quietly changed a row fails rather than wins. On the 113.7M-row slice the winner cut the median from 50.696s to 39.378s, a drop of 22.3%. That result is scale-dependent. On the small CI slice the baseline is fastest, so it is never claimed as a universal speedup. An AI coding assistant drafted the two competing hypotheses, but the harness, not the model, picked the winner.
-
-The warehouse checks itself. Every key carries unique, not_null, and relationships tests, and CI runs 33 tests plus a dbt build of 45 resources green. The streaming job passed a kill-and-resume recovery test from its checkpoint. It sustained 7,139 events/s at p50 lag 12.54s and p95 15.57s. That is an accelerated local replay on one machine that includes a deliberate 2-minute watermark hold, not a network number.
-
-Detection was measured against controls rather than asserted. Graph blast radius showed 1.9x reach at 1 hop versus a benign control. Vector search was scored both ways. As retrieval from an already-known bad day it reaches precision@10 of 4.59% against a 0.0113% base, a 406x lift. As a standalone detector it loses to four simple SQL rules.
-
-## What broke
-
-The best evidence here is a committed failure. The first optimization hypothesis killed the Spark Expand operator with a two-stage distinct aggregation, and it made every variant slower than doing nothing, 40.5s baseline against 50.3 to 61.1s. It lives in bench/spark_opt_rejected.json with the harness's own verdict. No win, the baseline was fastest, recorded honestly, and do not claim a speedup. The real insight was not dedupe first but share the grain. Two more negatives are committed, not hidden. The off-hours share feature caught 0 of 181 attack days, and graph blast radius saturates to a ratio of 1.0 by 3 hops, useful at one hop and meaningless by three.

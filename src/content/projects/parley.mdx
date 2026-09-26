@@ -1,0 +1,25 @@
+---
+title: "Parley"
+order: 4
+tone: { scheme: "dark", bg: "#15110e", ink: "#f1e8da", ink2: "#bcae9b", accent: "#5cc8b0", line: "#342b24" }
+problem: "A phone agent that books property viewings in English and Gulf Arabic and only states facts the listings database returned."
+description: "Parley answers the phone for a property agency in English, Gulf Arabic or both, books viewings, and only says facts the booking API returned."
+opener: "Parley answers the phone for a property agency, in English, Gulf Arabic or both in one sentence. It books a viewing, only ever says prices and addresses the listings database returned, and works with no internet connection."
+repo: "https://github.com/samad-zeeshan/Parley"
+demo: "https://samad-zeeshan.github.io/Parley/"
+demoNote: "Replays recorded calls in English, Arabic and a mix of both, plus one where the booking system fails mid-call. Each fact Parley speaks is marked with the booking API call it came from."
+gif: { file: "parley.gif", width: 800, height: 450, alt: "An Arabic call in the demo, with the booking confirmed" }
+poster: "parley.webp"
+numbers:
+  - value: "232 of 232"
+    label: "calls that hit a booking API fault were handled safely, with 0 false facts spoken"
+    source: "Parley README, booking API faults paragraph"
+  - value: "17 of 40"
+    label: "scripted calls booked end to end over audio on the offline speech stack"
+    source: "Parley README, calls booked table, row All, column local"
+papers:
+  - "Evaluation: arXiv 2609.20152 (MTVA-Bench), 2609.29452 (acoustic stress, TRACE), 2605.19069 (code-switching ASR), 2609.21084 (digit error rates)"
+  - "Dialect and judging: arXiv 2608.29990 (Saudi dialect rubric), 2609.29431 (calibrating LLM judges), 2605.16364 (WASIL, in-the-wild Arabic turns)"
+  - "Failures and turn taking: arXiv 2608.02372 (PredAct-Bench), 2606.31307 (safe recovery when the database fails), 2609.03321 (finite-state turn taking)"
+  - "Models and data: arXiv 2609.23959, 2609.26550 (Jev decisions), 2609.25176, 2609.11892, 2609.27086, 2609.24410, 2609.03423, 2609.23955, 2608.21950, 2604.14186"
+---
