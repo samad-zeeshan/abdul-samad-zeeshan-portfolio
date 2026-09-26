@@ -1,156 +1,422 @@
 ---
-// Case study page. Astro generates one per MDX entry, pairing the narrative body with facts.json data.
-import { getCollection, render } from 'astro:content';
+// Project page, painted in the demo's own palette inside the ultramarine header and
+// footer. Text and numbers come from the entry's frontmatter, copied from its README.
 import Base from '../../layouts/Base.astro';
-import EvidencePanel from '../../components/EvidencePanel.astro';
-import {
-  getProject,
-  profile,
-  categoriesForProject,
-  skillCountForProject,
-  CATEGORY_LABEL,
-  leadCategory,
-} from '../../lib/facts';
+import { getProjects, hasPage, countTarget, type Project } from '../../lib/site';
 import { withBase } from '../../lib/paths';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('projects');
-  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+  const all = await getProjects();
+  const shipped = all.filter(hasPage);
+  return shipped.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: { entry, next: shipped[(i + 1) % shipped.length], all },
+  }));
 }
 
-const { entry } = Astro.props;
-const { Content } = await render(entry);
-
-const project = getProject(entry.id);
-// Fail the build if a case study has no matching facts.json project, so the two never drift.
-if (!project) {
-  throw new Error(`No facts.json project for case study "${entry.id}"`);
+interface Props {
+  entry: Project;
+  next: Project;
+  all: Project[];
 }
+const { entry, next, all } = Astro.props;
+const d = entry.data;
 
-const cats = categoriesForProject(project.id);
-const lead = leadCategory(project.id);
-const skillCount = skillCountForProject(project.id);
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+// README openers mark field names in backticks. Render those as code, nothing else.
+const openerHtml = d.opener ? esc(d.opener).replace(/`([^`]+)`/g, '<code>$1</code>') : '';
+// Every arXiv id in a paper line becomes a link to its abstract.
+const paperHtml = (line: string) =>
+  esc(line).replace(
+    /\b(\d{4}\.\d{5})\b/g,
+    '<a class="link" href="https://arxiv.org/abs/$1" rel="noopener">$1</a>',
+  );
 ---
 
 <Base
-  title={`${project.label} · ${profile.name}`}
-  description={entry.data.description}
-  image={`/og/${project.id}.png`}
+  title={`${d.title}. ${d.problem}`}
+  description={d.description}
+  image={`/og/${entry.id}.png`}
+  current={entry.id}
+  tone={d.tone}
 >
-  <article class="case container">
-    <a class="case__back mono link" href={withBase('/#projects')}>&#8592; All projects</a>
-
-    <header class="case__head" data-cat={lead}>
-      <div class="case__cats" aria-label="Categories">
-        {
-          cats.map((c) => (
-            <span class="case__cat mono" data-cat={c}>
-              <span class="dot" aria-hidden="true" />
-              {CATEGORY_LABEL[c]}
-            </span>
-          ))
-        }
-      </div>
-      <h1 class="case__title">{project.label}</h1>
-      <p class="case__one">{project.oneLiner}</p>
-      <div class="case__meta mono">
-        {project.year && <span>{project.year}</span>}
-        <span>{skillCount} skills evidenced</span>
-      </div>
-      <div class="case__links mono">
-        <a class="btn" href={project.repo} target="_blank" rel="noopener">
-          View repository <span aria-hidden="true">&#8599;</span>
-        </a>
-        {
-          project.demo && (
-            <a class="btn btn--ghost" href={project.demo.url} target="_blank" rel="noopener">
-              {project.demo.label} <span aria-hidden="true">&#8599;</span>
-            </a>
-          )
-        }
+  <article class="p">
+    <header class="p__head wrap">
+      <h1 class="p__name" translate="no" style={`view-transition-name: name-${entry.id}`}>{d.title}</h1>
+      <div class="p__lead" data-settle style="--i:0">
+        <p class="p__problem">{d.problem}</p>
+        <div class="p__actions">
+          {
+            d.demo ? (
+              <a class="btn btn--solid" href={d.demo} rel="noopener">
+                Open the demo <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+              </a>
+            ) : (
+              <span class="btn" aria-disabled="true">
+                Demo not published yet
+              </span>
+            )
+          }
+          {
+            d.repo && (
+              <a class="btn" href={d.repo} rel="noopener">
+                Repository <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+              </a>
+            )
+          }
+        </div>
       </div>
     </header>
 
-    <div class="case__body prose">
-      <Content />
-    </div>
+    <section class="p__opener wrap" aria-label="What it is">
+      <p class="p__opener-text" data-settle style="--i:1" set:html={openerHtml} />
+    </section>
 
-    <EvidencePanel project={project} />
+    {
+      d.numbers.length > 0 && (
+        <section class="p__numbers wrap" aria-labelledby="numbers-h">
+          <h2 id="numbers-h" class="label p__cap">
+            Headline numbers
+          </h2>
+          <dl class="p__nums">
+            {d.numbers.map((n, i) => (
+              <div class="p__num" data-settle style={`--i:${i + 2}`}>
+                <dt class="p__num-label">{n.label}</dt>
+                <dd class="p__num-value mono">
+                  <span class="visually-hidden">{n.value}</span>
+                  <span aria-hidden="true" data-count={countTarget(n.value)}>
+                    {n.value}
+                  </span>
+                </dd>
+                <dd class="p__num-source">From the {n.source}.</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )
+    }
 
-    <nav class="case__nav mono" aria-label="Case study footer">
-      <a class="link" href={withBase('/#projects')}>&#8592; Back to all projects</a>
-      <a class="link" href={withBase('/')}>Evidence map</a>
+    {
+      d.gif && (
+        <section class="p__demo wrap" aria-labelledby="demo-h">
+          <h2 id="demo-h" class="label p__cap">
+            The demo, recorded
+          </h2>
+          <figure class="p__figure">
+            <div class="frame">
+              {/* Reduced-motion visitors get the still. Everyone else can pause the loop. */}
+              <picture>
+                {d.poster && (
+                  <source media="(prefers-reduced-motion: reduce)" srcset={withBase(`/posters/${d.poster}`)} />
+                )}
+                <img
+                  class="p__gif"
+                  src={withBase(`/gifs/${d.gif.file}`)}
+                  data-gif={withBase(`/gifs/${d.gif.file}`)}
+                  data-still={d.poster ? withBase(`/posters/${d.poster}`) : undefined}
+                  alt={d.gif.alt}
+                  width={d.gif.width}
+                  height={d.gif.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+            </div>
+            <div class="p__figfoot">
+              {d.demoNote && <figcaption class="p__caption">{d.demoNote}</figcaption>}
+              {d.poster && (
+                <button class="btn p__pause" type="button" aria-pressed="false" data-pause>
+                  Pause the recording
+                </button>
+              )}
+            </div>
+          </figure>
+        </section>
+      )
+    }
+
+    {
+      d.papers.length > 0 && (
+        <section class="p__papers wrap" aria-labelledby="papers-h">
+          <h2 id="papers-h" class="label p__cap">
+            Papers
+          </h2>
+          <ul class="p__paper-list">
+            {d.papers.map((line) => (
+              <li set:html={paperHtml(line)} />
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <nav class="p__nav wrap" aria-label="Projects">
+      <a class="p__next" href={withBase(`/projects/${next.id}/`)}>
+        <span class="label">Next project</span>
+        <span class="p__next-name" translate="no">{next.data.title}</span>
+      </a>
+      <ol class="p__rail mono">
+        {
+          all.map((p) =>
+            hasPage(p) ? (
+              <li>
+                <a
+                  href={withBase(`/projects/${p.id}/`)}
+                  aria-current={p.id === entry.id ? 'page' : undefined}
+                >
+                  {p.data.title}
+                </a>
+              </li>
+            ) : (
+              <li class="p__rail-off">{p.data.title}, in progress</li>
+            ),
+          )
+        }
+      </ol>
     </nav>
   </article>
 </Base>
 
+<script>
+  // A GIF cannot be paused, so pausing swaps in the still from the same moment.
+  document.querySelectorAll<HTMLButtonElement>('[data-pause]').forEach((btn) => {
+    const img = btn.closest('figure')?.querySelector<HTMLImageElement>('.p__gif');
+    if (!img || !img.dataset.still) return;
+    btn.addEventListener('click', () => {
+      const paused = btn.getAttribute('aria-pressed') === 'true';
+      img.src = paused ? img.dataset.gif! : img.dataset.still!;
+      btn.setAttribute('aria-pressed', String(!paused));
+      btn.textContent = paused ? 'Pause the recording' : 'Play the recording';
+    });
+  });
+</script>
+
 <style>
-  .case {
-    padding-block: var(--space-6) var(--space-6);
-    max-width: 52rem;
+  .p__head {
+    display: grid;
+    gap: var(--space-5);
+    padding-block: var(--space-7) var(--space-6);
   }
-  .case__back {
-    display: inline-block;
-    font-size: var(--step--1);
-    color: var(--text-500);
-    margin-bottom: var(--space-6);
+  .p__name {
+    font-size: var(--step-giant);
+    line-height: 0.82;
+    margin-left: -0.04em;
+    width: fit-content;
   }
-  .case__head {
-    padding-bottom: var(--space-6);
-    border-bottom: var(--border);
+  .p__lead {
+    display: grid;
+    gap: var(--space-5);
   }
-  .case__cats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-4);
-  }
-  .case__cat {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-size: var(--step--1);
-    color: var(--text-500);
-  }
-  .case__cat .dot {
-    background: var(--cat);
-  }
-  .case__title {
-    margin-top: var(--space-4);
-    font-size: var(--step-5);
-    letter-spacing: -0.02em;
-  }
-  .case__one {
-    margin-top: var(--space-4);
-    max-width: 48ch;
+  .p__problem {
+    max-width: 30ch;
     font-size: var(--step-2);
-    color: var(--text-300);
-    line-height: 1.4;
+    line-height: 1.3;
   }
-  .case__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-5);
-    margin-top: var(--space-5);
-    font-size: var(--step--1);
-    color: var(--text-500);
-  }
-  .case__links {
+  .p__actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
-    margin-top: var(--space-5);
   }
-  .case__body {
-    margin-top: var(--space-7);
-    max-width: 42rem;
+
+  .p__opener-text {
+    max-width: var(--measure);
+    font-size: var(--step-1);
+    line-height: 1.55;
   }
-  .case__nav {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-4);
-    margin-top: var(--space-8);
-    padding-top: var(--space-5);
-    border-top: var(--border);
+
+  .p__cap {
+    display: block;
+    font-family: var(--font-mono);
+    font-weight: 400;
     font-size: var(--step--1);
+    line-height: 1.4;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--tone-ink-2);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--tone-line);
+    margin-bottom: var(--space-5);
+  }
+
+  .p__numbers,
+  .p__demo,
+  .p__papers {
+    margin-top: var(--space-8);
+  }
+  .p__nums {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .p__num {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .p__num-value {
+    order: -1;
+    font-size: clamp(2.5rem, 1.2rem + 5.5vw, 5.5rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--tone-accent);
+  }
+  .p__num-label {
+    max-width: 36ch;
+    font-size: var(--step-1);
+    line-height: 1.4;
+  }
+  .p__num-source {
+    font-size: var(--step--1);
+    color: var(--tone-ink-2);
+    max-width: 48ch;
+  }
+
+  .p__figure {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .p__figfoot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: start;
+    justify-content: space-between;
+    gap: var(--space-3) var(--space-5);
+  }
+  .p__pause {
+    cursor: pointer;
+  }
+  .p__pause[aria-pressed='true'] {
+    background: var(--tone-ink);
+    color: var(--tone-bg);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .p__pause {
+      display: none;
+    }
+  }
+  .p__caption {
+    max-width: var(--measure);
+    font-size: var(--step--1);
+    color: var(--tone-ink-2);
+  }
+
+  .p__paper-list {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 72ch;
+    font-size: var(--step--1);
+    line-height: 1.55;
+  }
+
+  .p__nav {
+    margin-top: var(--space-9);
+    display: grid;
+    gap: var(--space-6);
+  }
+  .p__next {
+    display: grid;
+    gap: var(--space-2);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--tone-line);
+    text-decoration: none;
+    width: fit-content;
+  }
+  .p__next-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--step-index);
+    line-height: 0.84;
+    text-transform: uppercase;
+    background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 0.05em;
+    padding-bottom: 0.06em;
+    transition: background-size var(--dur-hover) var(--ease-out);
+  }
+  .p__next:hover .p__next-name,
+  .p__next:focus-visible .p__next-name {
+    background-size: 100% 0.05em;
+  }
+  .p__next:active .p__next-name {
+    transform: translateY(1px);
+  }
+  .p__rail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    font-size: var(--step--1);
+  }
+  .p__rail a,
+  .p__rail-off {
+    display: inline-block;
+  }
+  .p__rail a {
+    color: var(--tone-ink-2);
+    text-decoration: none;
+    padding-block: var(--space-2);
+  }
+  .p__rail a:hover {
+    color: var(--tone-ink);
+  }
+  /* The accent marks the current item and nothing else in the rail. */
+  .p__rail a[aria-current='page'] {
+    color: var(--tone-accent);
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+  }
+  .p__rail-off {
+    color: var(--tone-ink-2);
+    padding-block: var(--space-2);
+  }
+
+  @media (min-width: 60rem) {
+    .p__head {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: end;
+      padding-block: var(--space-8) var(--space-7);
+    }
+    .p__name {
+      grid-column: 1 / -1;
+    }
+    .p__lead {
+      grid-column: 1 / 13;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: end;
+    }
+    .p__problem {
+      grid-column: 1 / 7;
+    }
+    .p__actions {
+      grid-column: 8 / 13;
+      justify-content: flex-end;
+    }
+    .p__opener,
+    .p__numbers,
+    .p__papers {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-6);
+    }
+    .p__opener-text {
+      grid-column: 5 / 13;
+      font-size: var(--step-2);
+      line-height: 1.4;
+    }
+    .p__cap {
+      grid-column: 1 / 4;
+    }
+    .p__nums {
+      grid-column: 4 / 13;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--space-7);
+      border-top: 1px solid var(--tone-line);
+      padding-top: var(--space-3);
+    }
+    .p__numbers .p__cap,
+    .p__papers .p__cap {
+      border-top: 1px solid var(--tone-line);
+    }
+    .p__paper-list {
+      grid-column: 4 / 13;
+      border-top: 1px solid var(--tone-line);
+      padding-top: var(--space-3);
+    }
   }
 </style>

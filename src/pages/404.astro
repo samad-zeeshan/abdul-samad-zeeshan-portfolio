@@ -1,58 +1,32 @@
 ---
-// 404 page. Astro emits it as 404.html, which GitHub Pages serves for unknown URLs.
+// Not-found page. Astro emits it as 404.html, which GitHub Pages serves for unknown URLs.
 import Base from '../layouts/Base.astro';
-import { profile } from '../lib/facts';
+import { profile } from '../lib/site';
 import { withBase } from '../lib/paths';
 ---
 
-<Base
-  title={`Signal lost · ${profile.name}`}
-  description="This page was not found."
-  image="/og/home.png"
->
-  <section class="lost container">
-    <div class="panel lost__panel">
-      <div class="panel__cap">
-        <span>error</span>
-        <span aria-hidden="true">404</span>
-      </div>
-      <div class="lost__body">
-        <p class="lost__code mono">404</p>
-        <h1 class="lost__title">Signal lost</h1>
-        <p class="lost__msg">
-          No reading here. The page you asked for is not on this instrument.
-        </p>
-        <a class="btn" href={withBase('/')}>Back to the evidence map</a>
-      </div>
-    </div>
+<Base title={`Page not found. ${profile.name}`} description="This page does not exist.">
+  <section class="lost wrap">
+    <h1 class="lost__title">Not here</h1>
+    <p class="lost__msg">This address has no page. The projects are all on the home page.</p>
+    <a class="btn btn--solid" href={withBase('/#work')}>
+      See the projects <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+    </a>
   </section>
 </Base>
 
 <style>
   .lost {
-    padding-block: var(--space-8);
-    max-width: 40rem;
-  }
-  .lost__body {
-    padding: var(--space-7) var(--space-5) var(--space-8);
-    text-align: center;
-  }
-  .lost__code {
-    font-size: var(--step-1);
-    color: var(--signal-500);
-    letter-spacing: 0.2em;
+    display: grid;
+    gap: var(--space-5);
+    justify-items: start;
+    padding-block: var(--space-8) var(--space-6);
   }
   .lost__title {
-    margin-top: var(--space-2);
-    font-size: var(--step-5);
+    font-size: var(--step-giant);
   }
   .lost__msg {
-    margin-top: var(--space-4);
-    margin-inline: auto;
-    max-width: 36ch;
-    color: var(--text-300);
-  }
-  .lost__body .btn {
-    margin-top: var(--space-6);
+    font-size: var(--step-1);
+    max-width: 40ch;
   }
 </style>
