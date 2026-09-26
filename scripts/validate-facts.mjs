@@ -91,7 +91,9 @@ for (const p of textFiles) {
   const t = readFileSync(p, 'utf8');
   const rel = p.slice(root.length + 1);
   if (/[\u2014\u2013]/.test(t)) fail(`${rel}: contains an em or en dash`);
-  if (LOCATION.test(t)) fail(`${rel}: mentions a location (${t.match(LOCATION)[0]})`);
+  // The university name is allowed, it is a credential and not a place of residence.
+  const noUni = t.replace(/University of Alberta/g, '');
+  if (LOCATION.test(noUni)) fail(`${rel}: mentions a location (${noUni.match(LOCATION)[0]})`);
   if (BANNED.test(t)) fail(`${rel}: uses "${t.match(BANNED)[0]}"`);
   if (/[\u200b-\u200f\u2060\ufeff]/.test(t)) fail(`${rel}: contains invisible Unicode`);
 }
