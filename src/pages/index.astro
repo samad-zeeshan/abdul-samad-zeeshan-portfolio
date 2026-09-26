@@ -33,7 +33,7 @@ const introEnd = profile.intro.slice(at + tailText.length);
   title={`${profile.name}. ${profile.role}`}
   description="Seven projects in backend and data systems. Each one has a demo you can open and numbers copied from its own write-up."
 >
-  <section class="hero wrap" data-theme="field" aria-labelledby="hero-name">
+  <section class="hero wrap on-field" data-theme="field" aria-labelledby="hero-name">
     <Eyebrow text={fill(copy.eyebrows.hero, { count })} class="hero__eyebrow" />
     <h1 class="hero__name" id="hero-name" data-drift>
       <LitName text={profile.name} rise />
@@ -46,7 +46,7 @@ const introEnd = profile.intro.slice(at + tailText.length);
     </div>
   </section>
 
-  <section class="about wrap" data-theme="field" aria-labelledby="about-h">
+  <section class="about wrap on-field" data-theme="field" aria-labelledby="about-h">
     <div class="about__graph" data-reveal>
       <EvidenceMap />
     </div>
@@ -58,7 +58,12 @@ const introEnd = profile.intro.slice(at + tailText.length);
     </div>
   </section>
 
-  <section class="work" id="work" data-theme="paper" aria-labelledby="work-h">
+  <section class="work on-paper" id="work" data-theme="paper" aria-labelledby="work-h">
+    <div class="hair" aria-hidden="true">
+      <div class="wrap hair__grid">
+        {Array.from({ length: 12 }, (_, i) => <span style={`--n:${i}`} />)}
+      </div>
+    </div>
     <div class="wrap">
       <Eyebrow as="h2" id="work-h" class="work__cap" text={fill(copy.eyebrows.projects, { last: pad2(projects.length) })} />
       <ol class="work__list" data-follow-scope>
@@ -68,22 +73,43 @@ const introEnd = profile.intro.slice(at + tailText.length);
   </section>
   <Follower projects={shipped} />
 
-  <section class="tools wrap" data-theme="field" aria-labelledby="tools-h">
-    <Eyebrow as="h2" id="tools-h" class="tools__cap" text={fill(copy.eyebrows.tools, { n: profile.skills.length, count })} />
-    <p class="tools__line" data-reveal>
-      {
-        profile.skills.map((s, i) => (
-          <>
-            <span class="tools__item">{s}</span>
-            {i < profile.skills.length - 1 && <span class="tools__sep" aria-hidden="true">/</span>}
-          </>
-        ))
-      }
-    </p>
+  <section class="tools on-field" data-theme="field" aria-labelledby="tools-h">
+    <div class="hair" aria-hidden="true">
+      <div class="wrap hair__grid">
+        {Array.from({ length: 12 }, (_, i) => <span style={`--n:${i}`} />)}
+      </div>
+    </div>
+    <div class="wrap tools__in">
+      <Eyebrow as="h2" id="tools-h" class="tools__cap" text={fill(copy.eyebrows.tools, { n: profile.skills.length, count })} />
+      <p class="tools__line" data-reveal>
+        {
+          profile.skills.map((s, i) => (
+            <>
+              <span class="tools__item">{s}</span>
+              {i < profile.skills.length - 1 && <span class="tools__sep" aria-hidden="true">/</span>}
+            </>
+          ))
+        }
+      </p>
+    </div>
   </section>
 </Base>
 
 <style>
+  /* The field sections keep their own colours, so the stuck about section stays on
+     the field while the paper sheet crosses the middle and flips the header. */
+  .hero,
+  .about,
+  .tools {
+    color: var(--tone-ink);
+  }
+  :global(html[data-theme='paper']) {
+    background-color: var(--field);
+  }
+  :global(html[data-theme='paper'] body > .hair) {
+    --hair: rgba(241, 238, 230, 0.05);
+  }
+
   .hero {
     display: grid;
     gap: var(--space-5);
@@ -134,17 +160,36 @@ const introEnd = profile.intro.slice(at + tailText.length);
     color: var(--hi);
   }
 
-  /* The paper section. html turns paper while this crosses the middle of the screen. */
+  /* The paper section is an opaque sheet laid over the field. Each sheet carries its
+     own copy of the hairlines, since the fixed ones sit behind it. */
   .work {
+    position: relative;
+    z-index: 2;
     padding-block: var(--space-8) var(--space-9);
     scroll-margin-top: 0;
+    background: var(--paper);
+    color: var(--paper-ink);
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -24px 48px -24px rgba(0, 0, 0, 0.5);
+  }
+  .work > .hair,
+  .tools > .hair {
+    position: absolute;
+    border-radius: inherit;
+    overflow: hidden;
   }
   .work :global(.work__cap) {
     margin-bottom: var(--space-5);
   }
 
+  /* The field slides back over the paper the same way. */
   .tools {
+    position: relative;
+    z-index: 3;
     padding-top: var(--space-8);
+    background: var(--field);
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -24px 48px -24px rgba(0, 0, 0, 0.5);
   }
   .tools :global(.tools__cap) {
     margin-bottom: var(--space-4);
@@ -168,7 +213,7 @@ const introEnd = profile.intro.slice(at + tailText.length);
   @media (min-width: 60rem) {
     .hero,
     .about,
-    .tools {
+    .tools__in {
       display: grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
       column-gap: var(--space-6);
@@ -205,6 +250,17 @@ const introEnd = profile.intro.slice(at + tailText.length);
     }
     .tools__line {
       grid-column: 4 / 13;
+    }
+  }
+
+  /* The about section holds still while the paper sheet scrolls up over it. A full
+     screen tall, so the sheet always starts from below the fold. */
+  @media (min-width: 60rem) and (prefers-reduced-motion: no-preference) {
+    .about {
+      position: sticky;
+      top: 0;
+      min-height: 100svh;
+      align-content: center;
     }
   }
 </style>

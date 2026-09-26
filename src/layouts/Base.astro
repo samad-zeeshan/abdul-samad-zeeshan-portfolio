@@ -316,15 +316,23 @@ const ogImage = new URL(withBase(image), Astro.site).href;
       (function () {
         if (!('IntersectionObserver' in window)) return;
         var root = document.documentElement;
+        var els = [].slice.call(document.querySelectorAll('body [data-theme]'));
+        var on = new Set();
         var io = new IntersectionObserver(
           function (entries) {
             entries.forEach(function (e) {
-              if (e.isIntersecting) root.setAttribute('data-theme', e.target.getAttribute('data-theme'));
+              if (e.isIntersecting) on.add(e.target);
+              else on.delete(e.target);
             });
+            // The about section sticks, so it stays on the line under the sheet that
+            // covers it. Later sections stack on top, so the last one on the line wins.
+            for (var i = els.length - 1; i >= 0; i--) {
+              if (on.has(els[i])) return root.setAttribute('data-theme', els[i].getAttribute('data-theme'));
+            }
           },
           { rootMargin: '-50% 0px -50% 0px' },
         );
-        document.querySelectorAll('body [data-theme]').forEach(function (el) { io.observe(el); });
+        els.forEach(function (el) { io.observe(el); });
       })();
     </script>
   </body>
