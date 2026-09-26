@@ -24,3 +24,12 @@
   font-display: swap;
   src: url('../assets/fonts/JetBrainsMono-var.woff2') format('woff2');
 }
+
+/* Italic only, one weight. It sets verdict words, so no upright cut is shipped. */
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/InstrumentSerif-italic.woff2') format('woff2');
+}

@@ -9,6 +9,7 @@ import { profile } from '../lib/site';
 import { withBase } from '../lib/paths';
 import displayFont from '../assets/fonts/BigShouldersDisplay-var.woff2?url';
 import textFont from '../assets/fonts/SchibstedGrotesk-var.woff2?url';
+import verdictFont from '../assets/fonts/InstrumentSerif-italic.woff2?url';
 
 interface Props {
   title: string;
@@ -35,7 +36,7 @@ const ogImage = new URL(withBase(image), Astro.site).href;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <script is:inline define:vars={{ fonts: [displayFont, textFont] }}>
+    <script is:inline define:vars={{ fonts: [displayFont, textFont, verdictFont] }}>
       // Preload the fonts on the first page of a visit only. On later pages Chrome serves
       // them from memory, never claims the preload, and warns that it went unused.
       var later = false;
@@ -52,7 +53,7 @@ const ogImage = new URL(withBase(image), Astro.site).href;
         document.head.appendChild(l);
       });
     </script>
-    <meta name="theme-color" content={tone ? tone.bg : '#0a0a0a'} />
+    <meta name="theme-color" content={tone ? tone.bg : '#0e100a'} />
     <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
     <link rel="icon" href={withBase('/favicon-32.png')} type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />

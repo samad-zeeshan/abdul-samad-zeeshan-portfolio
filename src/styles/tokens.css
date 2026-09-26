@@ -1,26 +1,20 @@
-/* Design tokens. One dominant colour field with light ink, set in a condensed poster
-   face. The field is acid by default and data-palette on <html> swaps in another.
-   Project pages paint their body in their own demo's palette through --tone-*. */
+/* Design tokens. An olive black field with cream ink and one acid accent, and a paper
+   theme the home page flips to on scroll. Project pages paint their body in their own
+   demo's palette through --tone-*. */
 
 :root {
   color-scheme: dark;
 
-  /* One accent for projects in the graph and, in most palettes, the numbers. The four
-     --cat colours tell skill categories apart without matching the accent. */
-  --field: #0a0a0a;
-  --field-deep: #1a1a1a;
+  /* Neutrals carry a green hue so neither end is pure black or white. */
+  --field: #0e100a;
+  --field-deep: #181b13;
   --cream: #eef1e2;
   --cream-2: #b9bcae;
   --cream-3: #9a9d90;
   --accent: #d6ff3f;
-  /* Colour of the cursor glow. Usually the accent, the first version's blue on ultramarine. */
-  --glow: var(--accent);
-  --num: var(--accent);
-  --name: var(--accent);
-  --cat-ml: #8fb6ff;
-  --cat-systems: #ff9d8a;
-  --cat-web: #c7a6ff;
-  --cat-infra: #6fd6e0;
+  --paper: #eef1e2;
+  --paper-ink: #0e100a;
+  --paper-line: rgba(14, 16, 10, 0.18);
   --line: rgba(244, 239, 226, 0.28);
   --line-strong: rgba(244, 239, 226, 0.6);
   --shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.85);
@@ -28,6 +22,8 @@
   --font-display: 'Big Shoulders Display', 'Arial Narrow', 'Roboto Condensed', sans-serif-condensed, sans-serif;
   --font-text: 'Schibsted Grotesk', 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  /* Only for verdict words and three set lines. The validator holds that to four classes. */
+  --font-verdict: 'Instrument Serif', Georgia, 'Times New Roman', serif;
 
   --step--1: 0.8125rem;
   --step-0: 1rem;
@@ -35,6 +31,7 @@
   --step-2: 1.5rem;
   --step-3: clamp(2rem, 1.3rem + 3vw, 3.25rem);
   --step-index: clamp(3.25rem, 1.2rem + 9.5vw, 10rem);
+  --step-num: clamp(4rem, 1rem + 12vw, 11rem);
   --step-giant: clamp(4.25rem, 0.8rem + 16.5vw, 17rem);
 
   --space-1: 0.25rem;
@@ -59,163 +56,35 @@
   --dur-press: 120ms;
   --dur-hover: 320ms;
   --dur-settle: 600ms;
+  --dur-theme: 500ms;
 
+  --z-hair: -1;
   --z-preview: 1;
   --z-header: 10;
+  --z-pill: 15;
   --z-skip: 20;
 
-  /* Page tone defaults to the field. Project pages override these four. */
+  /* Page tone defaults to the field. Project pages override these from the demo. */
   --tone-bg: var(--field);
   --tone-ink: var(--cream);
   --tone-ink-2: var(--cream-2);
   --tone-accent: var(--cream);
   --tone-line: var(--line);
+  /* Accent text that must stay readable after a flip: accent on dark, ink on paper. */
+  --hi: var(--accent);
+  --hair: rgba(238, 241, 226, 0.05);
+  --pill-bg: var(--accent);
+  --pill-ink: var(--field);
 }
 
-/* Dark mode drops the field to pure black. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --field: #000000;
-    --field-deep: #1a1a1a;
-    --cream-2: #b9bcae;
-    --cream-3: #9a9d90;
-    --line: rgba(244, 239, 226, 0.22);
-  }
-}
-:root[data-theme='dark'] {
-  --field: #000000;
-  --field-deep: #1a1a1a;
-  --cream-2: #b9bcae;
-  --cream-3: #9a9d90;
-  --line: rgba(244, 239, 226, 0.22);
-}
-
-/* The other palettes override the same tokens, so every component follows. The
-   picker and ?palette= set the attribute, and the choice is kept in localStorage. */
-
-/* Ultramarine: the first palette. Cream is a touch lighter than it was, which sat at
-   6.99 to 1 on the field. */
-:root[data-palette='ultramarine'] {
-  --field: #1f2ee8;
-  --field-deep: #1824c4;
-  --cream: #f6f2e6;
-  --cream-2: #cfd2f6;
-  --cream-3: #b9bdf3;
-  --accent: #ffd84d;
-  --glow: #7ea6e4;
-  --num: var(--cream);
-  --name: var(--cream);
-  --cat-ml: #ffb3d1;
-  --cat-systems: #9ef0c9;
-  --cat-web: #ffc9a3;
-  --cat-infra: #d9dcff;
-  --shadow: 0 24px 48px -24px rgba(6, 10, 70, 0.7);
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-palette='ultramarine']:not([data-theme='light']) {
-    --field: #0c1150;
-    --field-deep: #1f2ee8;
-    --cream-2: #c3c7ee;
-    --cream-3: #a9aee6;
-  }
-}
-:root[data-palette='ultramarine'][data-theme='dark'] {
-  --field: #0c1150;
-  --field-deep: #1f2ee8;
-  --cream-2: #c3c7ee;
-  --cream-3: #a9aee6;
-}
-
-/* Oxblood: wine field, bone ink, one warm orange for numbers and the graph. */
-:root[data-palette='oxblood'] {
-  --field: #6b0f1a;
-  --field-deep: #540b14;
-  --cream: #f1e8d6;
-  --cream-2: #e4c9c0;
-  --cream-3: #d3aea4;
-  --accent: #ffa46b;
-  --num: var(--accent);
-  --name: var(--cream);
-  --cat-ml: #ffc2d6;
-  --cat-systems: #b8e6c9;
-  --cat-web: #c9c2ff;
-  --cat-infra: #9fd8ef;
-  --shadow: 0 24px 48px -24px rgba(40, 4, 8, 0.7);
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-palette='oxblood']:not([data-theme='light']) {
-    --field: #3a0710;
-    --field-deep: #6b0f1a;
-    --cream-2: #e0c4bb;
-    --cream-3: #c9a298;
-  }
-}
-:root[data-palette='oxblood'][data-theme='dark'] {
-  --field: #3a0710;
-  --field-deep: #6b0f1a;
-  --cream-2: #e0c4bb;
-  --cream-3: #c9a298;
-}
-
-/* Forest: deep green field, chalk ink, one yellow for numbers and the graph. */
-:root[data-palette='forest'] {
-  --field: #0f3d2e;
-  --field-deep: #0a2e22;
-  --cream: #eef0e6;
-  --cream-2: #c6d8cc;
-  --cream-3: #a9c4b3;
-  --accent: #f5d547;
-  --num: var(--accent);
-  --name: var(--cream);
-  --cat-ml: #ffb8a8;
-  --cat-systems: #a8d8ff;
-  --cat-web: #e0b8ff;
-  --cat-infra: #a6f0c9;
-  --shadow: 0 24px 48px -24px rgba(2, 20, 14, 0.7);
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-palette='forest']:not([data-theme='light']) {
-    --field: #082219;
-    --field-deep: #0f3d2e;
-    --cream-2: #c0d3c6;
-    --cream-3: #9fbaa9;
-  }
-}
-:root[data-palette='forest'][data-theme='dark'] {
-  --field: #082219;
-  --field-deep: #0f3d2e;
-  --cream-2: #c0d3c6;
-  --cream-3: #9fbaa9;
-}
-
-/* Terracotta: burnt orange taken dark enough for cream text at 7 to 1. A near-black
-   accent reads at 2.4 to 1 on any field that dark, so numbers use saffron instead. */
-:root[data-palette='terracotta'] {
-  --field: #8c3210;
-  --field-deep: #742a0d;
-  --cream: #fff6e6;
-  --cream-2: #f7d7c2;
-  --cream-3: #efc2a6;
-  --accent: #ffd27a;
-  --num: var(--accent);
-  --name: var(--cream);
-  --cat-ml: #bfe0ff;
-  --cat-systems: #c8f0c0;
-  --cat-web: #f2c4ff;
-  --cat-infra: #a8f0e8;
-  --shadow: 0 24px 48px -24px rgba(40, 12, 2, 0.7);
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-palette='terracotta']:not([data-theme='light']) {
-    --field: #4a1a07;
-    --field-deep: #8c3210;
-    --cream-2: #f0cfb8;
-    --cream-3: #e2b596;
-  }
-}
-:root[data-palette='terracotta'][data-theme='dark'] {
-  --field: #4a1a07;
-  --field-deep: #8c3210;
-  --cream-2: #f0cfb8;
-  --cream-3: #e2b596;
+/* The home page's projects section. The observer in Base writes the attribute. */
+:root[data-theme='paper'] {
+  color-scheme: light;
+  --tone-bg: var(--paper);
+  --tone-ink: var(--paper-ink);
+  --tone-ink-2: rgba(14, 16, 10, 0.7);
+  --tone-accent: var(--paper-ink);
+  --tone-line: var(--paper-line);
+  --hi: var(--paper-ink);
+  --hair: rgba(14, 16, 10, 0.07);
 }
