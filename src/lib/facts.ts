@@ -31,9 +31,9 @@ export const edges = graph.edges;
 export const CATEGORY_ORDER: Category[] = ['ml', 'systems', 'web', 'infra'];
 
 export const CATEGORY_LABEL: Record<Category, string> = {
-  ml: 'AI and ML',
-  systems: 'Systems and data',
-  web: 'Backend',
+  ml: 'AI / ML',
+  systems: 'Systems',
+  web: 'Web / backend',
   infra: 'Infrastructure',
 };
 

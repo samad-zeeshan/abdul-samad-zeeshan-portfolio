@@ -13,7 +13,8 @@
 .js .evmap__graph {
   display: block;
 }
-.js .evmap__fallback {
+.js .evmap__fallback,
+.js .evmap__cap {
   display: none;
 }
 
@@ -35,14 +36,17 @@
   height: 100%;
   touch-action: manipulation;
 }
-.eg__now {
-  min-height: 1.4em;
+.eg__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+.eg__legend {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-4);
-}
-.eg__now-name {
-  color: var(--cream);
 }
 .eg__key {
   display: inline-flex;
@@ -50,10 +54,71 @@
   gap: var(--space-2);
 }
 .eg__dot {
-  width: 0.45rem;
-  height: 0.45rem;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
-  background: var(--cream);
+}
+.eg__dot--proj {
+  border-radius: 1px;
+  background: var(--accent);
+}
+.eg__now {
+  min-height: 1.4em;
+}
+.eg__now-name {
+  color: var(--cream);
+  margin-right: 0.4em;
+}
+
+/* Rotate: a quiet pill with hover, pressed and focus states. */
+.eg__rotate {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2rem;
+  padding: 0.2rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--cream-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    color var(--dur-press) ease,
+    border-color var(--dur-press) ease,
+    transform var(--dur-press) var(--ease-out);
+}
+.eg__rotate-icon {
+  display: inline-block;
+  line-height: 1;
+  transition: transform 450ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .eg__rotate:hover {
+    color: var(--cream);
+    border-color: var(--line-strong);
+  }
+  .eg__rotate:hover .eg__rotate-icon {
+    transform: rotate(90deg);
+  }
+}
+.eg__rotate:active {
+  transform: scale(0.96);
+}
+.eg__rotate:focus-visible {
+  outline: 2px solid var(--cream);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .eg__rotate,
+  .eg__rotate-icon {
+    transition: none;
+  }
+  .eg__rotate:hover .eg__rotate-icon,
+  .eg__rotate:active {
+    transform: none;
+  }
 }
 .evmap__cap {
   color: var(--cream-2);

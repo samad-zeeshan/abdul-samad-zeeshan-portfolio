@@ -14,20 +14,30 @@ import type { Skill, Edge, Category, GraphProject } from '../lib/facts';
 
 const CATS: Category[] = ['ml', 'systems', 'web', 'infra'];
 const CAT_LABEL: Record<Category, string> = {
-  ml: 'AI and ML',
-  systems: 'Systems and data',
-  web: 'Backend',
+  ml: 'AI / ML',
+  systems: 'Systems',
+  web: 'Web / backend',
   infra: 'Infrastructure',
 };
-// Four tints of the ink, strongest for the largest cluster, so the graph stays in one
-// colour and the accent is left for projects and the active path.
-const CAT_ALPHA: Record<Category, number> = { ml: 1, systems: 0.78, web: 0.6, infra: 0.46 };
+// The four corners in clockwise order. At rotation 0, CATS[i] pulls toward CORNERS[i],
+// and each rotation step moves every category one corner along.
+const CORNERS: Array<[number, number]> = [
+  [-1, -1],
+  [1, -1],
+  [1, 1],
+  [-1, 1],
+];
+function anchorFor(cat: Category, rot: number): [number, number] {
+  return CORNERS[(CATS.indexOf(cat) + rot) % 4];
+}
+const RING_MS = 1400;
 
 interface Palette {
   ink: string;
   ink2: string;
   accent: string;
   field: string;
+  cat: Record<Category, string>;
   display: string;
   text: string;
 }
@@ -42,6 +52,14 @@ function readPalette(): Palette {
     ink2: v('--cream-2', '#cfd2f6'),
     accent: v('--accent', '#ffd84d'),
     field: v('--field', '#0a0a0a'),
+    // Each palette picks four hues that sit on its field and stay clear of the accent,
+    // which belongs to the project squares.
+    cat: {
+      ml: v('--cat-ml', '#8fb6ff'),
+      systems: v('--cat-systems', '#ff9d8a'),
+      web: v('--cat-web', '#c7a6ff'),
+      infra: v('--cat-infra', '#6fd6e0'),
+    },
     display: v('--font-display', 'sans-serif'),
     text: v('--font-text', 'sans-serif'),
   };
@@ -80,6 +98,11 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
   const rafRef = useRef(0);
   const transformRef = useRef({ s: 1, ox: 0, oy: 0 });
   const paletteRef = useRef<Palette | null>(null);
+  const rotationRef = useRef(0);
+  // The project ring turns a quarter per rotation. from and to are angle offsets and
+  // start is when the turn began, so the loop can ease between them.
+  const ringRef = useRef({ from: 0, to: 0, start: 0 });
+  const runRef = useRef<() => void>(() => {});
 
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
@@ -149,7 +172,7 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
     const active = activeId;
     const near = active ? adjacency.get(active) : undefined;
     const lit = (id: string) => !active || id === active || (near?.has(id) ?? false);
-    const tint = (n: GNode) => (n.category ? rgba(pal.ink, CAT_ALPHA[n.category]) : pal.ink);
+    const tint = (n: GNode) => (n.category ? pal.cat[n.category] : pal.ink);
 
     for (const l of links) {
       const a = l.source as GNode;
@@ -171,10 +194,16 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
         ctx.fillStyle = pal.accent;
         ctx.fillRect(x - n.r, y - n.r, n.r * 2, n.r * 2);
       } else {
+        const on = n.id === active;
         ctx.beginPath();
-        ctx.arc(x, y, n.id === active ? n.r + 1.2 : n.r, 0, Math.PI * 2);
-        ctx.fillStyle = n.id === active ? pal.accent : tint(n);
+        ctx.arc(x, y, on ? n.r + 1.4 : n.r, 0, Math.PI * 2);
+        ctx.fillStyle = tint(n);
         ctx.fill();
+        if (on) {
+          ctx.strokeStyle = pal.ink;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
       }
     }
     ctx.globalAlpha = 1;
@@ -240,39 +269,66 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
   useEffect(() => {
     const wrap = wrapRef.current;
     const aspect = wrap ? Math.max(0.8, Math.min(2.4, wrap.clientWidth / Math.max(wrap.clientHeight, 1))) : 1.4;
+    const rx = 150 * aspect;
+    const ry = 120;
     // Projects are pinned on an ellipse that fills the box, and skills settle between
-    // the projects that prove them. Free-floating projects bunched in the middle and
-    // hid each other's names.
+    // the projects that prove them while leaning toward their category's corner.
+    // Free-floating projects bunched in the middle and hid each other's names.
     const pinned = nodes.filter((n) => n.kind === 'project');
-    pinned.forEach((n, i) => {
-      const a = -Math.PI / 2 + (i / pinned.length) * Math.PI * 2;
-      n.fx = n.x = Math.cos(a) * 150 * aspect;
-      n.fy = n.y = Math.sin(a) * 120;
-    });
+    const placeRing = (offset: number) =>
+      pinned.forEach((n, i) => {
+        const a = -Math.PI / 2 + (i / pinned.length) * Math.PI * 2 + offset;
+        n.fx = Math.cos(a) * rx;
+        n.fy = Math.sin(a) * ry;
+      });
+    placeRing(ringRef.current.to);
+    for (const n of pinned) {
+      n.x = n.fx!;
+      n.y = n.fy!;
+    }
+    const corner = (d: GNode, axis: 0 | 1) =>
+      d.category ? anchorFor(d.category, rotationRef.current)[axis] * (axis === 0 ? rx : ry) * 0.8 : 0;
+    const fx = forceX<GNode>((d) => corner(d, 0)).strength((d) => (d.kind === 'skill' ? 0.11 : 0));
+    const fy = forceY<GNode>((d) => corner(d, 1)).strength((d) => (d.kind === 'skill' ? 0.11 : 0));
     const sim = forceSimulation<GNode>(nodes)
       .force('charge', forceManyBody<GNode>().strength(-40).distanceMax(200))
-      .force('link', forceLink<GNode, GLink>(links).id((d) => d.id).distance(40).strength(0.35))
+      .force('link', forceLink<GNode, GLink>(links).id((d) => d.id).distance(40).strength(0.3))
       .force('collide', forceCollide<GNode>().radius((d) => (d.kind === 'project' ? 14 : 8)).strength(0.9))
-      .force('x', forceX<GNode>(0).strength(0.02))
-      .force('y', forceY<GNode>(0).strength(0.02))
+      .force('x', fx)
+      .force('y', fy)
       .alphaMin(0.004)
       .alphaDecay(0.024)
       .velocityDecay(0.45)
       .stop();
     simRef.current = sim;
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      // Settle off screen and paint only the final frame.
-      while (sim.alpha() > sim.alphaMin()) sim.tick();
-      drawRef.current();
-    } else {
-      const loop = () => {
+    // Starts or restarts the settle. A rotation calls this after moving the ring target
+    // and reheating, so the layout drifts round rather than jumping.
+    const run = () => {
+      cancelAnimationFrame(rafRef.current);
+      // d3 caches the corner targets until the accessor is set again.
+      fx.x((d) => corner(d, 0));
+      fy.y((d) => corner(d, 1));
+      const ring = ringRef.current;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        // Settle off screen and paint only the final frame.
+        placeRing(ring.to);
+        while (sim.alpha() > sim.alphaMin()) sim.tick();
+        drawRef.current();
+        return;
+      }
+      const loop = (now: number) => {
+        const p = ring.start ? Math.min(1, (now - ring.start) / RING_MS) : 1;
+        const eased = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+        placeRing(ring.from + (ring.to - ring.from) * eased);
         sim.tick();
         drawRef.current();
-        if (sim.alpha() > sim.alphaMin()) rafRef.current = requestAnimationFrame(loop);
+        if (p < 1 || sim.alpha() > sim.alphaMin()) rafRef.current = requestAnimationFrame(loop);
       };
       rafRef.current = requestAnimationFrame(loop);
-    }
+    };
+    runRef.current = run;
+    run();
     // Canvas text falls back to a system face until the web fonts land.
     document.fonts?.ready.then(() => drawRef.current());
     return () => {
@@ -280,6 +336,19 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
       sim.stop();
     };
   }, [nodes, links]);
+
+  const rotate = useCallback(() => {
+    const sim = simRef.current;
+    if (!sim) return;
+    rotationRef.current = (rotationRef.current + 1) % 4;
+    const ring = ringRef.current;
+    ring.from = ring.to;
+    ring.to = ring.to + Math.PI / 2;
+    ring.start = performance.now();
+    // A gentle reheat, not a restart from the middle, so each skill travels a short way.
+    sim.alpha(0.55);
+    runRef.current();
+  }, []);
 
   // The picker flips data-palette on <html>. Re-read the tokens and repaint once.
   useEffect(() => {
@@ -382,6 +451,23 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
           ))}
         </ul>
       </div>
+      <div className="eg__bar">
+        <ul className="eg__legend label" aria-label="Skill categories">
+          {CATS.map((c) => (
+            <li key={c} className="eg__key">
+              <span className="eg__dot" style={{ background: `var(--cat-${c})` }} aria-hidden="true"></span>
+              {CAT_LABEL[c]}
+            </li>
+          ))}
+          <li className="eg__key">
+            <span className="eg__dot eg__dot--proj" aria-hidden="true"></span>
+            Project
+          </li>
+        </ul>
+        <button type="button" className="eg__rotate" onClick={rotate} aria-label="Rotate the graph">
+          <span className="eg__rotate-icon" aria-hidden="true">&#8635;</span> Rotate
+        </button>
+      </div>
       <p className="eg__now label" aria-live="polite">
         {active ? (
           active.kind === 'skill' ? (
@@ -394,12 +480,7 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
             </>
           )
         ) : (
-          CATS.map((c) => (
-            <span key={c} className="eg__key">
-              <span className="eg__dot" style={{ opacity: CAT_ALPHA[c] }} aria-hidden="true"></span>
-              {CAT_LABEL[c]}
-            </span>
-          ))
+          'Skills, linked to the project that proves each one.'
         )}
       </p>
     </div>
