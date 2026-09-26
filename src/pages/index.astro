@@ -19,7 +19,7 @@ const cut = profile.role.indexOf(', ');
 if (cut < 0) throw new Error('facts.json role needs a comma before its second half');
 const roleHead = profile.role.slice(0, cut + 1);
 const roleTail = profile.role.slice(cut + 2);
-const tailText = 'including the bad ones';
+const tailText = 'what actually happened when I tested it';
 const at = profile.intro.lastIndexOf(tailText);
 if (at < 0) throw new Error(`facts.json intro must end with "${tailText}"`);
 const introHead = profile.intro.slice(0, at);

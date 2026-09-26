@@ -6,7 +6,7 @@
     "bad": "reported as not good enough"
   },
   "eyebrows": {
-    "hero": "Report / 2026 / {count} systems, bad results included",
+    "hero": "Report / 2026 / {count} systems",
     "about": "The rule",
     "projects": "Projects / 01 to {last} / my top pick first",
     "tools": "Tools / {n} / used in the {count}",
