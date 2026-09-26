@@ -102,7 +102,7 @@ const ogImage = new URL(withBase(image), Astro.site).href;
     <Smoke />
     <div class="hair" aria-hidden="true">
       <div class="wrap hair__grid">
-        {Array.from({ length: 12 }, () => <span />)}
+        {Array.from({ length: 12 }, (_, i) => <span style={`--n:${i}`} />)}
       </div>
     </div>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -204,6 +204,70 @@ const ogImage = new URL(withBase(image), Astro.site).href;
             });
           },
           { threshold: 0.15 },
+        );
+        els.forEach(function (el) { io.observe(el); });
+      })();
+    </script>
+    <script is:inline>
+      // Short labels decode: each letter flickers through random glyphs, then lands on
+      // its real character, left to right. The real text is in the HTML throughout.
+      (function () {
+        if (!matchMedia('(hover: hover) and (pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference)').matches) return;
+        var GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/';
+        function decode(el, delay) {
+          var text = el.textContent;
+          var n = text.replace(/\s/g, '').length;
+          // 25ms a letter, squeezed on long lines so every line lands inside 900ms.
+          var step = n > 1 ? Math.min(25, 650 / (n - 1)) : 0;
+          var k = 0;
+          var ends = text.split('').map(function (c) {
+            return /\s/.test(c) ? -1 : delay + 250 + step * k++;
+          });
+          // Random capitals are wider than the real letters in the text face, so an
+          // inline label is pinned and clipped to its width until it lands. Otherwise
+          // the line reflows or the glyphs run into the next words.
+          var inline = getComputedStyle(el).display === 'inline';
+          if (inline) {
+            el.style.display = 'inline-block';
+            el.style.width = el.getBoundingClientRect().width + 'px';
+            el.style.whiteSpace = 'nowrap';
+            el.style.clipPath = 'inset(-0.5em 0 -0.5em 0)';
+          }
+          var start = performance.now(), last = -1e9;
+          function frame(now) {
+            var t = now - start, done = true;
+            // New glyphs every 40ms. At 60 a second the flicker is too fast to read as letters.
+            if (now - last >= 40) {
+              last = now;
+              el.textContent = ends.map(function (end, i) {
+                if (end < 0 || t >= end) return text[i];
+                done = false;
+                return GLYPHS[(Math.random() * GLYPHS.length) | 0];
+              }).join('');
+            } else done = false;
+            if (!done) return requestAnimationFrame(frame);
+            el.textContent = text;
+            if (inline) el.removeAttribute('style');
+          }
+          requestAnimationFrame(frame);
+        }
+        // The role line starts scrambled and lands once the name has risen, about
+        // 700ms into the first visit. Later pages decode it straight away.
+        var first = document.documentElement.classList.contains('enter');
+        document.querySelectorAll('[data-decode="paint"]').forEach(function (el) {
+          decode(el, first ? 700 : 0);
+        });
+        var els = document.querySelectorAll('[data-decode]:not([data-decode="paint"])');
+        if (!('IntersectionObserver' in window)) return;
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (e) {
+              if (!e.isIntersecting) return;
+              io.unobserve(e.target);
+              decode(e.target, 0);
+            });
+          },
+          { threshold: 0.5 },
         );
         els.forEach(function (el) { io.observe(el); });
       })();

@@ -12,7 +12,7 @@ const links = copy.footer.nav.map((label, i) => ({ label, href: hrefs[i], n: pad
 
 <footer class="foot" id="contact" data-theme="accent">
   <div class="wrap">
-    <div class="foot__card">
+    <div class="foot__card" data-reveal>
       <a class="foot__email" href={`mailto:${profile.email}`} aria-label={`Email ${profile.email}`}>{profile.email}</a>
       <nav class="foot__nav" aria-label="Footer">
         <ol>
@@ -21,7 +21,7 @@ const links = copy.footer.nav.map((label, i) => ({ label, href: hrefs[i], n: pad
               <li>
                 <a href={l.href} rel={l.href.startsWith('http') ? 'noopener' : undefined} data-magnetic>
                   <span class="mag">
-                    <span class="foot__n" aria-hidden="true">{l.n}</span> {l.label}
+                    <span class="foot__n" aria-hidden="true">{l.n}</span> <span data-decode>{l.label}</span>
                   </span>
                   <span class="fill" aria-hidden="true"></span>
                 </a>
@@ -113,6 +113,24 @@ const links = copy.footer.nav.map((label, i) => ({ label, href: hrefs[i], n: pad
   @media (min-width: 60rem) {
     .foot__card {
       padding: var(--space-8) var(--space-7) var(--space-6);
+    }
+  }
+  /* The card drops in with a slight tilt on wide pointer screens. Everywhere else it
+     opts out of the section fade and is simply there. */
+  @media (hover: hover) and (pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference) {
+    :global(html.js) .foot__card {
+      transition:
+        opacity 0.8s var(--spring),
+        transform 0.8s var(--spring);
+    }
+    :global(html.js) .foot__card:not(.is-in) {
+      transform: translateY(48px) rotate(0.4deg);
+    }
+  }
+  @media not all and (hover: hover) and (pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference) {
+    :global(html.js) .foot__card:not(.is-in) {
+      opacity: 1;
+      transform: none;
     }
   }
 </style>

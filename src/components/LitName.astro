@@ -12,9 +12,10 @@ const words = text.split(' ');
 ---
 
 <span class="name" data-lit>
+  <span class="visually-hidden">{text}</span>
   {
     ['outline', 'lit'].map((layer) => (
-      <span class={`name__${layer}`} aria-hidden={layer === 'outline' ? 'true' : undefined}>
+      <span class={`name__${layer}`} aria-hidden="true">
         {rise
           ? words.map((w, i) => (
               <span class="name__mask">
@@ -28,6 +29,31 @@ const words = text.split(' ');
     ))
   }
 </span>
+
+<script is:inline>
+  // On the first visit the hero name rises letter by letter. The split happens here,
+  // before first paint, so phones and later pages keep whole words and their kerning.
+  (function () {
+    var block = document.currentScript.previousElementSibling;
+    if (!document.documentElement.classList.contains('enter')) return;
+    if (!matchMedia('(hover: hover) and (pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference)').matches) return;
+    [].forEach.call(block.querySelectorAll('.name__outline, .name__lit'), function (layer) {
+      var c = 0;
+      [].forEach.call(layer.querySelectorAll('.name__word'), function (word) {
+        var chars = word.textContent.trim().split('');
+        word.removeAttribute('data-rise');
+        word.textContent = '';
+        chars.forEach(function (ch) {
+          var s = document.createElement('span');
+          s.className = 'ch';
+          s.style.setProperty('--c', c++);
+          s.textContent = ch;
+          word.appendChild(s);
+        });
+      });
+    });
+  })();
+</script>
 
 <script>
   // Same gate as the CSS below, checked first so phones and touch never pay for it.
@@ -109,6 +135,17 @@ const words = text.split(' ');
   }
   .name__word {
     display: inline-block;
+  }
+  /* The script adds these, so they are outside this component's scoped styles. */
+  .name :global(.ch) {
+    display: inline-block;
+    animation: ch-rise var(--dur-settle) var(--spring) backwards;
+    animation-delay: calc(var(--c) * 28ms + 60ms);
+  }
+  @keyframes ch-rise {
+    from {
+      transform: translateY(110%) rotate(4deg);
+    }
   }
 
   @media (hover: hover) and (pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference) {
