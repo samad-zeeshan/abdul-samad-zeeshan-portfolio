@@ -6,7 +6,7 @@
     "bad": "reported as not good enough"
   },
   "eyebrows": {
-    "hero": "Report / 2026 / {count} systems tested to failure",
+    "hero": "Report / 2026 / {count} systems, bad results included",
     "about": "The rule",
     "projects": "Projects / 01 to {last} / my top pick first",
     "tools": "Tools / {n} / used in the {count}",
@@ -24,7 +24,7 @@
   "footer": {
     "voice": "Numbers as they came out, including the bad ones.",
     "nav": ["Projects", "Resume", "GitHub"],
-    "note": "Every number on this site is copied from the project's own write-up."
+    "note": "Every result on this site is copied from the project's own write-up. The counts above are worked out from those results."
   },
   "pill": {
     "long": "Email me",
