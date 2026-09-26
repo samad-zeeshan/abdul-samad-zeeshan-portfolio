@@ -1,0 +1,207 @@
+---
+// One line of the project index: the name in poster type, the problem, the headline
+// number, and a still from the demo that slides in on hover.
+import type { Project } from '../lib/site';
+import { hasPage, countTarget } from '../lib/site';
+import { withBase } from '../lib/paths';
+
+interface Props {
+  project: Project;
+  index: number;
+}
+const { project, index } = Astro.props;
+const d = project.data;
+const linked = hasPage(project);
+const lead = d.numbers[0];
+const Tag = linked ? 'a' : 'div';
+---
+
+<li class="row" data-settle style={`--i:${index}`}>
+  <Tag class:list={['row__hit', { 'row__hit--static': !linked }]} href={linked ? withBase(`/projects/${project.id}/`) : undefined}>
+    <span class="row__fill" aria-hidden="true"></span>
+    <h3 class="row__name" translate="no" style={`view-transition-name: name-${project.id}`}>{d.title}</h3>
+    <p class="row__problem">{d.problem}</p>
+    {
+      lead ? (
+        <p class="row__num">
+          <span class="row__value mono">
+            <span class="visually-hidden">{lead.value}</span>
+            <span aria-hidden="true" data-count={countTarget(lead.value)}>
+              {lead.value}
+            </span>
+          </span>
+          <span class="row__label">{lead.label}</span>
+        </p>
+      ) : (
+        <p class="row__num">
+          <span class="row__value mono">In progress</span>
+          <span class="row__label">Built by hand. No demo or numbers yet.</span>
+        </p>
+      )
+    }
+    {
+      d.poster && (
+        <img
+          class="row__poster"
+          src={withBase(`/posters/${d.poster}`)}
+          alt=""
+          width="640"
+          height={d.gif && d.gif.height / d.gif.width < 0.6 ? 360 : 400}
+          loading="lazy"
+          decoding="async"
+        />
+      )
+    }
+  </Tag>
+</li>
+
+<style>
+  .row {
+    border-top: 1px solid var(--line);
+  }
+  .row:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+  .row__hit {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding-block: var(--space-5) var(--space-6);
+    padding-inline: var(--space-2);
+    margin-inline: calc(var(--space-2) * -1);
+    text-decoration: none;
+    color: var(--cream);
+    transition: color var(--dur-hover) var(--ease-out);
+  }
+  /* The cream fill wipes in from the left on hover. A scaleX transition stays on the
+     compositor, and unlike a keyframe it reverses mid-way when the pointer moves on. */
+  .row__fill {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--cream);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-hover) var(--ease-out);
+  }
+  .row__name {
+    font-size: var(--step-index);
+    font-weight: 800;
+    line-height: 0.84;
+    transform-origin: left center;
+    transition: transform var(--dur-press) var(--ease-out);
+    width: fit-content;
+  }
+  .row__problem {
+    max-width: 40ch;
+    font-size: var(--step-1);
+    line-height: 1.4;
+  }
+  .row__num {
+    display: grid;
+    gap: var(--space-1);
+    align-content: start;
+    transition: opacity var(--dur-hover) var(--ease-out);
+  }
+  .row__value {
+    font-size: var(--step-2);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  .row__label {
+    font-size: var(--step--1);
+    line-height: 1.45;
+    color: var(--cream-2);
+    max-width: 34ch;
+    transition: color var(--dur-hover) var(--ease-out);
+  }
+  .row__poster {
+    display: none;
+  }
+
+  @media (min-width: 60rem) {
+    .row__hit {
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.8fr);
+      align-items: end;
+      gap: var(--space-6);
+      padding-block: var(--space-5);
+    }
+    .row__problem {
+      padding-bottom: 0.35em;
+    }
+    .row__num {
+      padding-bottom: 0.35em;
+    }
+    .row__poster {
+      display: block;
+      position: absolute;
+      right: var(--space-4);
+      top: 50%;
+      z-index: var(--z-preview);
+      width: min(24rem, 26vw);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(-50%) translateX(24px) rotate(1.5deg) scale(0.96);
+      transition:
+        opacity var(--dur-hover) var(--ease-out),
+        transform var(--dur-hover) var(--ease-out);
+      pointer-events: none;
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .row__hit:not(.row__hit--static):hover,
+    .row__hit:not(.row__hit--static):focus-visible {
+      color: var(--field);
+    }
+    .row__hit:not(.row__hit--static):hover .row__fill,
+    .row__hit:not(.row__hit--static):focus-visible .row__fill {
+      transform: scaleX(1);
+    }
+    .row__hit:not(.row__hit--static):hover .row__label,
+    .row__hit:not(.row__hit--static):focus-visible .row__label {
+      color: var(--field);
+    }
+  }
+  /* The still replaces the number while previewed, so the two never overlap. */
+  @media (hover: hover) and (pointer: fine) and (min-width: 60rem) {
+    .row__hit:hover .row__poster,
+    .row__hit:focus-visible .row__poster {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0) rotate(-1.5deg) scale(1);
+    }
+    .row__hit:hover .row__num:has(+ .row__poster),
+    .row__hit:focus-visible .row__num:has(+ .row__poster) {
+      opacity: 0;
+    }
+  }
+  .row__hit:not(.row__hit--static):active .row__name {
+    transform: scale(0.985);
+  }
+  .row__hit:focus-visible {
+    outline: 2px solid var(--cream);
+    outline-offset: 2px;
+  }
+  .row__hit--static {
+    color: var(--cream-2);
+  }
+  .row__hit--static .row__name {
+    color: var(--cream-3);
+  }
+
+  /* Dark mode: the field is night blue, so the hover fill uses ultramarine instead. */
+  @media (prefers-color-scheme: dark) {
+    .row__fill {
+      background: var(--field-deep);
+    }
+    .row__hit:not(.row__hit--static):hover,
+    .row__hit:not(.row__hit--static):focus-visible,
+    .row__hit:not(.row__hit--static):hover .row__label,
+    .row__hit:not(.row__hit--static):focus-visible .row__label {
+      color: var(--cream);
+    }
+  }
+</style>
