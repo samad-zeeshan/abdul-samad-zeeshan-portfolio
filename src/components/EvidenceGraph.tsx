@@ -19,18 +19,18 @@ const CAT_LABEL: Record<Category, string> = {
   web: 'Web / backend',
   infra: 'Infrastructure',
 };
-// The four corners in clockwise order. At rotation 0, CATS[i] pulls toward CORNERS[i],
-// and each rotation step moves every category one corner along.
+// The four corners in clockwise order, in simulation space, as in the first version.
+// At rotation 0, CATS[i] pulls toward CORNERS[i], and each rotation step moves every
+// category one corner along.
 const CORNERS: Array<[number, number]> = [
-  [-1, -1],
-  [1, -1],
-  [1, 1],
-  [-1, 1],
+  [-155, -120],
+  [155, -120],
+  [155, 120],
+  [-155, 120],
 ];
 function anchorFor(cat: Category, rot: number): [number, number] {
   return CORNERS[(CATS.indexOf(cat) + rot) % 4];
 }
-const RING_MS = 1400;
 
 interface Palette {
   ink: string;
@@ -82,8 +82,9 @@ interface GNode {
   y: number;
   vx?: number;
   vy?: number;
-  fx?: number | null;
-  fy?: number | null;
+  // Collision radius from the first version's node sizes, so the settle keeps its
+  // spacing even though the dots are drawn smaller now.
+  cr: number;
 }
 interface GLink {
   source: GNode | string;
@@ -98,10 +99,9 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
   const rafRef = useRef(0);
   const transformRef = useRef({ s: 1, ox: 0, oy: 0 });
   const paletteRef = useRef<Palette | null>(null);
-  const rotationRef = useRef(0);
-  // The project ring turns a quarter per rotation. from and to are angle offsets and
-  // start is when the turn began, so the loop can ease between them.
-  const ringRef = useRef({ from: 0, to: 0, start: 0 });
+  // Starts at 3, the rotation the first version opened on because it keeps the
+  // project labels apart.
+  const rotationRef = useRef(3);
   const runRef = useRef<() => void>(() => {});
 
   const [hoverId, setHoverId] = useState<string | null>(null);
@@ -111,11 +111,22 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
 
   const { nodes, links, adjacency, byId } = useMemo(() => {
     const used = new Set(edges.map((e) => e.project));
+    const degree = new Map<string, number>();
+    for (const e of edges) degree.set(e.project, (degree.get(e.project) ?? 0) + 1);
     const nodes: GNode[] = [
       ...projects
         .filter((p) => used.has(p.id))
-        .map((p) => ({ id: p.id, kind: 'project' as const, label: p.label, href: p.href, r: 4.5, x: 0, y: 0 })),
-      ...skills.map((s) => ({ id: s.id, kind: 'skill' as const, label: s.label, category: s.category, r: 2.6, x: 0, y: 0 })),
+        .map((p) => ({
+          id: p.id,
+          kind: 'project' as const,
+          label: p.label,
+          href: p.href,
+          r: 4.5,
+          cr: 8 + Math.sqrt(degree.get(p.id) ?? 1) * 1.3 + 13,
+          x: 0,
+          y: 0,
+        })),
+      ...skills.map((s) => ({ id: s.id, kind: 'skill' as const, label: s.label, category: s.category, r: 2.6, cr: 12, x: 0, y: 0 })),
     ];
     const byId = new Map(nodes.map((n) => [n.id, n]));
     const kept = edges.filter((e) => byId.has(e.skill) && byId.has(e.project));
@@ -151,9 +162,9 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, cw, ch);
 
-    // Fit the settled layout into the box. Extra room on the right is for project labels.
-    const padX = 18;
-    const padY = 26;
+    // Fit the layout into the box every frame, as the first version did, so the bloom
+    // reads as the graph opening out from one point. The 46 px pad leaves room for names.
+    const pad = 46;
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     for (const n of nodes) {
       minX = Math.min(minX, n.x);
@@ -161,9 +172,8 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
       minY = Math.min(minY, n.y);
       maxY = Math.max(maxY, n.y);
     }
-    const labelRoom = 56;
-    const s = Math.min((cw - 2 * padX - labelRoom) / Math.max(maxX - minX, 1), (ch - 2 * padY) / Math.max(maxY - minY, 1), 2.2);
-    const ox = padX + (cw - 2 * padX - labelRoom - (maxX - minX) * s) / 2 - minX * s;
+    const s = Math.min((cw - 2 * pad) / Math.max(maxX - minX, 1), (ch - 2 * pad) / Math.max(maxY - minY, 1), 2.4);
+    const ox = cw / 2 - ((minX + maxX) / 2) * s;
     const oy = ch / 2 - ((minY + maxY) / 2) * s;
     transformRef.current = { s, ox, oy };
     const sx = (n: GNode) => n.x * s + ox;
@@ -266,64 +276,43 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
   const drawRef = useRef(draw);
   drawRef.current = draw;
 
+  // Forces, decay and timing are the first version's. Every node starts at the centre
+  // and blooms out, skills pulled to their category's corner, projects floating
+  // between the skills they use.
   useEffect(() => {
-    const wrap = wrapRef.current;
-    const aspect = wrap ? Math.max(0.8, Math.min(2.4, wrap.clientWidth / Math.max(wrap.clientHeight, 1))) : 1.4;
-    const rx = 150 * aspect;
-    const ry = 120;
-    // Projects are pinned on an ellipse that fills the box, and skills settle between
-    // the projects that prove them while leaning toward their category's corner.
-    // Free-floating projects bunched in the middle and hid each other's names.
-    const pinned = nodes.filter((n) => n.kind === 'project');
-    const placeRing = (offset: number) =>
-      pinned.forEach((n, i) => {
-        const a = -Math.PI / 2 + (i / pinned.length) * Math.PI * 2 + offset;
-        n.fx = Math.cos(a) * rx;
-        n.fy = Math.sin(a) * ry;
-      });
-    placeRing(ringRef.current.to);
-    for (const n of pinned) {
-      n.x = n.fx!;
-      n.y = n.fy!;
-    }
-    const corner = (d: GNode, axis: 0 | 1) =>
-      d.category ? anchorFor(d.category, rotationRef.current)[axis] * (axis === 0 ? rx : ry) * 0.8 : 0;
-    const fx = forceX<GNode>((d) => corner(d, 0)).strength((d) => (d.kind === 'skill' ? 0.11 : 0));
-    const fy = forceY<GNode>((d) => corner(d, 1)).strength((d) => (d.kind === 'skill' ? 0.11 : 0));
+    const target = (d: GNode, axis: 0 | 1) =>
+      d.kind === 'skill' && d.category ? anchorFor(d.category, rotationRef.current)[axis] : 0;
+    const fx = forceX<GNode>((d) => target(d, 0)).strength((d) => (d.kind === 'skill' ? 0.17 : 0.02));
+    const fy = forceY<GNode>((d) => target(d, 1)).strength((d) => (d.kind === 'skill' ? 0.17 : 0.02));
     const sim = forceSimulation<GNode>(nodes)
-      .force('charge', forceManyBody<GNode>().strength(-40).distanceMax(200))
-      .force('link', forceLink<GNode, GLink>(links).id((d) => d.id).distance(40).strength(0.3))
-      .force('collide', forceCollide<GNode>().radius((d) => (d.kind === 'project' ? 14 : 8)).strength(0.9))
+      .force('charge', forceManyBody<GNode>().strength(-135).distanceMax(340))
+      .force('link', forceLink<GNode, GLink>(links).id((d) => d.id).distance(46).strength(0.22))
+      .force('collide', forceCollide<GNode>().radius((d) => d.cr).strength(0.92))
       .force('x', fx)
       .force('y', fy)
-      .alphaMin(0.004)
-      .alphaDecay(0.024)
+      .alpha(1)
+      .alphaMin(0.0035)
+      .alphaDecay(0.021)
       .velocityDecay(0.45)
       .stop();
     simRef.current = sim;
 
-    // Starts or restarts the settle. A rotation calls this after moving the ring target
-    // and reheating, so the layout drifts round rather than jumping.
     const run = () => {
       cancelAnimationFrame(rafRef.current);
-      // d3 caches the corner targets until the accessor is set again.
-      fx.x((d) => corner(d, 0));
-      fy.y((d) => corner(d, 1));
-      const ring = ringRef.current;
+      // d3 caches the corner targets until the accessor is set again. The first version
+      // never re-set it, so its clusters came back to the same corners after a rotate.
+      fx.x((d) => target(d, 0));
+      fy.y((d) => target(d, 1));
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         // Settle off screen and paint only the final frame.
-        placeRing(ring.to);
-        while (sim.alpha() > sim.alphaMin()) sim.tick();
+        for (let i = 0; i < 800 && sim.alpha() > sim.alphaMin(); i++) sim.tick();
         drawRef.current();
         return;
       }
-      const loop = (now: number) => {
-        const p = ring.start ? Math.min(1, (now - ring.start) / RING_MS) : 1;
-        const eased = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-        placeRing(ring.from + (ring.to - ring.from) * eased);
+      const loop = () => {
         sim.tick();
         drawRef.current();
-        if (p < 1 || sim.alpha() > sim.alphaMin()) rafRef.current = requestAnimationFrame(loop);
+        if (sim.alpha() > sim.alphaMin()) rafRef.current = requestAnimationFrame(loop);
       };
       rafRef.current = requestAnimationFrame(loop);
     };
@@ -337,18 +326,24 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
     };
   }, [nodes, links]);
 
+  // Rotate, as in the first version: clear any highlight, send every node back to the
+  // centre, reheat to full and let the whole graph bloom out again into the new corners.
   const rotate = useCallback(() => {
     const sim = simRef.current;
     if (!sim) return;
     rotationRef.current = (rotationRef.current + 1) % 4;
-    const ring = ringRef.current;
-    ring.from = ring.to;
-    ring.to = ring.to + Math.PI / 2;
-    ring.start = performance.now();
-    // A gentle reheat, not a restart from the middle, so each skill travels a short way.
-    sim.alpha(0.55);
+    setPickedId(null);
+    setHoverId(null);
+    setFocusId(null);
+    for (const n of nodes) {
+      n.x = 0;
+      n.y = 0;
+      n.vx = 0;
+      n.vy = 0;
+    }
+    sim.alpha(1);
     runRef.current();
-  }, []);
+  }, [nodes]);
 
   // The picker flips data-palette on <html>. Re-read the tokens and repaint once.
   useEffect(() => {
