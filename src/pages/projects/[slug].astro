@@ -74,8 +74,11 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
         <div class="p__actions">
           {
             d.demo ? (
-              <a class="btn btn--solid" href={d.demo} rel="noopener">
-                Open the demo <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+              <a class="btn btn--solid" href={d.demo} rel="noopener" data-magnetic>
+                <span class="mag">
+                  Open the demo <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+                </span>
+                <span class="fill" aria-hidden="true"></span>
               </a>
             ) : (
               <span class="btn" aria-disabled="true">
@@ -85,8 +88,11 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
           }
           {
             d.repo && (
-              <a class="btn" href={d.repo} rel="noopener">
-                Repository <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+              <a class="btn" href={d.repo} rel="noopener" data-magnetic>
+                <span class="mag">
+                  Repository <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+                </span>
+                <span class="fill" aria-hidden="true"></span>
               </a>
             )
           }
@@ -191,15 +197,19 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
             </div>
             {
               d.demo && (
-                <a class="btn btn--solid p__demo-open" href={d.demo} rel="noopener">
-                  Open the demo <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+                <a class="btn btn--solid p__demo-open" href={d.demo} rel="noopener" data-magnetic>
+                  <span class="mag">
+                    Open the demo <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+                  </span>
+                  <span class="fill" aria-hidden="true"></span>
                 </a>
               )
             }
             <div class="p__figfoot">
               {d.demoNote && <figcaption class="p__caption">{d.demoNote}</figcaption>}
-              <button class="btn p__pause" type="button" aria-pressed="false" data-pause hidden>
-                Pause the recording
+              <button class="btn p__pause" type="button" aria-pressed="false" data-pause data-magnetic hidden>
+                <span class="mag">Pause the recording</span>
+                <span class="fill" aria-hidden="true"></span>
               </button>
             </div>
           </figure>
@@ -236,6 +246,7 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
             hasPage(p) ? (
               <li>
                 <a
+                  class="dot"
                   href={withBase(`/projects/${p.id}/`)}
                   aria-current={p.id === entry.id ? 'page' : undefined}
                 >

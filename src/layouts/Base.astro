@@ -102,17 +102,50 @@ const ogImage = new URL(withBase(image), Astro.site).href;
     </div>
     <a class="skip-link" href="#main">Skip to content</a>
     <Header current={current} />
-    <a class="pill" href={`mailto:${profile.email}`}>
-      <svg class="pill__icon" viewBox="0 0 16 12" width="16" height="12" aria-hidden="true">
-        <path d="M1 1h14v10H1zM1 1l7 5.5L15 1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
-      </svg>
-      <span class="pill__long">{copy.pill.long}</span>
-      <span class="pill__short">{copy.pill.short}</span>
+    <a class="pill" href={`mailto:${profile.email}`} data-magnetic>
+      <span class="mag">
+        <svg class="pill__icon" viewBox="0 0 16 12" width="16" height="12" aria-hidden="true">
+          <path d="M1 1h14v10H1zM1 1l7 5.5L15 1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+        </svg>
+        <span class="pill__long">{copy.pill.long}</span>
+        <span class="pill__short">{copy.pill.short}</span>
+      </span>
+      <span class="fill" aria-hidden="true"></span>
     </a>
     <main id="main">
       <slot />
     </main>
     <Footer />
+    <script is:inline>
+      // Magnetic pills lean toward the pointer. Strength is 0.4 because the email pill
+      // sits in a corner and a full-strength pull drags it off the screen.
+      (function () {
+        if (!matchMedia('(pointer: fine)').matches) return;
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        document.querySelectorAll('[data-magnetic]').forEach(function (el) {
+          var inner = el.firstElementChild;
+          var tx = 0, ty = 0;
+          el.addEventListener('mousemove', function (e) {
+            // The rect already includes the pull, so take it back out to find the
+            // resting centre. Otherwise the pull feeds on itself and comes out weaker.
+            var r = el.getBoundingClientRect();
+            var dx = e.clientX - (r.left - tx + r.width / 2);
+            var dy = e.clientY - (r.top - ty + r.height / 2);
+            tx = dx * 0.4;
+            ty = dy * 0.4;
+            el.classList.add('is-live');
+            el.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
+            if (inner) inner.style.transform = 'translate(' + dx * 0.2 + 'px,' + dy * 0.2 + 'px)';
+          });
+          el.addEventListener('mouseleave', function () {
+            tx = ty = 0;
+            el.classList.remove('is-live');
+            el.style.transform = '';
+            if (inner) inner.style.transform = '';
+          });
+        });
+      })();
+    </script>
     <script is:inline>
       // Headline numbers count up once, alongside the entrance. The final value is in
       // the HTML, so screen readers and no-JS visitors always get the real number.

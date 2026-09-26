@@ -11,8 +11,11 @@ import { withBase } from '../lib/paths';
     <Eyebrow text={copy.eyebrows.lost} />
     <h1 class="lost__title">Not here</h1>
     <p class="lost__msg">This address has no page. The projects are all on the home page.</p>
-    <a class="btn btn--solid" href={withBase('/#work')}>
-      See the projects <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+    <a class="btn btn--solid" href={withBase('/#work')} data-magnetic>
+      <span class="mag">
+        See the projects <span class="btn__arrow" aria-hidden="true">&#8599;</span>
+      </span>
+      <span class="fill" aria-hidden="true"></span>
     </a>
   </section>
 </Base>
