@@ -178,6 +178,7 @@ for (const [k, t] of Object.entries(copy.stats)) plain(`stat label ${k}`, t, 6);
 plain('footer note', copy.footer.note, 25);
 copy.footer.nav.forEach((t, i) => plain(`footer nav ${i + 1}`, t, 4));
 Object.entries(copy.pill).forEach(([k, t]) => plain(`pill ${k}`, t, 4));
+plain('follower disc', copy.follower.disc, 3);
 
 // The hero rail, counted the same way src/lib/site.ts counts it.
 const shippedEntries = entries.filter((e) => e.data && (e.data.status ?? 'shipped') === 'shipped');

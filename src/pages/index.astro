@@ -7,6 +7,7 @@ import IndexRow from '../components/IndexRow.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import StatRail from '../components/StatRail.astro';
 import EvidenceMap from '../components/EvidenceMap.astro';
+import Follower from '../components/Follower.astro';
 import { profile, copy, getProjects, hasPage, siteStats, inWords, pad2, fill } from '../lib/site';
 
 const projects = await getProjects();
@@ -68,11 +69,12 @@ const introEnd = profile.intro.slice(at + tailText.length);
   <section class="work" id="work" data-theme="paper" aria-labelledby="work-h">
     <div class="wrap">
       <Eyebrow as="h2" id="work-h" class="work__cap" text={fill(copy.eyebrows.projects, { last: pad2(projects.length) })} />
-      <ol class="work__list">
+      <ol class="work__list" data-follow-scope>
         {projects.map((p, i) => <IndexRow project={p} index={i} />)}
       </ol>
     </div>
   </section>
+  <Follower projects={shipped} />
 
   <section class="tools wrap" data-theme="field" aria-labelledby="tools-h">
     <Eyebrow as="h2" id="tools-h" class="tools__cap" text={fill(copy.eyebrows.tools, { n: profile.skills.length, count })} />

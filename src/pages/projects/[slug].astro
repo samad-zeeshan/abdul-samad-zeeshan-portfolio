@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import Base from '../../layouts/Base.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import ProvesTable from '../../components/ProvesTable.astro';
+import Follower from '../../components/Follower.astro';
 import { getProjects, hasPage, countTarget, copy, fill, pad2, type Project } from '../../lib/site';
 import { provesFor } from '../../lib/facts';
 import { withBase } from '../../lib/paths';
@@ -225,7 +226,7 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
     }
 
     <nav class="p__nav wrap" aria-label="Projects" data-reveal>
-      <a class="p__next" href={withBase(`/projects/${next.id}/`)}>
+      <a class="p__next" href={withBase(`/projects/${next.id}/`)} data-follow-scope data-follow={next.id}>
         <Eyebrow as="span" text={fill(copy.eyebrows.next, { index: place(next), total })} />
         <span class="p__next-name" translate="no">{next.data.title}</span>
       </a>
@@ -248,6 +249,7 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
         }
       </ol>
     </nav>
+    <Follower discOnly />
   </article>
 </Base>
 

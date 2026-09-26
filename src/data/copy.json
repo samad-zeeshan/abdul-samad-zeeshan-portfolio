@@ -25,6 +25,9 @@
     "nav": ["Projects", "Resume", "GitHub"],
     "note": "Every result on this site is copied from the project's own write-up. The counts above are worked out from those results."
   },
+  "follower": {
+    "disc": "Open"
+  },
   "pill": {
     "long": "Email me",
     "short": "Email"

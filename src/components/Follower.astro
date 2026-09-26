@@ -1,0 +1,193 @@
+---
+// A poster frame and an "Open" disc that trail the pointer over a list of project links.
+//
+// Links opt in with data-follow="<project id>" inside a [data-follow-scope] element.
+import type { Project } from '../lib/site';
+import { copy } from '../lib/site';
+import { withBase } from '../lib/paths';
+
+interface Props {
+  projects?: Project[];
+  discOnly?: boolean;
+}
+const { projects = [], discOnly = false } = Astro.props;
+const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
+---
+
+<div class:list={['follow', { 'follow--big': discOnly }]} aria-hidden="true">
+  {
+    !discOnly && (
+      <div class="follow__frame">
+        <div class="follow__stack" style={`--n:${posters.length}`}>
+          {posters.map((p) => (
+            <img
+              class="follow__img"
+              data-id={p.id}
+              src={withBase(`/posters/${p.data.poster}`)}
+              alt=""
+              width="640"
+              height="480"
+              loading="lazy"
+              decoding="async"
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+  <div class="follow__disc"><span>{copy.follower.disc}</span></div>
+</div>
+
+<script is:inline>
+  (function () {
+    if (!matchMedia('(pointer: fine) and (min-width: 60rem)').matches) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var root = document.currentScript.previousElementSibling;
+    var frame = root.querySelector('.follow__frame');
+    var stack = root.querySelector('.follow__stack');
+    var disc = root.querySelector('.follow__disc');
+    var parts = frame ? [frame, disc] : [disc];
+    var ids = [].map.call(root.querySelectorAll('.follow__img'), function (img) {
+      return img.dataset.id;
+    });
+    var scopes = document.querySelectorAll('[data-follow-scope]');
+    if (!scopes.length) return;
+
+    // Frame lags more than the disc (1/12 against 1/7 per frame), which is what makes
+    // the two read as separate objects instead of one sticker.
+    var px = 0, py = 0;
+    var f = { x: 0, y: 0 }, d = { x: 0, y: 0 };
+    var raf = 0, active = false, current = -1;
+
+    function place(el, p) {
+      el.style.transform = 'translate3d(' + p.x + 'px,' + p.y + 'px,0) translate(-50%,-50%)';
+    }
+    function tick() {
+      f.x += (px - f.x) / 12;
+      f.y += (py - f.y) / 12;
+      d.x += (px - d.x) / 7;
+      d.y += (py - d.y) / 7;
+      if (frame) place(frame, f);
+      place(disc, d);
+      raf = requestAnimationFrame(tick);
+    }
+    function on(i) {
+      if (i !== current && stack && i >= 0) {
+        stack.style.setProperty('--i', i);
+        current = i;
+      }
+      if (active) return;
+      // Coming back from rest, start under the pointer so nothing flies in from a corner.
+      if (!raf) {
+        f.x = d.x = px;
+        f.y = d.y = py;
+        raf = requestAnimationFrame(tick);
+      }
+      active = true;
+      parts.forEach(function (el) { el.classList.add('active'); });
+    }
+    function off() {
+      if (!active) return;
+      active = false;
+      parts.forEach(function (el) { el.classList.remove('active', 'pressed'); });
+    }
+
+    addEventListener('mousemove', function (e) { px = e.clientX; py = e.clientY; }, { passive: true });
+    // The loop keeps running through the shrink and stops once the disc reaches zero.
+    disc.addEventListener('transitionend', function (e) {
+      if (e.propertyName === 'width' && !active) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
+    });
+    [].forEach.call(scopes, function (scope) {
+      scope.addEventListener('mouseover', function (e) {
+        var link = e.target.closest('[data-follow]');
+        if (!link || !scope.contains(link)) return off();
+        on(ids.indexOf(link.dataset.follow));
+      });
+      scope.addEventListener('mouseleave', off);
+      scope.addEventListener('mousedown', function (e) {
+        if (active && e.target.closest('[data-follow]')) disc.classList.add('pressed');
+      });
+    });
+    addEventListener('mouseup', function () { disc.classList.remove('pressed'); });
+  })();
+</script>
+
+<style>
+  .follow {
+    display: none;
+  }
+  @media (pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference) {
+    .follow {
+      display: contents;
+    }
+  }
+  .follow__frame,
+  .follow__disc {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--z-preview);
+    pointer-events: none;
+    overflow: hidden;
+    transform: translate(-50%, -50%);
+    will-change: transform;
+  }
+  /* Grow with a slight overshoot, shrink with a slow start, as on the site this copies. */
+  .follow__frame {
+    width: 0;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius);
+    background: var(--field-deep);
+    transition: width 0.4s cubic-bezier(0.36, 0, 0.66, 0);
+  }
+  .follow__frame.active {
+    width: clamp(10rem, 27.5vw, 25rem);
+    transition-timing-function: cubic-bezier(0.34, 1, 0.64, 1);
+  }
+  .follow__stack {
+    height: calc(var(--n) * 100%);
+    display: flex;
+    flex-direction: column;
+    transform: translateY(calc(var(--i, 0) * -100% / var(--n)));
+    transition: transform 0.6s var(--ease-out);
+  }
+  .follow__img {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  .follow__disc {
+    --size: clamp(3.75rem, 5.5vw, 5rem);
+    width: 0;
+    height: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--field);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition:
+      width 0.4s cubic-bezier(0.36, 0, 0.66, 0),
+      height 0.4s cubic-bezier(0.36, 0, 0.66, 0),
+      scale 0.3s var(--ease-out);
+  }
+  .follow--big .follow__disc {
+    --size: calc(clamp(3.75rem, 5.5vw, 5rem) * 1.66);
+  }
+  .follow__disc.active {
+    width: var(--size);
+    height: var(--size);
+    transition-timing-function: cubic-bezier(0.34, 1, 0.64, 1), cubic-bezier(0.34, 1, 0.64, 1), var(--ease-out);
+  }
+  .follow__disc.pressed {
+    scale: 1.4;
+  }
+</style>
