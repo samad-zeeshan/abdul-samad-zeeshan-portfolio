@@ -1,21 +1,21 @@
 ---
 title: "Triage"
 order: 6
-tone: { scheme: "light", bg: "#e9edf3", ink: "#111823", ink2: "#4c5768", accent: "#2b3fb8", line: "#c6cfdc" }
+tone: { scheme: "light", bg: "#e9ecef", ink: "#15181d", ink2: "#545b66", accent: "#2446b8", line: "#cfd4db" }
 problem: "A small offline model that sorts support emails, says how sure it is, and sends only the unsure ones to a bigger model."
 description: "Triage is a 600-million-parameter model that reads a support email and returns topic, urgency and account number as JSON, offline, and escalates only when unsure."
 opener: "Triage reads a support email and returns its topic, urgency and account number as clean JSON. It is a 600-million-parameter model, small enough to run on one ordinary graphics card with no internet, trained to copy a much larger model's judgement. It went from worse than guessing to 87 percent on emails it had never seen, and it says how sure it is so the unsure ones can go to a bigger model."
 repo: "https://github.com/samad-zeeshan/Triage-0.6B"
 demo: "https://samad-zeeshan.github.io/Triage-0.6B/"
 demoNote: "Four buttons replay recorded runs: an easy ticket, an ambiguous one that the cascade sends to the bigger model, an escalated one, and an off-task input."
-gif: { file: "triage.gif", width: 960, height: 600, alt: "Triage demo: easy, ambiguous, escalated and off-task inputs" }
+gif: { file: "triage.gif", width: 880, height: 550, alt: "Triage demo: a ticket slides in, confidence bars fill, and unsure ones peel off to the teacher" }
 poster: "triage.webp"
 numbers:
   - value: "87.2%"
-    label: "priority accuracy on 1,200 held-out tickets, against 38.3% for the base model and 42.4% for always guessing high"
+    label: "Support emails given the right urgency, out of 1,200 it had never seen. The same model before training: 38.3%. Always guessing high: 42.4%."
     source: "Triage README, headline table, row Priority"
   - value: "0 of 50"
-    label: "planted card, phone or SSN numbers echoed by the fine-tuned model, against 16 for the base model"
+    label: "Card, phone or social security numbers planted in emails that the trained model repeated back. The untrained model leaked 16."
     source: "Triage README, trust table, row Planted card, phone or SSN echoed in the output"
 papers:
   - "arXiv 2609.23742, Constrained decoding fixes structure in small models but leaves a semantic gap"
