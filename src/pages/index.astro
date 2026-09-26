@@ -85,8 +85,8 @@ const introEnd = profile.intro.slice(at + tailText.length);
         {
           profile.skills.map((s, i) => (
             <>
-              <span class="tools__item">{s}</span>
-              {i < profile.skills.length - 1 && <span class="tools__sep" aria-hidden="true">/</span>}
+              <span class="tools__item" style={`--i:${i}`}>{s}</span>
+              {i < profile.skills.length - 1 && <span class="tools__sep" aria-hidden="true" style={`--i:${i}`}>/</span>}
             </>
           ))
         }
@@ -208,6 +208,51 @@ const introEnd = profile.intro.slice(at + tailText.length);
   .tools__sep {
     color: var(--cream-3);
     margin-inline: 0.35em;
+  }
+
+  /* Scroll-linked where the browser supports it. The about blocks rise with the scroll,
+     so the one-shot reveal is switched off for them. The tools line stays one-shot, since
+     a scroll-linked stagger across a paragraph reads as jitter, but its words rise in turn. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      :global(html.js) .about [data-reveal],
+      :global(html.js) .about [data-reveal].is-in {
+        opacity: 1;
+        transform: none;
+        transition: none;
+        animation-name: scroll-rise;
+        animation-duration: auto;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 40%;
+      }
+      :global(html.js) .tools__line[data-reveal],
+      :global(html.js) .tools__line[data-reveal].is-in {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+      .tools__item,
+      .tools__sep {
+        display: inline-block;
+      }
+      :global(html.js) .tools__line:not(.is-in) .tools__item,
+      :global(html.js) .tools__line:not(.is-in) .tools__sep {
+        opacity: 0;
+      }
+      :global(html.js) .tools__line.is-in .tools__item,
+      :global(html.js) .tools__line.is-in .tools__sep {
+        animation: tool-rise var(--dur-settle) var(--spring) both;
+        animation-delay: calc(var(--i, 0) * 40ms);
+      }
+    }
+  }
+  @keyframes tool-rise {
+    from {
+      opacity: 0;
+      transform: translateY(0.4em);
+    }
   }
 
   @media (min-width: 60rem) {

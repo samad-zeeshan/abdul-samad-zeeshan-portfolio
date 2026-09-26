@@ -448,6 +448,20 @@ code {
     }
   }
 }
+/* Shared by the scroll-linked rows and hairlines on the home page. They animate the
+   translate property, so hover nudges that use transform keep working on top. No end
+   frame, so each lands on its own resting opacity, like the dimmer row number. */
+@keyframes scroll-rise {
+  from {
+    translate: 0 24px;
+    opacity: 0;
+  }
+}
+@keyframes line-draw {
+  from {
+    transform: scaleX(0);
+  }
+}
 @keyframes drift {
   from {
     transform: translateY(0);

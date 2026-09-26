@@ -186,6 +186,49 @@ const Tag = linked ? 'a' : 'div';
       clip-path: inset(0 100% 0 0);
     }
   }
+  /* Where scroll timelines exist, the row settles as it enters and unwinds if you scroll
+     back. The name wipe above only ran off screen here, so this replaces it. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .row {
+        position: relative;
+        view-timeline: --row block;
+        border-top: 0;
+      }
+      .row:first-child {
+        border-top: 1px solid var(--tone-line);
+      }
+      .row:last-child {
+        border-bottom: 0;
+      }
+      .row::after {
+        content: '';
+        position: absolute;
+        inset: auto 0 0;
+        height: 1px;
+        background: var(--tone-line);
+        transform-origin: left;
+        animation-name: line-draw;
+        animation-duration: auto;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --row;
+        animation-range: entry 10% entry 60%;
+      }
+      /* html.js lifts this to the weight of the wipe rule so it wins on the first visit. */
+      :global(html.js) .row__index,
+      :global(html.js) .row__name,
+      :global(html.js) .row__problem {
+        animation-name: scroll-rise;
+        animation-duration: auto;
+        animation-delay: 0s;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --row;
+        animation-range: entry 0% entry 40%;
+      }
+    }
+  }
   .row__hit:focus-visible {
     outline: 2px solid var(--tone-ink);
     outline-offset: 2px;

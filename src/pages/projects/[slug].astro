@@ -8,7 +8,7 @@ import Eyebrow from '../../components/Eyebrow.astro';
 import ProvesTable from '../../components/ProvesTable.astro';
 import Follower from '../../components/Follower.astro';
 import LitName from '../../components/LitName.astro';
-import { getProjects, hasPage, countTarget, copy, fill, pad2, type Project } from '../../lib/site';
+import { getProjects, hasPage, copy, fill, pad2, type Project } from '../../lib/site';
 import { provesFor } from '../../lib/facts';
 import { withBase } from '../../lib/paths';
 
@@ -119,7 +119,7 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
                 <dd class="p__num-figure">
                   <span class="p__num-value mono" style={`--len:${n.value.length}`}>
                     <span class="visually-hidden">{n.value}</span>
-                    <span aria-hidden="true" data-count={countTarget(n.value)}>
+                    <span aria-hidden="true" data-count>
                       {n.value}
                     </span>
                   </span>
