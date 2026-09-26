@@ -17,9 +17,9 @@ const facts = JSON.parse(readFileSync(join(root, 'src', 'data', 'facts.json'), '
 const copy = JSON.parse(readFileSync(join(root, 'src', 'data', 'copy.json'), 'utf8'));
 
 // The site's own field and accent, so a shared link previews what a visitor sees.
-const FIELD = '#0e100a';
-const CREAM = '#eef1e2';
-const ACID = '#d6ff3f';
+const FIELD = '#121214';
+const CREAM = '#f1eee6';
+const ACCENT = '#ff5c2a';
 const DISPLAY = 'Impact, Haettenschweiler, Arial Narrow Bold, sans-serif';
 const TEXT = 'Segoe UI, Arial, sans-serif';
 const MONO = 'Consolas, Menlo, monospace';
@@ -56,7 +56,7 @@ function card({ title, sub, bg, ink, titleInk = ink, band, eyebrow, lead, leadIn
     : '';
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
   <rect width="1200" height="630" fill="${bg}"/>
-  ${band ? `<rect width="1200" height="64" fill="${FIELD}"/><text x="72" y="42" font-family="${TEXT}" font-size="22" font-weight="600" fill="${ACID}" letter-spacing="2">${esc(facts.name.toUpperCase())}</text>` : ''}
+  ${band ? `<rect width="1200" height="64" fill="${FIELD}"/><text x="72" y="42" font-family="${TEXT}" font-size="22" font-weight="600" fill="${ACCENT}" letter-spacing="2">${esc(facts.name.toUpperCase())}</text>` : ''}
   <text x="72" y="${top + 64}" font-family="${MONO}" font-size="22" fill="${ink}" fill-opacity="0.7" letter-spacing="3">${esc(eyebrow.toUpperCase())}</text>
   <text x="64" y="${top + (band ? 236 : 260)}" font-family="${DISPLAY}" font-size="${title.length > 9 ? 150 : 200}" fill="${titleInk}">${esc(title.toUpperCase())}</text>
   ${subLines
@@ -88,7 +88,7 @@ await write(
     sub: facts.role + '. Seven projects, each with a demo and its own numbers.',
     bg: FIELD,
     ink: CREAM,
-    titleInk: ACID,
+    titleInk: ACCENT,
     eyebrow: fill(copy.eyebrows.hero, { count: WORDS[shipped.length] ?? shipped.length }),
   }),
 );
