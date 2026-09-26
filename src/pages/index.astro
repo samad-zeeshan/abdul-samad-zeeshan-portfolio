@@ -8,12 +8,12 @@ import Eyebrow from '../components/Eyebrow.astro';
 import StatRail from '../components/StatRail.astro';
 import EvidenceMap from '../components/EvidenceMap.astro';
 import Follower from '../components/Follower.astro';
+import LitName from '../components/LitName.astro';
 import { profile, copy, getProjects, hasPage, siteStats, inWords, pad2, fill } from '../lib/site';
 
 const projects = await getProjects();
 const shipped = projects.filter(hasPage);
 const stats = siteStats(projects);
-const words = profile.name.split(' ');
 const count = inWords(shipped.length);
 
 // The role line and the intro each end in the second face. Both splits are checked
@@ -36,15 +36,7 @@ const introEnd = profile.intro.slice(at + tailText.length);
   <section class="hero wrap" data-theme="field" aria-labelledby="hero-name">
     <Eyebrow text={fill(copy.eyebrows.hero, { count })} class="hero__eyebrow" />
     <h1 class="hero__name" id="hero-name">
-      {
-        words.map((w, i) => (
-          <span class="hero__mask">
-            <span class="hero__word" data-rise style={`--i:${i}`}>
-              {w}
-            </span>
-          </span>
-        ))
-      }
+      <LitName text={profile.name} rise />
     </h1>
     <p class="hero__role" data-settle style="--i:0">
       {roleHead} <span class="role__tail">{roleTail}</span>
@@ -103,17 +95,6 @@ const introEnd = profile.intro.slice(at + tailText.length);
     line-height: 0.82;
     letter-spacing: -0.015em;
     margin-left: -0.04em;
-  }
-  /* Each word rises out of its own mask on first paint. */
-  .hero__mask {
-    display: inline-block;
-    overflow: hidden;
-    vertical-align: top;
-    padding-bottom: 0.04em;
-    margin-right: 0.18em;
-  }
-  .hero__word {
-    display: inline-block;
   }
   .hero__role {
     font-size: var(--step-2);

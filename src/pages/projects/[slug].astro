@@ -7,6 +7,7 @@ import Base from '../../layouts/Base.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import ProvesTable from '../../components/ProvesTable.astro';
 import Follower from '../../components/Follower.astro';
+import LitName from '../../components/LitName.astro';
 import { getProjects, hasPage, countTarget, copy, fill, pad2, type Project } from '../../lib/site';
 import { provesFor } from '../../lib/facts';
 import { withBase } from '../../lib/paths';
@@ -68,7 +69,9 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
   <article class="p" data-theme="field">
     <header class="p__head wrap">
       <Eyebrow text={fill(copy.eyebrows.project, { index: place(entry), total })} class="p__eyebrow" />
-      <h1 class="p__name" translate="no" style={`view-transition-name: name-${entry.id}`}>{d.title}</h1>
+      <h1 class="p__name" translate="no" style={`view-transition-name: name-${entry.id}`}>
+        <LitName text={d.title} />
+      </h1>
       <div class="p__lead" data-settle style="--i:0">
         <p class="p__problem">{d.problem}</p>
         <div class="p__actions">
@@ -316,6 +319,7 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
     line-height: 0.82;
     margin-left: -0.04em;
     width: fit-content;
+    --name-lit: var(--tone-accent);
   }
   .p__lead {
     display: grid;
