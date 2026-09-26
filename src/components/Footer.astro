@@ -1,6 +1,6 @@
 ---
-// Footer as an accent card: one line of voice, the email as the last big line, a
-// numbered nav, and where the numbers come from.
+// Footer as an accent card: the email as the last big line, a numbered nav, and
+// where the numbers come from.
 import { profile, copy, pad2 } from '../lib/site';
 import { withBase } from '../lib/paths';
 
@@ -13,7 +13,6 @@ const links = copy.footer.nav.map((label, i) => ({ label, href: hrefs[i], n: pad
 <footer class="foot" id="contact" data-theme="accent">
   <div class="wrap">
     <div class="foot__card">
-      <p class="foot__voice">{copy.footer.voice}</p>
       <a class="foot__email" href={`mailto:${profile.email}`} aria-label={`Email ${profile.email}`}>{profile.email}</a>
       <nav class="foot__nav" aria-label="Footer">
         <ol>
@@ -52,13 +51,6 @@ const links = copy.footer.nav.map((label, i) => ({ label, href: hrefs[i], n: pad
   }
   .foot :focus-visible {
     outline-color: var(--field);
-  }
-  .foot__voice {
-    max-width: 22ch;
-    font-family: var(--font-verdict);
-    font-style: italic;
-    font-size: var(--step-3);
-    line-height: 1.05;
   }
   .foot__email {
     display: inline-block;
