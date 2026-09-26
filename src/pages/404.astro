@@ -1,12 +1,14 @@
 ---
 // Not-found page. Astro emits it as 404.html, which GitHub Pages serves for unknown URLs.
 import Base from '../layouts/Base.astro';
-import { profile } from '../lib/site';
+import Eyebrow from '../components/Eyebrow.astro';
+import { profile, copy } from '../lib/site';
 import { withBase } from '../lib/paths';
 ---
 
 <Base title={`Page not found. ${profile.name}`} description="This page does not exist.">
-  <section class="lost wrap">
+  <section class="lost wrap" data-theme="field">
+    <Eyebrow text={copy.eyebrows.lost} />
     <h1 class="lost__title">Not here</h1>
     <p class="lost__msg">This address has no page. The projects are all on the home page.</p>
     <a class="btn btn--solid" href={withBase('/#work')}>
@@ -24,6 +26,7 @@ import { withBase } from '../lib/paths';
   }
   .lost__title {
     font-size: var(--step-giant);
+    color: var(--hi);
   }
   .lost__msg {
     font-size: var(--step-1);

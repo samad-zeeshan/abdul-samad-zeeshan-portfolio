@@ -1,8 +1,8 @@
 ---
-// One line of the project index: the name in poster type, what it does, one sentence
-// on the headline result with its figure under it, and a still from the demo on hover.
+// One line of the project index: its number, the name in poster type, what it does,
+// and the lead result with its verdict. A still from the demo shows on hover.
 import type { Project } from '../lib/site';
-import { hasPage, countTarget } from '../lib/site';
+import { hasPage, countTarget, pad2 } from '../lib/site';
 import { withBase } from '../lib/paths';
 
 interface Props {
@@ -19,17 +19,21 @@ const Tag = linked ? 'a' : 'div';
 <li class="row" data-settle style={`--i:${index}`}>
   <Tag class:list={['row__hit', { 'row__hit--static': !linked }]} href={linked ? withBase(`/projects/${project.id}/`) : undefined}>
     <span class="row__fill" aria-hidden="true"></span>
+    <span class="row__index mono" aria-hidden="true">{pad2(index + 1)}</span>
     <h3 class="row__name" translate="no" style={`view-transition-name: name-${project.id}`}>{d.title}</h3>
     <p class="row__problem">{d.problem}</p>
     {
       lead ? (
         <p class="row__num">
           <span class="row__label">{lead.label}</span>
-          <span class="row__value mono">
-            <span class="visually-hidden">{lead.value}</span>
-            <span aria-hidden="true" data-count={countTarget(lead.value)}>
-              {lead.value}
+          <span class="row__figure">
+            <span class="row__value mono" style={`--len:${lead.value.length}`}>
+              <span class="visually-hidden">{lead.value}</span>
+              <span aria-hidden="true" data-count={countTarget(lead.value)}>
+                {lead.value}
+              </span>
             </span>
+            {lead.verdict && <span class="verdict row__verdict">{lead.verdict}</span>}
           </span>
         </p>
       ) : (
@@ -57,10 +61,10 @@ const Tag = linked ? 'a' : 'div';
 
 <style>
   .row {
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--tone-line);
   }
   .row:last-child {
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--tone-line);
   }
   .row__hit {
     position: relative;
@@ -72,19 +76,23 @@ const Tag = linked ? 'a' : 'div';
     padding-inline: var(--space-2);
     margin-inline: calc(var(--space-2) * -1);
     text-decoration: none;
-    color: var(--cream);
+    color: var(--tone-ink);
     transition: color var(--dur-hover) var(--ease-out);
   }
-  /* The cream fill wipes in from the left on hover. A scaleX transition stays on the
+  /* The ink fill wipes in from the left on hover. A scaleX transition stays on the
      compositor, and unlike a keyframe it reverses mid-way when the pointer moves on. */
   .row__fill {
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: var(--cream);
+    background: var(--tone-ink);
     transform: scaleX(0);
     transform-origin: left center;
     transition: transform var(--dur-hover) var(--ease-out);
+  }
+  .row__index {
+    font-size: var(--step-1);
+    opacity: 0.6;
   }
   .row__name {
     font-size: var(--step-index);
@@ -101,21 +109,38 @@ const Tag = linked ? 'a' : 'div';
   }
   .row__num {
     display: grid;
-    gap: var(--space-1);
+    gap: var(--space-2);
     align-content: start;
+    container-type: inline-size;
     transition: opacity var(--dur-hover) var(--ease-out);
-  }
-  .row__value {
-    color: var(--hi);
-    font-size: var(--step-2);
-    font-weight: 500;
-    letter-spacing: -0.02em;
   }
   .row__label {
     font-size: var(--step--1);
     line-height: 1.45;
-    color: var(--cream-2);
+    color: var(--tone-ink-2);
     max-width: 34ch;
+    transition: color var(--dur-hover) var(--ease-out);
+  }
+  .row__figure {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-3);
+  }
+  /* Long values like "1.301 to 0.607" shrink to their column instead of spilling out.
+     JetBrains Mono glyphs are 0.6em wide, which is where the divisor comes from. */
+  .row__value {
+    color: var(--hi);
+    font-size: min(var(--step-3), 100cqi / (var(--len) * 0.6));
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    transition: color var(--dur-hover) var(--ease-out);
+  }
+  .row__verdict {
+    font-size: var(--step-2);
+    line-height: 1;
     transition: color var(--dur-hover) var(--ease-out);
   }
   .row__poster {
@@ -123,16 +148,29 @@ const Tag = linked ? 'a' : 'div';
   }
 
   @media (min-width: 60rem) {
+    /* Twelve columns with the same gap as the hairlines, so each part starts on a line. */
     .row__hit {
-      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.8fr);
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-6);
       align-items: end;
-      gap: var(--space-6);
       padding-block: var(--space-5);
+      padding-inline: 0;
+      margin-inline: 0;
+    }
+    .row__index {
+      grid-column: 1 / 2;
+      align-self: start;
+      padding-top: 0.3em;
+    }
+    .row__name {
+      grid-column: 2 / 7;
     }
     .row__problem {
+      grid-column: 7 / 10;
       padding-bottom: 0.35em;
     }
     .row__num {
+      grid-column: 10 / 13;
       padding-bottom: 0.35em;
     }
     .row__poster {
@@ -155,18 +193,18 @@ const Tag = linked ? 'a' : 'div';
 
   @media (hover: hover) and (pointer: fine) {
     .row__hit:not(.row__hit--static):hover,
-    .row__hit:not(.row__hit--static):focus-visible {
-      color: var(--field);
+    .row__hit:not(.row__hit--static):focus-visible,
+    .row__hit:not(.row__hit--static):hover .row__label,
+    .row__hit:not(.row__hit--static):focus-visible .row__label,
+    .row__hit:not(.row__hit--static):hover .row__value,
+    .row__hit:not(.row__hit--static):focus-visible .row__value,
+    .row__hit:not(.row__hit--static):hover .row__verdict,
+    .row__hit:not(.row__hit--static):focus-visible .row__verdict {
+      color: var(--tone-bg);
     }
     .row__hit:not(.row__hit--static):hover .row__fill,
     .row__hit:not(.row__hit--static):focus-visible .row__fill {
       transform: scaleX(1);
-    }
-    .row__hit:not(.row__hit--static):hover .row__label,
-    .row__hit:not(.row__hit--static):focus-visible .row__label,
-    .row__hit:not(.row__hit--static):hover .row__value,
-    .row__hit:not(.row__hit--static):focus-visible .row__value {
-      color: var(--field);
     }
   }
   /* The still replaces the number while previewed, so the two never overlap. */
@@ -185,28 +223,10 @@ const Tag = linked ? 'a' : 'div';
     transform: scale(0.985);
   }
   .row__hit:focus-visible {
-    outline: 2px solid var(--cream);
+    outline: 2px solid var(--tone-ink);
     outline-offset: 2px;
   }
   .row__hit--static {
-    color: var(--cream-2);
-  }
-  .row__hit--static .row__name {
-    color: var(--cream-3);
-  }
-
-  /* Dark mode deepens the field, so the hover fill uses the deep tone with light text. */
-  @media (prefers-color-scheme: dark) {
-    .row__fill {
-      background: var(--field-deep);
-    }
-    .row__hit:not(.row__hit--static):hover,
-    .row__hit:not(.row__hit--static):focus-visible,
-    .row__hit:not(.row__hit--static):hover .row__label,
-    .row__hit:not(.row__hit--static):focus-visible .row__label,
-    .row__hit:not(.row__hit--static):hover .row__value,
-    .row__hit:not(.row__hit--static):focus-visible .row__value {
-      color: var(--cream);
-    }
+    color: var(--tone-ink-2);
   }
 </style>

@@ -46,6 +46,7 @@ const links = copy.footer.nav.map((label, i) => ({ label, href: hrefs[i], n: pad
     gap: var(--space-6);
     padding: var(--space-7) var(--space-5) var(--space-5);
     border-radius: 12px;
+    container-type: inline-size;
     background: var(--accent);
     color: var(--field);
   }
@@ -64,7 +65,9 @@ const links = copy.footer.nav.map((label, i) => ({ label, href: hrefs[i], n: pad
     width: fit-content;
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: clamp(1.75rem, 0.2rem + 8.4vw, 9rem);
+    /* The address is about ten em wide in this face, so a tenth of the card keeps it
+       on one line at any width instead of breaking mid-word on phones. */
+    font-size: min(9rem, 100cqi / 10.5);
     line-height: 0.9;
     text-transform: uppercase;
     text-decoration: none;

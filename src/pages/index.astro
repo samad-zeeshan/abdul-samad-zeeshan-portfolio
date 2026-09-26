@@ -1,19 +1,37 @@
 ---
-// Home: the name in poster type, a paragraph about the work,
-// the eight-line project index, and the tools line. The footer carries the email.
+// Home, laid out as a test report: the name and counted results, the rule the work
+// follows, the project index on paper, and the tools line. The footer carries the email.
 import Base from '../layouts/Base.astro';
 import IndexRow from '../components/IndexRow.astro';
-import { profile, getProjects } from '../lib/site';
+import Eyebrow from '../components/Eyebrow.astro';
+import StatRail from '../components/StatRail.astro';
+import { profile, copy, getProjects, hasPage, siteStats, inWords, pad2, fill } from '../lib/site';
 
 const projects = await getProjects();
+const shipped = projects.filter(hasPage);
+const stats = siteStats(projects);
 const words = profile.name.split(' ');
+const count = inWords(shipped.length);
+
+// The role line and the intro each end in the second face. Both splits are checked
+// here so an edit to facts.json fails the build instead of dropping the styling.
+const cut = profile.role.indexOf(', ');
+if (cut < 0) throw new Error('facts.json role needs a comma before its second half');
+const roleHead = profile.role.slice(0, cut + 1);
+const roleTail = profile.role.slice(cut + 2);
+const tailText = 'including the bad ones';
+const at = profile.intro.lastIndexOf(tailText);
+if (at < 0) throw new Error(`facts.json intro must end with "${tailText}"`);
+const introHead = profile.intro.slice(0, at);
+const introEnd = profile.intro.slice(at + tailText.length);
 ---
 
 <Base
   title={`${profile.name}. ${profile.role}`}
   description="Seven projects in backend and data systems. Each one has a demo you can open and numbers copied from its own write-up."
 >
-  <section class="hero wrap" aria-labelledby="hero-name">
+  <section class="hero wrap" data-theme="field" aria-labelledby="hero-name">
+    <Eyebrow text={fill(copy.eyebrows.hero, { count })} class="hero__eyebrow" />
     <h1 class="hero__name" id="hero-name">
       {
         words.map((w, i) => (
@@ -25,26 +43,35 @@ const words = profile.name.split(' ');
         ))
       }
     </h1>
-    <p class="hero__role" data-settle style="--i:0">{profile.role}</p>
-  </section>
-
-  <section class="about wrap" aria-label="About">
-    <p class="about__text" data-settle style="--i:1">{profile.intro}</p>
-  </section>
-
-  <section class="work wrap" id="work" aria-labelledby="work-h">
-    <div class="work__head">
-      <h2 id="work-h" class="work__title">Projects</h2>
-      <p class="label work__note">Ordered by what I would show first. Each one opens its demo, a short recording and its numbers.</p>
+    <p class="hero__role" data-settle style="--i:0">
+      {roleHead} <span class="role__tail">{roleTail}</span>
+    </p>
+    <div class="hero__rail">
+      <StatRail stats={stats} />
     </div>
-    <ol class="work__list">
-      {projects.map((p, i) => <IndexRow project={p} index={i} />)}
-    </ol>
   </section>
 
-  <section class="tools wrap" aria-labelledby="tools-h">
-    <h2 id="tools-h" class="label tools__cap">Tools I use in these projects</h2>
-    <p class="tools__line">
+  <section class="about wrap" data-theme="field" aria-labelledby="about-h">
+    <div class="about__body" data-reveal>
+      <Eyebrow as="h2" id="about-h" text={copy.eyebrows.about} />
+      <p class="about__text">
+        {introHead}<span class="about__tail">{tailText}</span>{introEnd}
+      </p>
+    </div>
+  </section>
+
+  <section class="work" id="work" data-theme="paper" aria-labelledby="work-h">
+    <div class="wrap">
+      <Eyebrow as="h2" id="work-h" class="work__cap" text={fill(copy.eyebrows.projects, { last: pad2(projects.length) })} />
+      <ol class="work__list">
+        {projects.map((p, i) => <IndexRow project={p} index={i} />)}
+      </ol>
+    </div>
+  </section>
+
+  <section class="tools wrap" data-theme="field" aria-labelledby="tools-h">
+    <Eyebrow as="h2" id="tools-h" class="tools__cap" text={fill(copy.eyebrows.tools, { n: profile.skills.length, count })} />
+    <p class="tools__line" data-reveal>
       {
         profile.skills.map((s, i) => (
           <>
@@ -61,7 +88,7 @@ const words = profile.name.split(' ');
   .hero {
     display: grid;
     gap: var(--space-5);
-    padding-block: var(--space-7) var(--space-6);
+    padding-block: var(--space-6) var(--space-7);
   }
   .hero__name {
     color: var(--hi);
@@ -81,52 +108,53 @@ const words = profile.name.split(' ');
   .hero__word {
     display: inline-block;
   }
-  /* The positioning line, so it gets the primary ink and enough size to read at a glance. */
   .hero__role {
     font-size: var(--step-2);
-    color: var(--cream);
+    line-height: 1.25;
+  }
+  .role__tail {
+    font-family: var(--font-verdict);
+    font-style: italic;
+    font-size: 1.08em;
+  }
+  .hero__rail {
+    margin-top: var(--space-4);
   }
 
   .about {
-    display: grid;
-    gap: var(--space-6);
+    padding-block: var(--space-8);
   }
-  /* On a phone the skills index is long, so the paragraph comes first. */
+  .about__body {
+    display: grid;
+    gap: var(--space-4);
+  }
   .about__text {
-    order: -1;
     max-width: 34ch;
     font-size: var(--step-2);
     line-height: 1.35;
     letter-spacing: -0.01em;
   }
+  .about__tail {
+    font-family: var(--font-verdict);
+    font-style: italic;
+    font-size: 1.08em;
+    letter-spacing: 0;
+    color: var(--hi);
+  }
 
+  /* The paper section. html turns paper while this crosses the middle of the screen. */
   .work {
-    margin-top: var(--space-9);
-    scroll-margin-top: var(--space-5);
+    padding-block: var(--space-8) var(--space-9);
+    scroll-margin-top: 0;
   }
-  .work__head {
-    display: grid;
-    gap: var(--space-3);
+  .work :global(.work__cap) {
     margin-bottom: var(--space-5);
-  }
-  .work__title {
-    font-size: var(--step-3);
-  }
-  .work__note {
-    max-width: 44ch;
-    color: var(--cream-2);
   }
 
   .tools {
-    margin-top: var(--space-9);
+    padding-top: var(--space-8);
   }
-  .tools__cap {
-    font-family: var(--font-mono);
-    font-weight: 400;
-    text-transform: none;
-    line-height: 1.4;
-    letter-spacing: 0;
-    color: var(--cream-2);
+  .tools :global(.tools__cap) {
     margin-bottom: var(--space-4);
   }
   .tools__line {
@@ -146,43 +174,30 @@ const words = profile.name.split(' ');
   }
 
   @media (min-width: 60rem) {
-    .hero {
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      align-items: end;
-      padding-block: var(--space-8) var(--space-7);
-    }
-    .hero__name {
-      grid-column: 1 / -1;
-    }
-    .hero__role {
-      grid-column: 1 / 6;
-    }
-    /* Offset to the right so the page reads as a poster, not a centred column. */
-    .about {
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      column-gap: var(--space-6);
-      align-items: stretch;
-    }
-    .about__text {
-      order: 0;
-      grid-column: 6 / 13;
-      grid-row: 1;
-    }
-    .work__head {
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      align-items: end;
-    }
-    .work__title {
-      grid-column: 1 / 6;
-    }
-    .work__note {
-      grid-column: 6 / 11;
-    }
+    .hero,
+    .about,
     .tools {
       display: grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-6);
     }
-    .tools__cap {
+    .hero {
+      align-items: end;
+      padding-block: var(--space-7) var(--space-8);
+    }
+    .hero :global(.hero__eyebrow),
+    .hero__name,
+    .hero__rail {
+      grid-column: 1 / -1;
+    }
+    .hero__role {
+      grid-column: 1 / 7;
+    }
+    /* Columns 6 to 12 only, so the left reads as a report margin. */
+    .about__body {
+      grid-column: 6 / 13;
+    }
+    .tools :global(.tools__cap) {
       grid-column: 1 / 4;
       padding-top: 0.6em;
     }

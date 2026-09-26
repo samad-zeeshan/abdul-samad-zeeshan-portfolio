@@ -1,8 +1,13 @@
 ---
 // Project page, painted in the demo's own palette inside the site's header and
 // footer. Text and numbers come from the entry's frontmatter, copied from its README.
+import { execFileSync } from 'node:child_process';
+import { join } from 'node:path';
 import Base from '../../layouts/Base.astro';
-import { getProjects, hasPage, countTarget, type Project } from '../../lib/site';
+import Eyebrow from '../../components/Eyebrow.astro';
+import ProvesTable from '../../components/ProvesTable.astro';
+import { getProjects, hasPage, countTarget, copy, fill, pad2, type Project } from '../../lib/site';
+import { provesFor } from '../../lib/facts';
 import { withBase } from '../../lib/paths';
 
 export async function getStaticPaths() {
@@ -10,7 +15,7 @@ export async function getStaticPaths() {
   const shipped = all.filter(hasPage);
   return shipped.map((entry, i) => ({
     params: { slug: entry.id },
-    props: { entry, next: shipped[(i + 1) % shipped.length], all },
+    props: { entry, next: shipped[(i + 1) % shipped.length], all, shipped },
   }));
 }
 
@@ -18,9 +23,12 @@ interface Props {
   entry: Project;
   next: Project;
   all: Project[];
+  shipped: Project[];
 }
-const { entry, next, all } = Astro.props;
+const { entry, next, all, shipped } = Astro.props;
 const d = entry.data;
+const total = pad2(shipped.length);
+const place = (p: Project) => pad2(shipped.findIndex((s) => s.id === p.id) + 1);
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 // README openers mark field names in backticks. Render those as code, nothing else.
@@ -28,6 +36,25 @@ const openerHtml = d.opener ? esc(d.opener).replace(/`([^`]+)`/g, '<code>$1</cod
 // The videos share the GIF's base name, and the poster doubles as the still.
 const clip = d.gif?.file.replace(/\.gif$/, '');
 const still = d.gif ? withBase(d.poster ? `/posters/${d.poster}` : `/gifs/${d.gif.file}`) : '';
+
+// Read the clip length from the file so the eyebrow never drifts from the recording.
+// Without ffprobe on the build machine the eyebrow drops the time instead of guessing.
+function clipLength(name: string | undefined): string | undefined {
+  if (!name) return undefined;
+  try {
+    const file = join(process.cwd(), 'public', 'videos', `${name}.mp4`);
+    const out = execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', file], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    const secs = Math.round(parseFloat(out));
+    return Number.isFinite(secs) ? `${Math.floor(secs / 60)}:${pad2(secs % 60)}` : undefined;
+  } catch {
+    return undefined;
+  }
+}
+const duration = clipLength(clip);
+const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
 ---
 
 <Base
@@ -37,8 +64,9 @@ const still = d.gif ? withBase(d.poster ? `/posters/${d.poster}` : `/gifs/${d.gi
   current={entry.id}
   tone={d.tone}
 >
-  <article class="p">
+  <article class="p" data-theme="field">
     <header class="p__head wrap">
+      <Eyebrow text={fill(copy.eyebrows.project, { index: place(entry), total })} class="p__eyebrow" />
       <h1 class="p__name" translate="no" style={`view-transition-name: name-${entry.id}`}>{d.title}</h1>
       <div class="p__lead" data-settle style="--i:0">
         <p class="p__problem">{d.problem}</p>
@@ -65,66 +93,75 @@ const still = d.gif ? withBase(d.poster ? `/posters/${d.poster}` : `/gifs/${d.gi
       </div>
     </header>
 
-    <section class="p__opener wrap" aria-label="What it is">
-      <p class="p__opener-text" data-settle style="--i:1" set:html={openerHtml} />
+    <section class="p__opener p__sec wrap" aria-labelledby="opener-h">
+      <Eyebrow as="h2" id="opener-h" text={copy.eyebrows.opener} class="p__cap" />
+      <p class="p__opener-text p__body" data-settle style="--i:1" set:html={openerHtml} />
     </section>
 
     {
       d.numbers.length > 0 && (
-        <section class="p__numbers wrap" aria-labelledby="numbers-h">
-          <h2 id="numbers-h" class="label p__cap">
-            Headline numbers
-          </h2>
+        <section class="p__numbers p__sec wrap" aria-labelledby="numbers-h" data-reveal>
+          <Eyebrow as="h2" id="numbers-h" text={fill(copy.eyebrows.numbers, { n: d.numbers.length })} class="p__cap" />
           <dl class="p__nums">
-            {d.numbers.map((n, i) => (
-              <div class="p__num" data-settle style={`--i:${i + 2}`}>
+            {d.numbers.map((n) => (
+              <div class="p__num">
                 <dt class="p__num-label">{n.label}</dt>
-                <dd class="p__num-value mono">
-                  <span class="visually-hidden">{n.value}</span>
-                  <span aria-hidden="true" data-count={countTarget(n.value)}>
-                    {n.value}
+                <dd class="p__num-figure">
+                  <span class="p__num-value mono" style={`--len:${n.value.length}`}>
+                    <span class="visually-hidden">{n.value}</span>
+                    <span aria-hidden="true" data-count={countTarget(n.value)}>
+                      {n.value}
+                    </span>
                   </span>
+                  {n.verdict && <span class="verdict p__verdict">{n.verdict}</span>}
                 </dd>
+                <dd class="p__num-source mono">From the {n.source}.</dd>
               </div>
             ))}
           </dl>
-          <details class="p__sources" open>
-            <summary>Where these numbers come from</summary>
-            <ul>
-              {d.numbers.map((n) => (
-                <li>From the {n.source}.</li>
-              ))}
-            </ul>
-          </details>
-          {/* Open in the HTML so no-JS readers see the sources. Closed here, during parse,
-              so everyone else never sees it flash open. */}
-          <script is:inline>document.currentScript.previousElementSibling.open = false;</script>
         </section>
       )
     }
 
     {
       d.decisions.length > 0 && (
-        <section class="p__decisions wrap" aria-labelledby="decisions-h">
-          <h2 id="decisions-h" class="label p__cap">
-            Decisions I made and things that broke
-          </h2>
-          <ul class="p__decision-list">
-            {d.decisions.map((line) => (
-              <li>{line}</li>
+        <section class="p__decisions p__sec wrap" aria-labelledby="decisions-h" data-reveal>
+          <Eyebrow as="h2" id="decisions-h" text={copy.eyebrows.decisions} class="p__cap" />
+          <ol class="p__table p__body">
+            {d.decisions.map((line, i) => (
+              <li class="p__trow">
+                <span class="p__tidx mono" aria-hidden="true">
+                  {pad2(i + 1)}
+                </span>
+                <span class="p__tcell">{line}</span>
+              </li>
             ))}
-          </ul>
+          </ol>
+        </section>
+      )
+    }
+
+    {
+      proves > 0 && (
+        <section class="p__proves p__sec wrap" aria-labelledby="proves-h" data-reveal>
+          <Eyebrow as="h2" id="proves-h" text={fill(copy.eyebrows.proves, { n: proves })} class="p__cap" />
+          <div class="p__body">
+            <ProvesTable projectId={entry.id} />
+          </div>
         </section>
       )
     }
 
     {
       d.gif && (
-        <section class="p__demo wrap" aria-labelledby="demo-h">
-          <h2 id="demo-h" class="label p__cap">
-            The demo, recorded
-          </h2>
-          <figure class="p__figure">
+        <section class="p__demo p__sec wrap" aria-labelledby="demo-h" data-reveal>
+          <Eyebrow
+            as="h2"
+            id="demo-h"
+            text={duration ? fill(copy.eyebrows.demoTimed, { duration }) : copy.eyebrows.demo}
+            class="p__cap"
+          />
+          <figure class="p__figure p__body">
             <div class="frame" data-demo>
               <img
                 class="p__still"
@@ -171,11 +208,9 @@ const still = d.gif ? withBase(d.poster ? `/posters/${d.poster}` : `/gifs/${d.gi
 
     {
       d.papers.length > 0 && (
-        <section class="p__papers wrap" aria-labelledby="papers-h">
-          <h2 id="papers-h" class="label p__cap">
-            Papers
-          </h2>
-          <ul class="p__paper-list">
+        <section class="p__papers p__sec wrap" aria-labelledby="papers-h" data-reveal>
+          <Eyebrow as="h2" id="papers-h" text={fill(copy.eyebrows.papers, { n: d.papers.length })} class="p__cap" />
+          <ul class="p__paper-list p__body">
             {d.papers.map((paper) => (
               <li class="p__paper">
                 <span class="p__paper-head">
@@ -189,9 +224,9 @@ const still = d.gif ? withBase(d.poster ? `/posters/${d.poster}` : `/gifs/${d.gi
       )
     }
 
-    <nav class="p__nav wrap" aria-label="Projects">
+    <nav class="p__nav wrap" aria-label="Projects" data-reveal>
       <a class="p__next" href={withBase(`/projects/${next.id}/`)}>
-        <span class="label">Next project</span>
+        <Eyebrow as="span" text={fill(copy.eyebrows.next, { index: place(next), total })} />
         <span class="p__next-name" translate="no">{next.data.title}</span>
       </a>
       <ol class="p__rail mono">
@@ -203,7 +238,7 @@ const still = d.gif ? withBase(d.poster ? `/posters/${d.poster}` : `/gifs/${d.gi
                   href={withBase(`/projects/${p.id}/`)}
                   aria-current={p.id === entry.id ? 'page' : undefined}
                 >
-                  {p.data.title}
+                  <span class="p__rail-n" aria-hidden="true">{place(p)}</span> {p.data.title}
                 </a>
               </li>
             ) : (
@@ -261,7 +296,7 @@ const still = d.gif ? withBase(d.poster ? `/posters/${d.poster}` : `/gifs/${d.gi
   .p__head {
     display: grid;
     gap: var(--space-5);
-    padding-block: var(--space-7) var(--space-6);
+    padding-block: var(--space-6);
   }
   .p__name {
     font-size: var(--step-giant);
@@ -284,74 +319,85 @@ const still = d.gif ? withBase(d.poster ? `/posters/${d.poster}` : `/gifs/${d.gi
     gap: var(--space-3);
   }
 
+  .p__sec {
+    display: grid;
+    gap: var(--space-5);
+    margin-top: var(--space-8);
+  }
+  .p__sec > :global(.p__cap) {
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--tone-line);
+  }
+  .p__opener {
+    margin-top: var(--space-7);
+  }
   .p__opener-text {
     max-width: var(--measure);
     font-size: var(--step-1);
     line-height: 1.55;
   }
 
-  .p__cap {
-    display: block;
-    font-family: var(--font-mono);
-    font-weight: 400;
-    font-size: var(--step--1);
-    line-height: 1.4;
-    letter-spacing: 0;
-    text-transform: none;
-    color: var(--tone-ink-2);
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--tone-line);
-    margin-bottom: var(--space-5);
-  }
-
-  .p__numbers,
-  .p__decisions,
-  .p__demo,
-  .p__papers {
-    margin-top: var(--space-8);
-  }
-  .p__decision-list {
-    display: grid;
-    gap: var(--space-4);
-    max-width: 62ch;
-    font-size: var(--step-1);
-    line-height: 1.45;
-  }
   .p__nums {
     display: grid;
-    gap: var(--space-6);
+    gap: var(--space-7);
   }
+  /* Each number is its own container, so the figure can size itself to the column. */
   .p__num {
     display: grid;
-    gap: var(--space-2);
-  }
-  .p__num-value {
-    font-size: clamp(2.5rem, 1.2rem + 5.5vw, 5.5rem);
-    font-weight: 500;
-    line-height: 1;
-    letter-spacing: -0.04em;
-    color: var(--tone-accent);
+    gap: var(--space-3);
+    align-content: start;
+    container-type: inline-size;
   }
   .p__num-label {
     max-width: 36ch;
     font-size: var(--step-1);
     line-height: 1.4;
   }
-  .p__sources {
-    margin-top: var(--space-5);
+  .p__num-figure {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-4);
+  }
+  /* The big size holds for short values. Long ones like "1.301 to 0.607" shrink until
+     they fit, since mono glyphs are 0.6em wide and the column is 100cqi. */
+  .p__num-value {
+    font-size: min(var(--step-num), 100cqi / (var(--len) * 0.6));
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+    color: var(--tone-accent);
+  }
+  .p__verdict {
+    font-size: var(--step-3);
+    line-height: 1;
+  }
+  .p__num-source {
+    max-width: 60ch;
     font-size: var(--step--1);
-    color: var(--tone-ink-2);
-    max-width: 72ch;
+    line-height: 1.5;
+    opacity: 0.6;
   }
-  .p__sources summary {
-    cursor: pointer;
-    width: fit-content;
-    padding-block: var(--space-2);
-  }
-  .p__sources ul {
+
+  /* Hairline tables: one rule per row, the index above the sentence on phones. */
+  .p__trow {
     display: grid;
     gap: var(--space-2);
-    padding-top: var(--space-2);
+    padding-block: var(--space-4);
+    border-top: 1px solid var(--tone-line);
+  }
+  .p__trow:last-child {
+    border-bottom: 1px solid var(--tone-line);
+  }
+  .p__tidx {
+    font-size: var(--step--1);
+    color: var(--tone-ink-2);
+  }
+  .p__tcell {
+    max-width: 62ch;
+    font-size: var(--step-1);
+    line-height: 1.45;
   }
 
   .p__figure {
@@ -467,6 +513,9 @@ const still = d.gif ? withBase(d.poster ? `/posters/${d.poster}` : `/gifs/${d.gi
   .p__rail a:hover {
     color: var(--tone-ink);
   }
+  .p__rail-n {
+    opacity: 0.7;
+  }
   /* The accent marks the current item and nothing else in the rail. */
   .p__rail a[aria-current='page'] {
     color: var(--tone-accent);
@@ -481,15 +530,18 @@ const still = d.gif ? withBase(d.poster ? `/posters/${d.poster}` : `/gifs/${d.gi
   @media (min-width: 60rem) {
     .p__head {
       grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-6);
       align-items: end;
-      padding-block: var(--space-8) var(--space-7);
+      padding-block: var(--space-7);
     }
+    .p__head > :global(.p__eyebrow),
     .p__name {
       grid-column: 1 / -1;
     }
     .p__lead {
       grid-column: 1 / 13;
       grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-6);
       align-items: end;
     }
     .p__problem {
@@ -499,41 +551,39 @@ const still = d.gif ? withBase(d.poster ? `/posters/${d.poster}` : `/gifs/${d.gi
       grid-column: 8 / 13;
       justify-content: flex-end;
     }
-    .p__opener,
-    .p__numbers,
-    .p__decisions,
-    .p__papers {
-      display: grid;
+    /* Eyebrow in the left margin, content from column 4, on the hairline grid. */
+    .p__sec {
       grid-template-columns: repeat(12, minmax(0, 1fr));
       column-gap: var(--space-6);
+      row-gap: var(--space-5);
+    }
+    .p__sec > :global(.p__cap) {
+      grid-column: 1 / 4;
+      align-self: start;
+    }
+    .p__sec > .p__body {
+      grid-column: 4 / 13;
+      border-top: 1px solid var(--tone-line);
+      padding-top: var(--space-3);
     }
     .p__opener-text {
-      grid-column: 5 / 13;
       font-size: var(--step-2);
       line-height: 1.4;
     }
-    .p__cap {
-      grid-column: 1 / 4;
-    }
-    .p__sources {
-      grid-column: 4 / 13;
-    }
+    /* Numbers get the full width, since the figures are the largest type on the page. */
     .p__nums {
-      grid-column: 4 / 13;
+      grid-column: 1 / -1;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: var(--space-7);
-      border-top: 1px solid var(--tone-line);
-      padding-top: var(--space-3);
+      column-gap: var(--space-6);
     }
-    .p__numbers .p__cap,
-    .p__papers .p__cap {
-      border-top: 1px solid var(--tone-line);
+    .p__table.p__body {
+      border-top: 0;
+      padding-top: 0;
     }
-    .p__decision-list,
-    .p__paper-list {
-      grid-column: 4 / 13;
-      border-top: 1px solid var(--tone-line);
-      padding-top: var(--space-3);
+    .p__trow {
+      grid-template-columns: 5rem minmax(0, 1fr);
+      column-gap: var(--space-6);
+      align-items: baseline;
     }
   }
 </style>
