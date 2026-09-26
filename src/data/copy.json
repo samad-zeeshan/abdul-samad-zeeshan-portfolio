@@ -22,7 +22,6 @@
     "lost": "Page not found"
   },
   "footer": {
-    "voice": "Numbers as they came out, including the bad ones.",
     "nav": ["Projects", "Resume", "GitHub"],
     "note": "Every result on this site is copied from the project's own write-up. The counts above are worked out from those results."
   },

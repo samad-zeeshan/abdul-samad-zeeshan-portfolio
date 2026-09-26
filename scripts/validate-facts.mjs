@@ -175,7 +175,6 @@ const copy = JSON.parse(readFileSync(join(root, 'src', 'data', 'copy.json'), 'ut
 const filled = (t) => t.replace(/\{\w+\}/g, '7');
 for (const [k, t] of Object.entries(copy.eyebrows)) plain(`eyebrow ${k}`, filled(t), 10);
 for (const [k, t] of Object.entries(copy.stats)) plain(`stat label ${k}`, t, 6);
-plain('footer voice', copy.footer.voice, 15);
 plain('footer note', copy.footer.note, 25);
 copy.footer.nav.forEach((t, i) => plain(`footer nav ${i + 1}`, t, 4));
 Object.entries(copy.pill).forEach(([k, t]) => plain(`pill ${k}`, t, 4));
@@ -190,9 +189,9 @@ const stats = {
   bad: allNumbers.filter((n) => n.tone === 'bad').length,
 };
 
-// The verdict face is for verdicts and three set lines only. Any other rule that sets
+// The verdict face is for verdicts and two set lines only. Any other rule that sets
 // it fails, so the second face cannot creep into body text.
-const SERIF_OK = ['.verdict', '.role__tail', '.about__tail', '.foot__voice'];
+const SERIF_OK = ['.verdict', '.role__tail', '.about__tail'];
 for (const p of walk(join(root, 'src')).filter((f) => /\.(astro|css)$/.test(f))) {
   const rel = p.slice(root.length + 1);
   const t = readFileSync(p, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
