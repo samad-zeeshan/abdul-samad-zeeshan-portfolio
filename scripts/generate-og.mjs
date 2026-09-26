@@ -15,8 +15,10 @@ const outDir = join(root, 'public', 'og');
 mkdirSync(outDir, { recursive: true });
 const facts = JSON.parse(readFileSync(join(root, 'src', 'data', 'facts.json'), 'utf8'));
 
-const FIELD = '#1f2ee8';
-const CREAM = '#f4efe2';
+// The acid palette, the site's default, so a shared link previews what a visitor sees.
+const FIELD = '#0a0a0a';
+const CREAM = '#eef1e2';
+const ACID = '#d6ff3f';
 const DISPLAY = 'Impact, Haettenschweiler, Arial Narrow Bold, sans-serif';
 const TEXT = 'Segoe UI, Arial, sans-serif';
 
@@ -37,12 +39,12 @@ function wrap(text, max) {
   return lines;
 }
 
-function card({ title, sub, bg, ink, band }) {
+function card({ title, sub, bg, ink, titleInk = ink, band }) {
   const subLines = wrap(sub, 46).slice(0, 3);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
   <rect width="1200" height="630" fill="${bg}"/>
-  ${band ? `<rect width="1200" height="64" fill="${FIELD}"/><text x="72" y="42" font-family="${TEXT}" font-size="22" font-weight="600" fill="${CREAM}" letter-spacing="2">${esc(facts.name.toUpperCase())}</text>` : ''}
-  <text x="64" y="${band ? 330 : 300}" font-family="${DISPLAY}" font-size="${title.length > 12 ? 150 : 220}" fill="${ink}">${esc(title.toUpperCase())}</text>
+  ${band ? `<rect width="1200" height="64" fill="${FIELD}"/><text x="72" y="42" font-family="${TEXT}" font-size="22" font-weight="600" fill="${ACID}" letter-spacing="2">${esc(facts.name.toUpperCase())}</text>` : ''}
+  <text x="64" y="${band ? 330 : 300}" font-family="${DISPLAY}" font-size="${title.length > 9 ? 150 : 220}" fill="${titleInk}">${esc(title.toUpperCase())}</text>
   ${subLines
     .map((l, i) => `<text x="72" y="${(band ? 410 : 390) + i * 46}" font-family="${TEXT}" font-size="34" fill="${ink}">${esc(l)}</text>`)
     .join('\n  ')}
@@ -54,7 +56,7 @@ async function write(name, svg) {
   console.log(`og: ${name}.png`);
 }
 
-await write('home', card({ title: 'Abdul Samad', sub: facts.role + '. Eight projects, each with a demo and its own numbers.', bg: FIELD, ink: CREAM }));
+await write('home', card({ title: 'Abdul Samad', sub: facts.role + '. Eight projects, each with a demo and its own numbers.', bg: FIELD, ink: CREAM, titleInk: ACID }));
 
 const dir = join(root, 'src', 'content', 'projects');
 for (const f of readdirSync(dir).filter((x) => x.endsWith('.mdx'))) {
