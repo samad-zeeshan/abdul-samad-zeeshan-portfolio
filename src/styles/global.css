@@ -15,6 +15,52 @@
   animation-duration: 260ms;
 }
 
+/* On wide pointer screens the old page fades and the new one wipes in through six
+   columns, with the accent showing in the gaps. Phones keep the crossfade above. */
+@media (hover: hover) and (pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference) {
+  ::view-transition {
+    background: var(--accent);
+  }
+  ::view-transition-old(root) {
+    animation: curtain-out 250ms linear both;
+    mix-blend-mode: normal;
+  }
+  ::view-transition-new(root) {
+    animation: curtain-in 700ms cubic-bezier(0.84, 0, 0.16, 1) both;
+    mix-blend-mode: normal;
+  }
+}
+@keyframes curtain-out {
+  to {
+    opacity: 0;
+  }
+}
+/* One polygon traces the column tops left to right and the bottoms back, so all six
+   heights animate as one shape. Each column starts 4 percent further past its edge,
+   which is the stagger. */
+@keyframes curtain-in {
+  from {
+    clip-path: polygon(
+      0% 0%, 16.6667% 0%, 16.6667% 104%, 33.3333% 104%,
+      33.3333% 0%, 50% 0%, 50% 112%, 66.6667% 112%,
+      66.6667% 0%, 83.3333% 0%, 83.3333% 120%, 100% 120%,
+      100% 100%, 83.3333% 100%, 83.3333% -16%, 66.6667% -16%,
+      66.6667% 100%, 50% 100%, 50% -8%, 33.3333% -8%,
+      33.3333% 100%, 16.6667% 100%, 16.6667% 0%, 0% 0%
+    );
+  }
+  to {
+    clip-path: polygon(
+      0% 0%, 16.6667% 0%, 16.6667% 0%, 33.3333% 0%,
+      33.3333% 0%, 50% 0%, 50% 0%, 66.6667% 0%,
+      66.6667% 0%, 83.3333% 0%, 83.3333% 0%, 100% 0%,
+      100% 100%, 83.3333% 100%, 83.3333% 100%, 66.6667% 100%,
+      66.6667% 100%, 50% 100%, 50% 100%, 33.3333% 100%,
+      33.3333% 100%, 16.6667% 100%, 16.6667% 100%, 0% 100%
+    );
+  }
+}
+
 *,
 *::before,
 *::after {

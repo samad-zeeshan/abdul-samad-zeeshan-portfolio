@@ -48,6 +48,9 @@ const ogImage = new URL(withBase(image), Astro.site).href;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {/* The new page is shown at its first paint, which can come before the parser reaches
+        the heading. Holding that paint for the heading keeps the name morph from dropping. */}
+    {current && <link rel="expect" href="#project-name" blocking="render" />}
     <script is:inline define:vars={{ fonts: [displayFont, textFont, verdictFont] }}>
       // Preload the fonts on the first page of a visit only. On later pages Chrome serves
       // them from memory, never claims the preload, and warns that it went unused.
