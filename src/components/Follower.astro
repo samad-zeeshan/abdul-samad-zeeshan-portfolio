@@ -26,7 +26,7 @@ const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
               src={withBase(`/posters/${p.data.poster}`)}
               alt=""
               width="640"
-              height="480"
+              height="400"
               loading="lazy"
               decoding="async"
             />
@@ -138,13 +138,14 @@ const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
   /* Grow with a slight overshoot, shrink with a slow start, as on the site this copies. */
   .follow__frame {
     width: 0;
-    aspect-ratio: 4 / 3;
+    /* Posters are 16:10 or 16:9, so a 16:10 frame shows them whole or nearly. */
+    aspect-ratio: 16 / 10;
     border-radius: var(--radius);
     background: var(--field-deep);
     transition: width 0.4s cubic-bezier(0.36, 0, 0.66, 0);
   }
   .follow__frame.active {
-    width: clamp(10rem, 27.5vw, 25rem);
+    width: clamp(14rem, 30vw, 28rem);
     transition-timing-function: cubic-bezier(0.34, 1, 0.64, 1);
   }
   .follow__stack {
