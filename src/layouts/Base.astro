@@ -272,6 +272,42 @@ const ogImage = new URL(withBase(image), Astro.site).href;
         els.forEach(function (el) { io.observe(el); });
       })();
     </script>
+    <script>
+      // Smooth wheel scrolling on wide pointer screens. The import sits behind the same
+      // gate, so phones, touch and reduced-motion visitors never download the library.
+      const smooth = '(pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference)';
+      if (matchMedia(smooth).matches) {
+        import('lenis').then(({ default: Lenis }) => {
+          const lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1, smoothWheel: true, syncTouch: false });
+          const loop = (t: number) => {
+            lenis.raf(t);
+            requestAnimationFrame(loop);
+          };
+          requestAnimationFrame(loop);
+
+          // Same-page anchors go through Lenis, or the native jump cuts across its easing.
+          document.addEventListener('click', (e) => {
+            if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            const a = (e.target as Element | null)?.closest?.('a[href*="#"]') as HTMLAnchorElement | null;
+            if (!a || a.origin !== location.origin || a.pathname !== location.pathname || !a.hash) return;
+            const target = document.getElementById(decodeURIComponent(a.hash.slice(1)));
+            if (!target) return;
+            e.preventDefault();
+            lenis.scrollTo(a.hash, { offset: 0 });
+            history.pushState(null, '', a.hash);
+            // A native anchor jump also moves focus. Without this the skip link would
+            // scroll but leave the next Tab on the header.
+            if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+            target.focus({ preventScroll: true });
+          });
+
+          // Stopped while the view transition snapshots the old page, and started again
+          // if the page comes back from the back-forward cache.
+          addEventListener('pagehide', () => lenis.stop());
+          addEventListener('pageshow', () => lenis.start());
+        });
+      }
+    </script>
     <script is:inline>
       // Theme flip. The margins shrink the viewport to a line across its middle, so
       // whichever section crosses that line owns the page colour. html carries the

@@ -80,6 +80,19 @@ html {
     background-color var(--dur-theme) ease,
     color var(--dur-theme) ease;
 }
+/* Anchor links glide for everyone. Lenis adds html.lenis on wide pointer screens and
+   eases the scroll itself, so the native smoothing steps aside there. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+html.lenis {
+  scroll-behavior: auto;
+}
+[tabindex='-1']:focus {
+  outline: none;
+}
 /* The body stays clear so the hairline columns, which sit just above the html
    background, show through. html carries the page colour instead. */
 body {
