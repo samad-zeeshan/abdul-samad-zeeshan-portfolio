@@ -21,7 +21,7 @@ interface Props {
 const { title, description, image = '/og/home.png', current, tone } = Astro.props;
 // A project page paints itself in its demo's palette by overriding the tone tokens.
 const toneStyle = tone
-  ? `--tone-bg:${tone.bg};--tone-ink:${tone.ink};--tone-ink-2:${tone.ink2};--tone-accent:${tone.accent};--tone-line:${tone.line};color-scheme:${tone.scheme}`
+  ? `--tone-bg:${tone.bg};--tone-ink:${tone.ink};--tone-ink-2:${tone.ink2};--tone-accent:${tone.accent};--tone-line:${tone.line};--glow-color:${tone.accent};color-scheme:${tone.scheme}`
   : undefined;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL(withBase(image), Astro.site).href;
@@ -82,6 +82,7 @@ const ogImage = new URL(withBase(image), Astro.site).href;
     </script>
   </head>
   <body>
+    <span class="bg-glow" aria-hidden="true"></span>
     <a class="skip-link" href="#main">Skip to content</a>
     <Header current={current} />
     <main id="main">
@@ -89,6 +90,30 @@ const ogImage = new URL(withBase(image), Astro.site).href;
     </main>
     <Footer />
     <PalettePicker />
+    <script is:inline>
+      // The glow trails a fine pointer, one write per frame. Touch and reduced motion
+      // keep it resting behind the hero, where the CSS puts it.
+      (function () {
+        if (!matchMedia('(pointer: fine)').matches) return;
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        var glow = document.querySelector('.bg-glow');
+        if (!glow) return;
+        var x = 0, y = 0, queued = 0;
+        addEventListener(
+          'pointermove',
+          function (e) {
+            x = e.clientX;
+            y = e.clientY;
+            if (queued) return;
+            queued = requestAnimationFrame(function () {
+              glow.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0)';
+              queued = 0;
+            });
+          },
+          { passive: true },
+        );
+      })();
+    </script>
     <script is:inline>
       // Headline numbers count up once, alongside the entrance. The final value is in
       // the HTML, so screen readers and no-JS visitors always get the real number.

@@ -13,6 +13,8 @@
   --cream-2: #b9bcae;
   --cream-3: #9a9d90;
   --accent: #d6ff3f;
+  /* Colour of the cursor glow. Usually the accent, the first version's blue on ultramarine. */
+  --glow: var(--accent);
   --num: var(--accent);
   --name: var(--accent);
   --cat-ml: #8fb6ff;
@@ -100,6 +102,7 @@
   --cream-2: #cfd2f6;
   --cream-3: #b9bdf3;
   --accent: #ffd84d;
+  --glow: #7ea6e4;
   --num: var(--cream);
   --name: var(--cream);
   --cat-ml: #ffb3d1;
