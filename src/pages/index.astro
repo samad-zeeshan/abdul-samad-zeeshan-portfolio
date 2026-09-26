@@ -1,9 +1,8 @@
 ---
-// Home: the name in poster type, the skills graph beside a paragraph about the work,
+// Home: the name in poster type, a paragraph about the work,
 // the eight-line project index, and the tools line. The footer carries the email.
 import Base from '../layouts/Base.astro';
 import IndexRow from '../components/IndexRow.astro';
-import EvidenceMap from '../components/EvidenceMap.astro';
 import { profile, getProjects } from '../lib/site';
 
 const projects = await getProjects();
@@ -30,9 +29,6 @@ const words = profile.name.split(' ');
   </section>
 
   <section class="about wrap" aria-label="About">
-    <div class="about__graph" data-settle style="--i:2">
-      <EvidenceMap />
-    </div>
     <p class="about__text" data-settle style="--i:1">{profile.intro}</p>
   </section>
 
@@ -166,11 +162,6 @@ const words = profile.name.split(' ');
       grid-template-columns: repeat(12, minmax(0, 1fr));
       column-gap: var(--space-6);
       align-items: stretch;
-    }
-    .about__graph {
-      grid-column: 1 / 6;
-      grid-row: 1;
-      display: grid;
     }
     .about__text {
       order: 0;
