@@ -12,6 +12,12 @@
   --cream-2: #b9bcae;
   --cream-3: #9a9d90;
   --accent: #d6ff3f;
+  /* Skill dots in the graph. Four hues that read on the field and stay clear of the
+     accent, which belongs to the project squares. */
+  --cat-ml: #8fb6ff;
+  --cat-systems: #ff9d8a;
+  --cat-web: #c7a6ff;
+  --cat-infra: #6fd6e0;
   --paper: #eef1e2;
   --paper-ink: #0e100a;
   --paper-line: rgba(14, 16, 10, 0.18);

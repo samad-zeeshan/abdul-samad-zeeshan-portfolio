@@ -1,10 +1,12 @@
 ---
-// Home, laid out as a test report: the name and counted results, the rule the work
-// follows, the project index on paper, and the tools line. The footer carries the email.
+// Home, laid out as a test report: the name and counted results, the skills graph
+// beside the rule the work follows, the project index on paper, and the tools line.
+// The footer carries the email.
 import Base from '../layouts/Base.astro';
 import IndexRow from '../components/IndexRow.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import StatRail from '../components/StatRail.astro';
+import EvidenceMap from '../components/EvidenceMap.astro';
 import { profile, copy, getProjects, hasPage, siteStats, inWords, pad2, fill } from '../lib/site';
 
 const projects = await getProjects();
@@ -52,6 +54,9 @@ const introEnd = profile.intro.slice(at + tailText.length);
   </section>
 
   <section class="about wrap" data-theme="field" aria-labelledby="about-h">
+    <div class="about__graph" data-reveal>
+      <EvidenceMap />
+    </div>
     <div class="about__body" data-reveal>
       <Eyebrow as="h2" id="about-h" text={copy.eyebrows.about} />
       <p class="about__text">
@@ -122,9 +127,13 @@ const introEnd = profile.intro.slice(at + tailText.length);
   }
 
   .about {
+    display: grid;
+    gap: var(--space-6);
     padding-block: var(--space-8);
   }
+  /* On a phone the skills index is long, so the paragraph comes first. */
   .about__body {
+    order: -1;
     display: grid;
     gap: var(--space-4);
   }
@@ -193,9 +202,19 @@ const introEnd = profile.intro.slice(at + tailText.length);
     .hero__role {
       grid-column: 1 / 7;
     }
-    /* Columns 6 to 12 only, so the left reads as a report margin. */
+    .about {
+      align-items: stretch;
+    }
+    .about__graph {
+      grid-column: 1 / 6;
+      grid-row: 1;
+      display: grid;
+    }
     .about__body {
+      order: 0;
       grid-column: 6 / 13;
+      grid-row: 1;
+      align-content: start;
     }
     .tools :global(.tools__cap) {
       grid-column: 1 / 4;

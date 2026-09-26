@@ -204,8 +204,8 @@ for (const p of walk(join(root, 'src')).filter((f) => /\.(astro|css)$/.test(f)))
   }
 }
 
-// Leftovers from the removed picker, glow and graph must not come back.
-const LEFTOVER = /PalettePicker|bg-glow|EvidenceGraph|d3-force/;
+// Leftovers from the removed picker and glow must not come back.
+const LEFTOVER = /PalettePicker|bg-glow/;
 for (const p of [...walk(join(root, 'src')), join(root, 'package.json')]) {
   const t = readFileSync(p, 'utf8');
   if (LEFTOVER.test(t)) fail(`${p.slice(root.length + 1)}: references "${t.match(LEFTOVER)[0]}"`);
