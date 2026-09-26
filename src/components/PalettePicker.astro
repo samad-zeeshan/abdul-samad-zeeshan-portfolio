@@ -1,0 +1,96 @@
+---
+// Five swatches fixed at the bottom left for comparing palettes live. Hidden unless the
+// URL carries ?palette or ?pick=1, so a normal visitor never sees it.
+const palettes = [
+  { id: 'ultramarine', field: '#1f2ee8', accent: '#ffd84d' },
+  { id: 'oxblood', field: '#6b0f1a', accent: '#ffa46b' },
+  { id: 'forest', field: '#0f3d2e', accent: '#f5d547' },
+  { id: 'terracotta', field: '#8c3210', accent: '#ffd27a' },
+  { id: 'acid', field: '#0a0a0a', accent: '#d6ff3f' },
+];
+---
+
+<div class="pick" data-picker hidden role="group" aria-label="Palette">
+  {
+    palettes.map((p) => (
+      <button
+        type="button"
+        class="pick__sw"
+        data-palette-id={p.id}
+        aria-pressed="false"
+        title={p.id}
+        style={`--sw-field:${p.field};--sw-accent:${p.accent}`}
+      >
+        <span class="visually-hidden">{p.id}</span>
+      </button>
+    ))
+  }
+</div>
+
+<script is:inline>
+  (function () {
+    var q = new URLSearchParams(location.search);
+    if (!q.has('palette') && q.get('pick') !== '1') return;
+    var box = document.querySelector('[data-picker]');
+    if (!box) return;
+    box.hidden = false;
+    var root = document.documentElement;
+    var buttons = box.querySelectorAll('[data-palette-id]');
+    function mark() {
+      var cur = root.getAttribute('data-palette') || 'ultramarine';
+      buttons.forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.getAttribute('data-palette-id') === cur));
+      });
+    }
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-palette-id');
+        root.setAttribute('data-palette', id);
+        try {
+          localStorage.setItem('palette', id);
+        } catch (e) {}
+        // Keep the choice in the address, so a reload or a shared link shows the same one.
+        q.set('palette', id);
+        history.replaceState(null, '', location.pathname + '?' + q.toString() + location.hash);
+        mark();
+      });
+    });
+    mark();
+  })();
+</script>
+
+<style>
+  .pick {
+    position: fixed;
+    left: var(--space-4);
+    bottom: var(--space-4);
+    z-index: var(--z-skip);
+    display: flex;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    background: var(--field);
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    box-shadow: var(--shadow);
+  }
+  .pick[hidden] {
+    display: none;
+  }
+  .pick__sw {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border-radius: 50%;
+    border: 1.5px solid var(--line-strong);
+    background: radial-gradient(circle at 50% 50%, var(--sw-accent) 0 26%, var(--sw-field) 28%);
+    cursor: pointer;
+    transition: transform var(--dur-press) var(--ease-out);
+  }
+  .pick__sw:active {
+    transform: scale(0.92);
+  }
+  .pick__sw[aria-pressed='true'] {
+    border-color: var(--cream);
+    box-shadow: 0 0 0 2px var(--field), 0 0 0 3.5px var(--cream);
+  }
+</style>

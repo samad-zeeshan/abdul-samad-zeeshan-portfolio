@@ -7,11 +7,15 @@
 
   --field: #1f2ee8;
   --field-deep: #1824c4;
-  --cream: #f4efe2;
+  /* A touch lighter than the first cream, which sat at 6.99 to 1 on the field. */
+  --cream: #f6f2e6;
   --cream-2: #cfd2f6;
   --cream-3: #b9bdf3;
   /* One accent, kept for the graph: project squares and the highlighted path. */
   --accent: #ffd84d;
+  /* Headline numbers and the hero name. Other palettes point these at the accent. */
+  --num: var(--cream);
+  --name: var(--cream);
   --line: rgba(244, 239, 226, 0.28);
   --line-strong: rgba(244, 239, 226, 0.6);
   --shadow: 0 24px 48px -24px rgba(6, 10, 70, 0.7);
@@ -81,4 +85,116 @@
   --cream-3: #a9aee6;
   --line: rgba(244, 239, 226, 0.22);
   --shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.85);
+}
+
+
+/* Alternative palettes for comparison, switched by data-palette on <html> from the
+   ?palette= parameter. Ultramarine is the default above and needs no block. Each one
+   overrides the same tokens, so every component follows without changes. */
+
+/* Oxblood: wine field, bone ink, one warm orange for numbers and the graph. */
+:root[data-palette='oxblood'] {
+  --field: #6b0f1a;
+  --field-deep: #540b14;
+  --cream: #f1e8d6;
+  --cream-2: #e4c9c0;
+  --cream-3: #d3aea4;
+  --accent: #ffa46b;
+  --num: var(--accent);
+  --shadow: 0 24px 48px -24px rgba(40, 4, 8, 0.7);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-palette='oxblood']:not([data-theme='light']) {
+    --field: #3a0710;
+    --field-deep: #6b0f1a;
+    --cream-2: #e0c4bb;
+    --cream-3: #c9a298;
+  }
+}
+:root[data-palette='oxblood'][data-theme='dark'] {
+  --field: #3a0710;
+  --field-deep: #6b0f1a;
+  --cream-2: #e0c4bb;
+  --cream-3: #c9a298;
+}
+
+/* Forest: deep green field, chalk ink, one yellow for numbers and the graph. */
+:root[data-palette='forest'] {
+  --field: #0f3d2e;
+  --field-deep: #0a2e22;
+  --cream: #eef0e6;
+  --cream-2: #c6d8cc;
+  --cream-3: #a9c4b3;
+  --accent: #f5d547;
+  --num: var(--accent);
+  --shadow: 0 24px 48px -24px rgba(2, 20, 14, 0.7);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-palette='forest']:not([data-theme='light']) {
+    --field: #082219;
+    --field-deep: #0f3d2e;
+    --cream-2: #c0d3c6;
+    --cream-3: #9fbaa9;
+  }
+}
+:root[data-palette='forest'][data-theme='dark'] {
+  --field: #082219;
+  --field-deep: #0f3d2e;
+  --cream-2: #c0d3c6;
+  --cream-3: #9fbaa9;
+}
+
+/* Terracotta: burnt orange taken dark enough for cream text at 7 to 1. A near-black
+   accent reads at 2.4 to 1 on any field that dark, so numbers use saffron instead. */
+:root[data-palette='terracotta'] {
+  --field: #8c3210;
+  --field-deep: #742a0d;
+  --cream: #fff6e6;
+  --cream-2: #f7d7c2;
+  --cream-3: #efc2a6;
+  --accent: #ffd27a;
+  --num: var(--accent);
+  --shadow: 0 24px 48px -24px rgba(40, 12, 2, 0.7);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-palette='terracotta']:not([data-theme='light']) {
+    --field: #4a1a07;
+    --field-deep: #8c3210;
+    --cream-2: #f0cfb8;
+    --cream-3: #e2b596;
+  }
+}
+:root[data-palette='terracotta'][data-theme='dark'] {
+  --field: #4a1a07;
+  --field-deep: #8c3210;
+  --cream-2: #f0cfb8;
+  --cream-3: #e2b596;
+}
+
+/* Acid: black field, off-white body text, acid yellow-green kept for the name,
+   the numbers and the graph so long text stays easy to read. */
+:root[data-palette='acid'] {
+  --field: #0a0a0a;
+  --field-deep: #1a1a1a;
+  --cream: #eef1e2;
+  --cream-2: #b9bcae;
+  --cream-3: #9a9d90;
+  --accent: #d6ff3f;
+  --num: var(--accent);
+  --name: var(--accent);
+  --shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.85);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-palette='acid']:not([data-theme='light']) {
+    --field: #000000;
+    --field-deep: #1a1a1a;
+    --cream-2: #b9bcae;
+    --cream-3: #9a9d90;
+  }
+}
+:root[data-palette='acid'][data-theme='dark'] {
+  --field: #000000;
+  --field-deep: #1a1a1a;
+  --cream-2: #b9bcae;
+  --cream-3: #9a9d90;
 }

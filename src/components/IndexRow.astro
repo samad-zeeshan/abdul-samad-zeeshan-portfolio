@@ -106,6 +106,7 @@ const Tag = linked ? 'a' : 'div';
     transition: opacity var(--dur-hover) var(--ease-out);
   }
   .row__value {
+    color: var(--num);
     font-size: var(--step-2);
     font-weight: 500;
     letter-spacing: -0.02em;
@@ -162,7 +163,9 @@ const Tag = linked ? 'a' : 'div';
       transform: scaleX(1);
     }
     .row__hit:not(.row__hit--static):hover .row__label,
-    .row__hit:not(.row__hit--static):focus-visible .row__label {
+    .row__hit:not(.row__hit--static):focus-visible .row__label,
+    .row__hit:not(.row__hit--static):hover .row__value,
+    .row__hit:not(.row__hit--static):focus-visible .row__value {
       color: var(--field);
     }
   }
@@ -200,7 +203,9 @@ const Tag = linked ? 'a' : 'div';
     .row__hit:not(.row__hit--static):hover,
     .row__hit:not(.row__hit--static):focus-visible,
     .row__hit:not(.row__hit--static):hover .row__label,
-    .row__hit:not(.row__hit--static):focus-visible .row__label {
+    .row__hit:not(.row__hit--static):focus-visible .row__label,
+    .row__hit:not(.row__hit--static):hover .row__value,
+    .row__hit:not(.row__hit--static):focus-visible .row__value {
       color: var(--cream);
     }
   }
