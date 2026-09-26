@@ -78,13 +78,28 @@ if (docket && /\b(runs|running|operates|in production)\b/i.test(docket.raw)) {
 const tarn = entries.find((e) => e.id === 'tarn');
 if (tarn && /at scale/i.test(tarn.raw)) fail('tarn: Tarn is never "at scale"');
 
+// The skills graph may only link skills to shipped projects, since an in-progress one has
+// no numbers to back an edge and no page for the node to open.
+const facts = JSON.parse(readFileSync(join(root, 'src', 'data', 'facts.json'), 'utf8'));
+const graph = facts.graph ?? { skills: [], edges: [] };
+const skillIds = new Set(graph.skills.map((s) => s.id));
+const shipped = new Set(entries.filter((e) => e.data?.status !== 'in-progress').map((e) => e.id));
+for (const edge of graph.edges) {
+  if (!skillIds.has(edge.skill)) fail(`graph: edge names unknown skill ${edge.skill}`);
+  if (!shipped.has(edge.project)) fail(`graph: edge to ${edge.project}, which is not a shipped project`);
+  if (!edge.evidence) fail(`graph: ${edge.skill} to ${edge.project} has no evidence`);
+}
+for (const id of skillIds) {
+  if (!graph.edges.some((e) => e.skill === id)) fail(`graph: skill ${id} has no evidence`);
+}
+
 // Scan every file that renders text: content, data, pages, components, layouts.
 function walk(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
     d.isDirectory() ? walk(join(dir, d.name)) : [join(dir, d.name)],
   );
 }
-const textFiles = walk(join(root, 'src')).filter((p) => /\.(astro|mdx|json|ts)$/.test(p));
+const textFiles = walk(join(root, 'src')).filter((p) => /\.(astro|mdx|json|tsx?)$/.test(p));
 const LOCATION = /\b(Edmonton|Alberta|Canada|Dubai|UAE|Emirates|relocat\w*)\b/i;
 const BANNED = /\b(seamless\w*|powerful|cutting-edge|robust|comprehensive|leverag\w*|elevate)\b/i;
 for (const p of textFiles) {
