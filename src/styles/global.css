@@ -46,6 +46,13 @@ body {
   overflow-wrap: break-word;
   overflow-x: clip;
 }
+/* Content sits above the smoke canvas, which sits above the hairlines. The header
+   already stacks at its own higher level. */
+main,
+body > footer {
+  position: relative;
+  z-index: 1;
+}
 /* Twelve hairline columns on the layout grid, four on phones. The only texture. */
 .hair {
   position: fixed;

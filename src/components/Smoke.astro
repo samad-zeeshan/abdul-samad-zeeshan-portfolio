@@ -1,0 +1,132 @@
+---
+// A soft smoke trail behind the pointer, drawn on one fixed canvas under the page content.
+//
+// Wide screens with a mouse only. Touch, phones and reduced motion never run the script.
+---
+
+<canvas class="smoke" aria-hidden="true"></canvas>
+
+<script is:inline>
+  (function () {
+    if (!matchMedia('(hover: hover) and (pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference)').matches) return;
+    var canvas = document.currentScript.previousElementSibling;
+    var ctx = canvas.getContext('2d');
+    var root = document.documentElement;
+    // Capped at 1.5 because a full screen canvas at 2x or 3x costs four to nine times
+    // the fill work every frame, and soft gradients gain nothing from the extra pixels.
+    var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    var w = 0, h = 0, rgb = '238,241,226';
+
+    function size() {
+      w = innerWidth;
+      h = innerHeight;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    // Ink on whatever the page is showing: cream on the field, ink on paper, the
+    // project's own ink on its page, and the field colour on the accent footer.
+    // Letting the canvas parse the colour turns any CSS form into r,g,b.
+    function tint() {
+      var s = getComputedStyle(root);
+      var c = s.getPropertyValue(root.getAttribute('data-theme') === 'accent' ? '--field' : '--tone-ink').trim();
+      ctx.fillStyle = '#000';
+      ctx.fillStyle = c || '#000';
+      var v = String(ctx.fillStyle);
+      rgb = v.charAt(0) === '#'
+        ? [1, 3, 5].map(function (i) { return parseInt(v.slice(i, i + 2), 16); }).join(',')
+        : v.slice(v.indexOf('(') + 1, v.lastIndexOf(')')).split(',').slice(0, 3).join(',');
+    }
+
+    // Three copies of the pointer that trail it at different speeds, big to small.
+    var puffs = [
+      { k: 1 / 6, r: 140, x: 0, y: 0 },
+      { k: 1 / 10, r: 115, x: 0, y: 0 },
+      { k: 1 / 16, r: 90, x: 0, y: 0 },
+    ];
+    var px = 0, py = 0, moved = -1e9, rest = 0, tick = 0, fading = 0, raf = 0;
+
+    function frame(now) {
+      // Erase a little of everything each frame so old smoke thins out to nothing.
+      // Painting the page colour over it would leave an opaque sheet that hides the
+      // hairlines and goes stale the moment the page changes colour.
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = 'rgba(0,0,0,0.06)';
+      ctx.fillRect(0, 0, w, h);
+      ctx.globalCompositeOperation = 'source-over';
+
+      if (now - moved < 1500) {
+        fading = 0;
+        tick++;
+        rest++;
+        puffs.forEach(function (p, i) {
+          p.x += (px - p.x) * p.k;
+          p.y += (py - p.y) * p.k;
+          // A resting pointer still smokes, so the puffs rise and sway on their own.
+          var x = p.x + Math.sin(tick * 0.04 + i * 2.1) * 8;
+          var y = p.y - rest * 0.3;
+          var g = ctx.createRadialGradient(x, y, 0, x, y, p.r);
+          g.addColorStop(0, 'rgba(' + rgb + ',0.1)');
+          g.addColorStop(1, 'rgba(' + rgb + ',0)');
+          ctx.fillStyle = g;
+          ctx.fillRect(x - p.r, y - p.r, p.r * 2, p.r * 2);
+        });
+      } else if (++fading > 90) {
+        // Six percent a frame leaves a faint residue that 8 bit alpha never rounds
+        // away, so after 90 frames the canvas is cleared and the loop stops.
+        ctx.clearRect(0, 0, w, h);
+        raf = 0;
+        return;
+      }
+      raf = requestAnimationFrame(frame);
+    }
+
+    size();
+    tint();
+    addEventListener('resize', size);
+    new MutationObserver(tint).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    addEventListener(
+      'pointermove',
+      function (e) {
+        if (e.pointerType !== 'mouse') return;
+        px = e.clientX;
+        py = e.clientY;
+        rest = 0;
+        if (!raf) {
+          if (performance.now() - moved > 1500) {
+            puffs.forEach(function (p) { p.x = px; p.y = py; });
+          }
+          raf = requestAnimationFrame(frame);
+        }
+        moved = performance.now();
+      },
+      { passive: true },
+    );
+  })();
+</script>
+
+<style>
+  .smoke {
+    display: none;
+  }
+  @media (hover: hover) and (pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference) {
+    .smoke {
+      display: block;
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+    :global(body) {
+      cursor: crosshair;
+    }
+    :global(a),
+    :global(button),
+    :global(label),
+    :global(summary) {
+      cursor: pointer;
+    }
+  }
+</style>
