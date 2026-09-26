@@ -9,6 +9,14 @@ const number = z.object({
   label: z.string(),
   // Where the number was copied from, so a reviewer can check it against the repo.
   source: z.string(),
+  // A short lowercase judgement lifted from the label itself, never a new one.
+  verdict: z
+    .string()
+    .regex(/^[^A-Z]+$/, 'verdict must be lowercase')
+    .refine((v) => v.trim().split(/\s+/).length <= 4, 'verdict must be four words or fewer')
+    .optional(),
+  // "bad" only where the label already says the result fell short. The hero counts these.
+  tone: z.enum(['good', 'bad', 'neutral']).optional(),
 });
 
 // Only papers the README cites beside a design choice, each with what it changed.

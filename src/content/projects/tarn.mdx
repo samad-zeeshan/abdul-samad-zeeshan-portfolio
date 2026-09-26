@@ -13,9 +13,13 @@ poster: "tarn.webp"
 numbers:
   - value: "29 of 181"
     label: "Days of real attacker activity caught when an analyst reads only 100 alerts a day. The first version caught 21. Most still got through."
+    verdict: "most still got through"
+    tone: "bad"
     source: "Tarn README, graph detector budget table, rows v2 graph detector and v1"
   - value: "5,079,642"
     label: "Detector inputs recomputed with the future hidden, to prove it never peeked ahead. Zero mismatches."
+    verdict: "zero mismatches"
+    tone: "good"
     source: "Tarn README, point-in-time check table, row v2 feature engine"
 decisions:
   - "Everything the detectors learn comes from the first day only, and the code refuses any fit that reaches past it, so no test day leaks in."

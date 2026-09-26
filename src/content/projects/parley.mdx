@@ -13,9 +13,13 @@ poster: "parley.webp"
 numbers:
   - value: "232 of 232"
     label: "Every time the booking system failed mid-call, all 232 times, Parley said so and offered a callback instead of inventing a price or address."
+    verdict: "never invented a fact"
+    tone: "good"
     source: "Parley README, booking API faults paragraph"
   - value: "17 of 40"
     label: "Scripted calls booked start to finish by voice with no internet. Not good enough yet. Calls mixing English and Arabic fail most."
+    verdict: "not good enough yet"
+    tone: "bad"
     source: "Parley README, calls booked table, row All, column local"
 decisions:
   - "No model decides the next step. Replies are fixed templates, and any model rewording that adds an unknown fact is thrown away."
