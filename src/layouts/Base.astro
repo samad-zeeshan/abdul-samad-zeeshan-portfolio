@@ -37,7 +37,7 @@ const ogImage = new URL(withBase(image), Astro.site).href;
     <link rel="canonical" href={canonical} />
     <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={textFont} as="font" type="font/woff2" crossorigin />
-    <meta name="theme-color" content={tone ? tone.bg : '#1f2ee8'} />
+    <meta name="theme-color" content={tone ? tone.bg : '#0a0a0a'} />
     <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
     <link rel="icon" href={withBase('/favicon-32.png')} type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />
@@ -54,8 +54,8 @@ const ogImage = new URL(withBase(image), Astro.site).href;
     <meta name="twitter:card" content="summary_large_image" />
 
     <script is:inline>
-      // Palette for comparison: ?palette= wins, then the last choice this browser made.
-      // Runs before first paint so the page never flashes the default blue.
+      // Palette: ?palette= wins, then the last choice this browser made, else acid.
+      // Runs before first paint so a chosen palette never flashes the default.
       (function () {
         var known = ['ultramarine', 'oxblood', 'forest', 'terracotta', 'acid'];
         var p = new URLSearchParams(location.search).get('palette');

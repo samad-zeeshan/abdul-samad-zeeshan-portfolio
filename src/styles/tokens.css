@@ -1,24 +1,27 @@
-/* Design tokens. One dominant colour: a saturated ultramarine field with cream ink,
-   set in a condensed poster face. Project pages swap in their own demo's palette
-   through the --tone-* tokens, so each keeps its voice inside the same system. */
+/* Design tokens. One dominant colour field with light ink, set in a condensed poster
+   face. The field is acid by default and data-palette on <html> swaps in another.
+   Project pages paint their body in their own demo's palette through --tone-*. */
 
 :root {
   color-scheme: dark;
 
-  --field: #1f2ee8;
-  --field-deep: #1824c4;
-  /* A touch lighter than the first cream, which sat at 6.99 to 1 on the field. */
-  --cream: #f6f2e6;
-  --cream-2: #cfd2f6;
-  --cream-3: #b9bdf3;
-  /* One accent, kept for the graph: project squares and the highlighted path. */
-  --accent: #ffd84d;
-  /* Headline numbers and the hero name. Other palettes point these at the accent. */
-  --num: var(--cream);
-  --name: var(--cream);
+  /* One accent for projects in the graph and, in most palettes, the numbers. The four
+     --cat colours tell skill categories apart without matching the accent. */
+  --field: #0a0a0a;
+  --field-deep: #1a1a1a;
+  --cream: #eef1e2;
+  --cream-2: #b9bcae;
+  --cream-3: #9a9d90;
+  --accent: #d6ff3f;
+  --num: var(--accent);
+  --name: var(--accent);
+  --cat-ml: #8fb6ff;
+  --cat-systems: #ff9d8a;
+  --cat-web: #c7a6ff;
+  --cat-infra: #6fd6e0;
   --line: rgba(244, 239, 226, 0.28);
   --line-strong: rgba(244, 239, 226, 0.6);
-  --shadow: 0 24px 48px -24px rgba(6, 10, 70, 0.7);
+  --shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.85);
 
   --font-display: 'Big Shoulders Display', 'Arial Narrow', 'Roboto Condensed', sans-serif-condensed, sans-serif;
   --font-text: 'Schibsted Grotesk', 'Segoe UI', system-ui, sans-serif;
@@ -67,30 +70,58 @@
   --tone-line: var(--line);
 }
 
-/* Dark mode deepens the field to night blue and keeps ultramarine for fills. */
+/* Dark mode drops the field to pure black. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
+    --field: #000000;
+    --field-deep: #1a1a1a;
+    --cream-2: #b9bcae;
+    --cream-3: #9a9d90;
+    --line: rgba(244, 239, 226, 0.22);
+  }
+}
+:root[data-theme='dark'] {
+  --field: #000000;
+  --field-deep: #1a1a1a;
+  --cream-2: #b9bcae;
+  --cream-3: #9a9d90;
+  --line: rgba(244, 239, 226, 0.22);
+}
+
+/* The other palettes override the same tokens, so every component follows. The
+   picker and ?palette= set the attribute, and the choice is kept in localStorage. */
+
+/* Ultramarine: the first palette. Cream is a touch lighter than it was, which sat at
+   6.99 to 1 on the field. */
+:root[data-palette='ultramarine'] {
+  --field: #1f2ee8;
+  --field-deep: #1824c4;
+  --cream: #f6f2e6;
+  --cream-2: #cfd2f6;
+  --cream-3: #b9bdf3;
+  --accent: #ffd84d;
+  --num: var(--cream);
+  --name: var(--cream);
+  --cat-ml: #ffb3d1;
+  --cat-systems: #9ef0c9;
+  --cat-web: #ffc9a3;
+  --cat-infra: #d9dcff;
+  --shadow: 0 24px 48px -24px rgba(6, 10, 70, 0.7);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-palette='ultramarine']:not([data-theme='light']) {
     --field: #0c1150;
     --field-deep: #1f2ee8;
     --cream-2: #c3c7ee;
     --cream-3: #a9aee6;
-    --line: rgba(244, 239, 226, 0.22);
-    --shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.85);
   }
 }
-:root[data-theme='dark'] {
+:root[data-palette='ultramarine'][data-theme='dark'] {
   --field: #0c1150;
   --field-deep: #1f2ee8;
   --cream-2: #c3c7ee;
   --cream-3: #a9aee6;
-  --line: rgba(244, 239, 226, 0.22);
-  --shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.85);
 }
-
-
-/* Alternative palettes for comparison, switched by data-palette on <html> from the
-   ?palette= parameter. Ultramarine is the default above and needs no block. Each one
-   overrides the same tokens, so every component follows without changes. */
 
 /* Oxblood: wine field, bone ink, one warm orange for numbers and the graph. */
 :root[data-palette='oxblood'] {
@@ -101,6 +132,11 @@
   --cream-3: #d3aea4;
   --accent: #ffa46b;
   --num: var(--accent);
+  --name: var(--cream);
+  --cat-ml: #ffc2d6;
+  --cat-systems: #b8e6c9;
+  --cat-web: #c9c2ff;
+  --cat-infra: #9fd8ef;
   --shadow: 0 24px 48px -24px rgba(40, 4, 8, 0.7);
 }
 @media (prefers-color-scheme: dark) {
@@ -127,6 +163,11 @@
   --cream-3: #a9c4b3;
   --accent: #f5d547;
   --num: var(--accent);
+  --name: var(--cream);
+  --cat-ml: #ffb8a8;
+  --cat-systems: #a8d8ff;
+  --cat-web: #e0b8ff;
+  --cat-infra: #a6f0c9;
   --shadow: 0 24px 48px -24px rgba(2, 20, 14, 0.7);
 }
 @media (prefers-color-scheme: dark) {
@@ -154,6 +195,11 @@
   --cream-3: #efc2a6;
   --accent: #ffd27a;
   --num: var(--accent);
+  --name: var(--cream);
+  --cat-ml: #bfe0ff;
+  --cat-systems: #c8f0c0;
+  --cat-web: #f2c4ff;
+  --cat-infra: #a8f0e8;
   --shadow: 0 24px 48px -24px rgba(40, 12, 2, 0.7);
 }
 @media (prefers-color-scheme: dark) {
@@ -169,32 +215,4 @@
   --field-deep: #8c3210;
   --cream-2: #f0cfb8;
   --cream-3: #e2b596;
-}
-
-/* Acid: black field, off-white body text, acid yellow-green kept for the name,
-   the numbers and the graph so long text stays easy to read. */
-:root[data-palette='acid'] {
-  --field: #0a0a0a;
-  --field-deep: #1a1a1a;
-  --cream: #eef1e2;
-  --cream-2: #b9bcae;
-  --cream-3: #9a9d90;
-  --accent: #d6ff3f;
-  --num: var(--accent);
-  --name: var(--accent);
-  --shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.85);
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-palette='acid']:not([data-theme='light']) {
-    --field: #000000;
-    --field-deep: #1a1a1a;
-    --cream-2: #b9bcae;
-    --cream-3: #9a9d90;
-  }
-}
-:root[data-palette='acid'][data-theme='dark'] {
-  --field: #000000;
-  --field-deep: #1a1a1a;
-  --cream-2: #b9bcae;
-  --cream-3: #9a9d90;
 }

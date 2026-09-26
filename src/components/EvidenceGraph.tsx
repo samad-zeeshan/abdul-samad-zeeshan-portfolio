@@ -41,7 +41,7 @@ function readPalette(): Palette {
     ink: v('--cream', '#f6f2e6'),
     ink2: v('--cream-2', '#cfd2f6'),
     accent: v('--accent', '#ffd84d'),
-    field: v('--field', '#1f2ee8'),
+    field: v('--field', '#0a0a0a'),
     display: v('--font-display', 'sans-serif'),
     text: v('--font-text', 'sans-serif'),
   };
