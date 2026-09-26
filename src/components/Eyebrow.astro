@@ -1,0 +1,25 @@
+---
+// Mono run-header label that opens every section, like the header line of a test report.
+interface Props {
+  text: string;
+  as?: 'p' | 'h2' | 'h3' | 'span';
+  id?: string;
+  class?: string;
+}
+const { text, as: Tag = 'p', id, class: cls } = Astro.props;
+---
+
+<Tag class:list={['eyebrow', cls]} id={id}>{text}</Tag>
+
+<style>
+  /* Source text stays in sentence case so screen readers read words, not letters. */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: var(--step--1);
+    line-height: 1.4;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tone-ink-2);
+  }
+</style>

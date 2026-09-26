@@ -1,5 +1,5 @@
 ---
-// Site header, always on the field colour so project pages sit inside the system.
+// Site header with no fill of its own, so it takes the colour of whatever theme the page is in.
 import { profile } from '../lib/site';
 import { withBase } from '../lib/paths';
 
@@ -19,25 +19,25 @@ const onHome = current === undefined;
       <a href={withBase('/#work')}>Projects</a>
       <a href={withBase('/resume.pdf')} type="application/pdf">Resume</a>
       <a href={profile.github} rel="noopener">GitHub</a>
-      <a href={`mailto:${profile.email}`}>Email</a>
     </nav>
   </div>
 </header>
 
 <style>
   .head {
-    background: var(--field);
-    color: var(--cream);
-    border-bottom: 1px solid var(--line);
+    position: relative;
+    z-index: var(--z-header);
   }
+  /* The right padding keeps the links clear of the fixed email pill. */
   .head__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: var(--space-2) var(--space-5);
-    min-height: 3.75rem;
-    padding-block: var(--space-2);
+    min-height: 5rem;
+    padding-block: var(--space-4) var(--space-2);
+    padding-right: calc(var(--gutter) + 6.5rem);
   }
   .head__name {
     font-family: var(--font-display);
@@ -63,7 +63,9 @@ const onHome = current === undefined;
   .head__nav a:focus-visible {
     background-size: 100% 1px;
   }
-  .head :focus-visible {
-    outline-color: var(--cream);
+  @media (min-width: 60rem) {
+    .head__inner {
+      padding-right: calc(var(--gutter) + 9rem);
+    }
   }
 </style>

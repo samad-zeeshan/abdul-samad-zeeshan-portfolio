@@ -1,10 +1,10 @@
 ---
-// Page shell: head meta for search and share cards, the header and footer, and the
-// one-time entrance and count-up script.
+// Page shell: head meta, the hairline columns, header, email pill and footer, and the
+// small scripts for the entrance, count-up, section reveals and theme flips.
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { profile } from '../lib/site';
+import { profile, copy } from '../lib/site';
 import { withBase } from '../lib/paths';
 import displayFont from '../assets/fonts/BigShouldersDisplay-var.woff2?url';
 import textFont from '../assets/fonts/SchibstedGrotesk-var.woff2?url';
@@ -20,8 +20,20 @@ interface Props {
 
 const { title, description, image = '/og/home.png', current, tone } = Astro.props;
 // A project page paints itself in its demo's palette by overriding the tone tokens.
+// Verdicts follow the site rule, accent on a dark page and ink on a light one.
 const toneStyle = tone
-  ? `--tone-bg:${tone.bg};--tone-ink:${tone.ink};--tone-ink-2:${tone.ink2};--tone-accent:${tone.accent};--tone-line:${tone.line};color-scheme:${tone.scheme}`
+  ? [
+      `--tone-bg:${tone.bg}`,
+      `--tone-ink:${tone.ink}`,
+      `--tone-ink-2:${tone.ink2}`,
+      `--tone-accent:${tone.accent}`,
+      `--tone-line:${tone.line}`,
+      `--hi:${tone.scheme === 'dark' ? tone.accent : tone.ink}`,
+      `--hair:color-mix(in srgb, ${tone.ink} ${tone.scheme === 'dark' ? 5 : 7}%, transparent)`,
+      `--pill-bg:${tone.accent}`,
+      `--pill-ink:${tone.bg}`,
+      `color-scheme:${tone.scheme}`,
+    ].join(';')
   : undefined;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL(withBase(image), Astro.site).href;
@@ -83,8 +95,20 @@ const ogImage = new URL(withBase(image), Astro.site).href;
     </script>
   </head>
   <body>
+    <div class="hair" aria-hidden="true">
+      <div class="wrap hair__grid">
+        {Array.from({ length: 12 }, () => <span />)}
+      </div>
+    </div>
     <a class="skip-link" href="#main">Skip to content</a>
     <Header current={current} />
+    <a class="pill" href={`mailto:${profile.email}`}>
+      <svg class="pill__icon" viewBox="0 0 16 12" width="16" height="12" aria-hidden="true">
+        <path d="M1 1h14v10H1zM1 1l7 5.5L15 1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+      </svg>
+      <span class="pill__long">{copy.pill.long}</span>
+      <span class="pill__short">{copy.pill.short}</span>
+    </a>
     <main id="main">
       <slot />
     </main>
@@ -122,6 +146,46 @@ const ogImage = new URL(withBase(image), Astro.site).href;
           }
           requestAnimationFrame(tick);
         });
+      })();
+    </script>
+    <script is:inline>
+      // Sections fade up once when 15 percent is on screen. Reduced motion never hides
+      // them in the first place, see global.css.
+      (function () {
+        var els = document.querySelectorAll('[data-reveal]');
+        if (!('IntersectionObserver' in window)) {
+          els.forEach(function (el) { el.classList.add('is-in'); });
+          return;
+        }
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (e) {
+              if (!e.isIntersecting) return;
+              e.target.classList.add('is-in');
+              io.unobserve(e.target);
+            });
+          },
+          { threshold: 0.15 },
+        );
+        els.forEach(function (el) { io.observe(el); });
+      })();
+    </script>
+    <script is:inline>
+      // Theme flip. The margins shrink the viewport to a line across its middle, so
+      // whichever section crosses that line owns the page colour. html carries the
+      // colour and transitions it, so every section and the header follow.
+      (function () {
+        if (!('IntersectionObserver' in window)) return;
+        var root = document.documentElement;
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (e) {
+              if (e.isIntersecting) root.setAttribute('data-theme', e.target.getAttribute('data-theme'));
+            });
+          },
+          { rootMargin: '-50% 0px -50% 0px' },
+        );
+        document.querySelectorAll('body [data-theme]').forEach(function (el) { io.observe(el); });
       })();
     </script>
   </body>

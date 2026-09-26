@@ -1,19 +1,37 @@
 ---
-// Footer on the field: the email as the last big line, then one line pointing to GitHub.
-import { profile } from '../lib/site';
+// Footer as an accent card: one line of voice, the email as the last big line, a
+// numbered nav, and where the numbers come from.
+import { profile, copy, pad2 } from '../lib/site';
+import { withBase } from '../lib/paths';
 
 // Fixed rather than new Date(), so a rebuild in a later year does not change the page.
 const year = '2026';
+const hrefs = [withBase('/#work'), withBase('/resume.pdf'), profile.github];
+const links = copy.footer.nav.map((label, i) => ({ label, href: hrefs[i], n: pad2(i + 1) }));
 ---
 
-<footer class="foot" id="contact">
+<footer class="foot" id="contact" data-theme="accent">
   <div class="wrap">
-    <a class="foot__email" href={`mailto:${profile.email}`} aria-label={`Email ${profile.email}`}>{profile.email}</a>
-    <div class="foot__meta">
-      <p>
-        Everything else I have built is on <a class="link" href={profile.github} rel="noopener">GitHub</a>.
-      </p>
-      <p>{profile.name}, {year}</p>
+    <div class="foot__card">
+      <p class="foot__voice">{copy.footer.voice}</p>
+      <a class="foot__email" href={`mailto:${profile.email}`} aria-label={`Email ${profile.email}`}>{profile.email}</a>
+      <nav class="foot__nav" aria-label="Footer">
+        <ol>
+          {
+            links.map((l) => (
+              <li>
+                <a href={l.href} rel={l.href.startsWith('http') ? 'noopener' : undefined}>
+                  <span class="foot__n" aria-hidden="true">{l.n}</span> {l.label}
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+      <div class="foot__base">
+        <p>{profile.name}, {year}</p>
+        <p>{copy.footer.note}</p>
+      </div>
     </div>
   </div>
 </footer>
@@ -21,23 +39,29 @@ const year = '2026';
 <style>
   .foot {
     margin-top: var(--space-9);
-    padding-block: var(--space-8) var(--space-6);
-    background: var(--field);
-    color: var(--cream);
-    --tone-accent: var(--cream);
-    --tone-ink-2: var(--cream-2);
+    padding-bottom: var(--gutter);
   }
-  /* Room for the fixed palette picker, so it never covers the last line. */
-  @media (min-width: 60rem) {
-    .foot {
-      padding-bottom: calc(var(--space-6) + 3.5rem);
-    }
+  .foot__card {
+    display: grid;
+    gap: var(--space-6);
+    padding: var(--space-7) var(--space-5) var(--space-5);
+    border-radius: 12px;
+    background: var(--accent);
+    color: var(--field);
   }
   .foot :focus-visible {
-    outline-color: var(--cream);
+    outline-color: var(--field);
+  }
+  .foot__voice {
+    max-width: 22ch;
+    font-family: var(--font-verdict);
+    font-style: italic;
+    font-size: var(--step-3);
+    line-height: 1.05;
   }
   .foot__email {
     display: inline-block;
+    width: fit-content;
     font-family: var(--font-display);
     font-weight: 800;
     font-size: clamp(1.75rem, 0.2rem + 8.4vw, 9rem);
@@ -53,15 +77,37 @@ const year = '2026';
   .foot__email:focus-visible {
     background-size: 100% 0.06em;
   }
-  .foot__meta {
+  .foot__nav ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    font-family: var(--font-mono);
+    font-size: var(--step-0);
+  }
+  .foot__nav a {
+    display: inline-block;
+    padding-block: var(--space-2);
+    text-decoration: none;
+  }
+  .foot__nav a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  .foot__n {
+    opacity: 0.6;
+  }
+  .foot__base {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--space-3) var(--space-6);
-    margin-top: var(--space-8);
     padding-top: var(--space-4);
-    border-top: 1px solid var(--line);
+    border-top: 1px solid rgba(14, 16, 10, 0.25);
     font-size: var(--step--1);
-    color: var(--cream-2);
+  }
+  @media (min-width: 60rem) {
+    .foot__card {
+      padding: var(--space-8) var(--space-7) var(--space-6);
+    }
   }
 </style>

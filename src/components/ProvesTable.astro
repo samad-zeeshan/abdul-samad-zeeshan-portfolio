@@ -1,0 +1,69 @@
+---
+// What one project proves: its skills by category, each beside the README sentence
+// that backs it. Replaces the old skills graph with something that reads on a phone.
+import Eyebrow from './Eyebrow.astro';
+import { provesFor } from '../lib/facts';
+
+interface Props {
+  projectId: string;
+}
+const groups = provesFor(Astro.props.projectId);
+---
+
+<div class="proves">
+  {
+    groups.map((g) => (
+      <div class="proves__group">
+        <Eyebrow as="h3" text={g.label} class="proves__cat" />
+        <dl class="proves__list">
+          {g.rows.map((r) => (
+            <div class="proves__row">
+              <dt class="proves__skill">{r.skill.label}</dt>
+              <dd class="proves__ev">{r.evidence}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .proves {
+    display: grid;
+    gap: var(--space-7);
+  }
+  .proves__group {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .proves__row {
+    display: grid;
+    gap: var(--space-2);
+    padding-block: var(--space-4);
+    border-top: 1px solid var(--tone-line);
+  }
+  .proves__row:last-child {
+    border-bottom: 1px solid var(--tone-line);
+  }
+  .proves__skill {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--step-1);
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+  .proves__ev {
+    max-width: 62ch;
+    font-size: var(--step-0);
+    line-height: 1.55;
+  }
+  @media (min-width: 60rem) {
+    .proves__row {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+      column-gap: var(--space-6);
+      align-items: baseline;
+    }
+  }
+</style>
