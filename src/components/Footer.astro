@@ -19,8 +19,11 @@ const links = copy.footer.nav.map((label, i) => ({ label, href: hrefs[i], n: pad
           {
             links.map((l) => (
               <li>
-                <a href={l.href} rel={l.href.startsWith('http') ? 'noopener' : undefined}>
-                  <span class="foot__n" aria-hidden="true">{l.n}</span> {l.label}
+                <a href={l.href} rel={l.href.startsWith('http') ? 'noopener' : undefined} data-magnetic>
+                  <span class="mag">
+                    <span class="foot__n" aria-hidden="true">{l.n}</span> {l.label}
+                  </span>
+                  <span class="fill" aria-hidden="true"></span>
                 </a>
               </li>
             ))
@@ -79,14 +82,21 @@ const links = copy.footer.nav.map((label, i) => ({ label, href: hrefs[i], n: pad
     font-family: var(--font-mono);
     font-size: var(--step-0);
   }
+  /* Pill shaped so the rising fill has an edge to fill up to. */
   .foot__nav a {
-    display: inline-block;
-    padding-block: var(--space-2);
+    display: inline-flex;
+    gap: 0.5em;
+    padding: var(--space-2) var(--space-4);
+    margin-inline: calc(var(--space-4) * -1);
+    border-radius: 999px;
     text-decoration: none;
   }
-  .foot__nav a:hover {
-    text-decoration: underline;
-    text-underline-offset: 0.25em;
+  .foot__nav a:hover,
+  .foot__nav a:focus-visible {
+    color: var(--accent);
+  }
+  .foot__nav .fill {
+    background: var(--field);
   }
   .foot__n {
     opacity: 0.6;

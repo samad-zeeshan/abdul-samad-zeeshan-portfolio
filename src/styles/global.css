@@ -240,7 +240,7 @@ code {
   color: var(--tone-ink-2);
 }
 
-/* A pressable pill used for the demo and repo links: hover fills, press sinks. */
+/* A pressable pill used for the demo and repo links. The hover fill is further down. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -254,10 +254,6 @@ code {
   text-decoration: none;
   color: var(--tone-ink);
   background: transparent;
-  transition:
-    background-color var(--dur-press) ease,
-    color var(--dur-press) ease,
-    transform var(--dur-press) var(--ease-out);
 }
 .btn__arrow {
   display: inline-block;
@@ -268,15 +264,6 @@ code {
   color: var(--tone-bg);
 }
 @media (hover: hover) and (pointer: fine) {
-  .btn:hover {
-    background: var(--tone-ink);
-    color: var(--tone-bg);
-  }
-  .btn--solid:hover {
-    background: var(--tone-accent);
-    border-color: var(--tone-accent);
-    color: var(--tone-bg);
-  }
   .btn:hover .btn__arrow {
     transform: translate(2px, -2px);
   }
@@ -353,5 +340,103 @@ code {
   .btn,
   .btn__arrow {
     transition-property: background-color, color;
+  }
+}
+
+/* Magnetic pills. The script in Base pulls them toward the pointer, and an ellipse
+   rises from below on hover. It starts 76 percent up so its curved bottom edge is
+   what shows first, which reads as liquid rather than a flat bar. */
+/* No weight on the position, so the fixed email pill stays fixed. */
+:where([data-magnetic]) {
+  position: relative;
+}
+[data-magnetic] {
+  overflow: hidden;
+  will-change: transform;
+  transition:
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.2s ease,
+    background-color var(--dur-theme) ease;
+}
+[data-magnetic] > .mag {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* The script sets this while the pointer moves, so the pull tracks with no lag. */
+[data-magnetic].is-live,
+[data-magnetic].is-live > .mag {
+  transition:
+    color 0.2s ease 0.25s,
+    background-color var(--dur-theme) ease;
+}
+.fill {
+  position: absolute;
+  inset: -50% auto auto -25%;
+  width: 150%;
+  height: 200%;
+  border-radius: 50%;
+  transform: translateY(-76%);
+  transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+  pointer-events: none;
+}
+[data-magnetic]:hover .fill,
+[data-magnetic]:focus-visible .fill {
+  transform: translateY(0);
+}
+/* The text changes colour once the fill is about halfway up behind it. */
+[data-magnetic]:hover,
+[data-magnetic]:focus-visible {
+  transition-delay: 0s, 0.25s, 0s;
+}
+.btn .fill {
+  background: var(--tone-ink);
+}
+.btn:hover,
+.btn:focus-visible {
+  color: var(--tone-bg);
+}
+.btn--solid .fill {
+  background: var(--tone-accent);
+}
+.pill .fill {
+  background: var(--field);
+}
+.pill:hover,
+.pill:focus-visible {
+  color: var(--accent);
+}
+
+/* Text links get a small dot under them on hover. */
+.dot {
+  position: relative;
+}
+.dot::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: currentColor;
+  transform: scale(0);
+  transition: transform 0.25s var(--ease-out);
+  pointer-events: none;
+}
+.dot:hover::after,
+.dot:focus-visible::after {
+  transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-magnetic],
+  [data-magnetic] > .mag,
+  .fill {
+    transition: none;
   }
 }

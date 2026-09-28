@@ -1,6 +1,6 @@
 ---
 // One line of the project index: its number, the name in poster type, what it does,
-// and the lead result with its verdict. A still from the demo shows on hover.
+// and the lead result with its verdict. The home page's follower shows the demo still.
 import type { Project } from '../lib/site';
 import { hasPage, countTarget, pad2 } from '../lib/site';
 import { withBase } from '../lib/paths';
@@ -17,8 +17,11 @@ const Tag = linked ? 'a' : 'div';
 ---
 
 <li class="row" data-settle style={`--i:${index}`}>
-  <Tag class:list={['row__hit', { 'row__hit--static': !linked }]} href={linked ? withBase(`/projects/${project.id}/`) : undefined}>
-    <span class="row__fill" aria-hidden="true"></span>
+  <Tag
+    class:list={['row__hit', { 'row__hit--static': !linked }]}
+    href={linked ? withBase(`/projects/${project.id}/`) : undefined}
+    data-follow={linked ? project.id : undefined}
+  >
     <span class="row__index mono" aria-hidden="true">{pad2(index + 1)}</span>
     <h3 class="row__name" translate="no" style={`view-transition-name: name-${project.id}`}>{d.title}</h3>
     <p class="row__problem">{d.problem}</p>
@@ -43,19 +46,6 @@ const Tag = linked ? 'a' : 'div';
         </p>
       )
     }
-    {
-      d.poster && (
-        <img
-          class="row__poster"
-          src={withBase(`/posters/${d.poster}`)}
-          alt=""
-          width="640"
-          height={d.gif && d.gif.height / d.gif.width < 0.6 ? 360 : 400}
-          loading="lazy"
-          decoding="async"
-        />
-      )
-    }
   </Tag>
 </li>
 
@@ -77,18 +67,7 @@ const Tag = linked ? 'a' : 'div';
     margin-inline: calc(var(--space-2) * -1);
     text-decoration: none;
     color: var(--tone-ink);
-    transition: color var(--dur-hover) var(--ease-out);
-  }
-  /* The ink fill wipes in from the left on hover. A scaleX transition stays on the
-     compositor, and unlike a keyframe it reverses mid-way when the pointer moves on. */
-  .row__fill {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: var(--tone-ink);
-    transform: scaleX(0);
-    transform-origin: left center;
-    transition: transform var(--dur-hover) var(--ease-out);
+    transition: opacity 0.4s var(--ease-out);
   }
   .row__index {
     font-size: var(--step-1);
@@ -99,13 +78,14 @@ const Tag = linked ? 'a' : 'div';
     font-weight: 800;
     line-height: 0.84;
     transform-origin: left center;
-    transition: transform var(--dur-press) var(--ease-out);
+    transition: transform 0.4s var(--ease-out);
     width: fit-content;
   }
   .row__problem {
     max-width: 40ch;
     font-size: var(--step-1);
     line-height: 1.4;
+    transition: transform 0.4s var(--ease-out);
   }
   .row__num {
     display: grid;
@@ -143,9 +123,6 @@ const Tag = linked ? 'a' : 'div';
     line-height: 1;
     transition: color var(--dur-hover) var(--ease-out);
   }
-  .row__poster {
-    display: none;
-  }
 
   @media (min-width: 60rem) {
     /* Twelve columns with the same gap as the hairlines, so each part starts on a line. */
@@ -173,50 +150,25 @@ const Tag = linked ? 'a' : 'div';
       grid-column: 10 / 13;
       padding-bottom: 0.35em;
     }
-    .row__poster {
-      display: block;
-      position: absolute;
-      right: var(--space-4);
-      top: 50%;
-      z-index: var(--z-preview);
-      width: min(24rem, 26vw);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      opacity: 0;
-      transform: translateY(-50%) translateX(24px) rotate(1.5deg) scale(0.96);
-      transition:
-        opacity var(--dur-hover) var(--ease-out),
-        transform var(--dur-hover) var(--ease-out);
-      pointer-events: none;
-    }
   }
 
+  /* The list dims and the hovered row stays lit, so the eye lands on one project while
+     the follower carries its still. Touch keeps every row at full strength. */
   @media (hover: hover) and (pointer: fine) {
-    .row__hit:not(.row__hit--static):hover,
-    .row__hit:not(.row__hit--static):focus-visible,
-    .row__hit:not(.row__hit--static):hover .row__label,
-    .row__hit:not(.row__hit--static):focus-visible .row__label,
-    .row__hit:not(.row__hit--static):hover .row__value,
-    .row__hit:not(.row__hit--static):focus-visible .row__value,
-    .row__hit:not(.row__hit--static):hover .row__verdict,
-    .row__hit:not(.row__hit--static):focus-visible .row__verdict {
-      color: var(--tone-bg);
+    :global(.work__list:hover) .row__hit {
+      opacity: 0.33;
     }
-    .row__hit:not(.row__hit--static):hover .row__fill,
-    .row__hit:not(.row__hit--static):focus-visible .row__fill {
-      transform: scaleX(1);
-    }
-  }
-  /* The still replaces the number while previewed, so the two never overlap. */
-  @media (hover: hover) and (pointer: fine) and (min-width: 60rem) {
-    .row__hit:hover .row__poster,
-    .row__hit:focus-visible .row__poster {
+    :global(.work__list) .row__hit:hover {
       opacity: 1;
-      transform: translateY(-50%) translateX(0) rotate(-1.5deg) scale(1);
     }
-    .row__hit:hover .row__num:has(+ .row__poster),
-    .row__hit:focus-visible .row__num:has(+ .row__poster) {
-      opacity: 0;
+    .row__hit:not(.row__hit--static):hover .row__name {
+      transform: translateX(-0.1em);
+    }
+    .row__hit:not(.row__hit--static):hover .row__problem {
+      transform: translateX(0.1em);
+    }
+    .row__hit:not(.row__hit--static):hover:active .row__name {
+      transform: translateX(-0.1em) scale(0.985);
     }
   }
   .row__hit:not(.row__hit--static):active .row__name {

@@ -16,9 +16,9 @@ const onHome = current === undefined;
       {profile.name}
     </a>
     <nav class="head__nav" aria-label="Primary">
-      <a href={withBase('/#work')}>Projects</a>
-      <a href={withBase('/resume.pdf')} type="application/pdf">Resume</a>
-      <a href={profile.github} rel="noopener">GitHub</a>
+      <a class="dot" href={withBase('/#work')}>Projects</a>
+      <a class="dot" href={withBase('/resume.pdf')} type="application/pdf">Resume</a>
+      <a class="dot" href={profile.github} rel="noopener">GitHub</a>
     </nav>
   </div>
 </header>

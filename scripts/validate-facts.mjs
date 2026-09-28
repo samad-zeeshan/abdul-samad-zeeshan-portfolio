@@ -178,6 +178,7 @@ for (const [k, t] of Object.entries(copy.stats)) plain(`stat label ${k}`, t, 6);
 plain('footer note', copy.footer.note, 25);
 copy.footer.nav.forEach((t, i) => plain(`footer nav ${i + 1}`, t, 4));
 Object.entries(copy.pill).forEach(([k, t]) => plain(`pill ${k}`, t, 4));
+plain('follower disc', copy.follower.disc, 3);
 
 // The hero rail, counted the same way src/lib/site.ts counts it.
 const shippedEntries = entries.filter((e) => e.data && (e.data.status ?? 'shipped') === 'shipped');
@@ -204,8 +205,8 @@ for (const p of walk(join(root, 'src')).filter((f) => /\.(astro|css)$/.test(f)))
   }
 }
 
-// Leftovers from the removed picker, glow and graph must not come back.
-const LEFTOVER = /PalettePicker|bg-glow|EvidenceGraph|d3-force/;
+// Leftovers from the removed picker and glow must not come back.
+const LEFTOVER = /PalettePicker|bg-glow/;
 for (const p of [...walk(join(root, 'src')), join(root, 'package.json')]) {
   const t = readFileSync(p, 'utf8');
   if (LEFTOVER.test(t)) fail(`${p.slice(root.length + 1)}: references "${t.match(LEFTOVER)[0]}"`);
