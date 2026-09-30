@@ -1,0 +1,131 @@
+---
+// A giant name drawn as a thin outline, with a solid copy on top that shows only
+// where the pointer is.
+//
+// Without the effect the solid copy covers the outline, so the name looks unchanged.
+interface Props {
+  text: string;
+  rise?: boolean;
+}
+const { text, rise = false } = Astro.props;
+const words = text.split(' ');
+---
+
+<span class="name" data-lit>
+  {
+    ['outline', 'lit'].map((layer) => (
+      <span class={`name__${layer}`} aria-hidden={layer === 'outline' ? 'true' : undefined}>
+        {rise
+          ? words.map((w, i) => (
+              <span class="name__mask">
+                <span class="name__word" data-rise style={`--i:${i}`}>
+                  {w}
+                </span>
+              </span>
+            ))
+          : text}
+      </span>
+    ))
+  }
+</span>
+
+<script>
+  // Same gate as the CSS below, checked first so phones and touch never pay for it.
+  const wide = '(hover: hover) and (pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference)';
+  const OPEN = 220;
+  const TWEEN = 600;
+  // The site's in-out curve, cubic-bezier(.84, 0, .16, 1), is close to a quintic.
+  const ease = (t: number) => (t < 0.5 ? 16 * t ** 5 : 1 - (-2 * t + 2) ** 5 / 2);
+
+  function light(block: HTMLElement) {
+    const lit = block.querySelector<HTMLElement>('.name__lit');
+    if (!lit) return;
+    let mx = 0, my = 0, tx = 0, ty = 0;
+    let r = 0, from = 0, to = 0, t0 = 0, raf = 0;
+
+    const aim = (e: PointerEvent) => {
+      const b = block.getBoundingClientRect();
+      tx = e.clientX - b.left;
+      ty = e.clientY - b.top;
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
+    const tween = (target: number) => {
+      from = r;
+      to = target;
+      t0 = performance.now();
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
+    function frame(now: number) {
+      mx += (tx - mx) / 8;
+      my += (ty - my) / 8;
+      const p = Math.min(1, (now - t0) / TWEEN);
+      r = p === 1 ? to : from + (to - from) * ease(p);
+      lit!.style.setProperty('--mx', `${mx}px`);
+      lit!.style.setProperty('--my', `${my}px`);
+      lit!.style.setProperty('--r', `${r}px`);
+      // Stop once the patch has caught up. The next pointer move starts it again.
+      const settled = Math.abs(tx - mx) < 0.5 && Math.abs(ty - my) < 0.5 && r === to;
+      raf = settled ? 0 : requestAnimationFrame(frame);
+    }
+
+    block.addEventListener('pointerenter', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      aim(e);
+      // A closed patch reopens under the pointer rather than sliding in from where it shut.
+      if (r === 0) {
+        mx = tx;
+        my = ty;
+      }
+      tween(OPEN);
+    });
+    block.addEventListener('pointermove', aim);
+    // Closing instead of freezing, so the name never keeps a lit patch nobody is pointing at.
+    block.addEventListener('pointerleave', () => tween(0));
+  }
+
+  if (matchMedia(wide).matches) document.querySelectorAll<HTMLElement>('[data-lit]').forEach(light);
+</script>
+
+<style>
+  .name {
+    position: relative;
+    display: block;
+  }
+  .name__outline {
+    display: block;
+    visibility: hidden;
+  }
+  .name__lit {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .name__mask {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    padding-bottom: 0.04em;
+    margin-right: 0.18em;
+  }
+  .name__word {
+    display: inline-block;
+  }
+
+  @media (hover: hover) and (pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference) {
+    :global(html.js) .name__outline {
+      visibility: visible;
+      color: transparent;
+      -webkit-text-stroke: 1px color-mix(in srgb, var(--tone-ink) 45%, transparent);
+    }
+    /* The mask is solid out to 40 percent of the radius, then feathers, so the lit
+       strokes have a soft edge instead of a hard circle. */
+    :global(html.js) .name__lit {
+      --r: 0px;
+      --mx: 50%;
+      --my: 50%;
+      color: var(--name-lit, var(--accent));
+      -webkit-mask-image: radial-gradient(circle var(--r) at var(--mx) var(--my), #000 0%, #000 40%, transparent 100%);
+      mask-image: radial-gradient(circle var(--r) at var(--mx) var(--my), #000 0%, #000 40%, transparent 100%);
+    }
+  }
+</style>
