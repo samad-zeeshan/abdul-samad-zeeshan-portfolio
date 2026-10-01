@@ -12,7 +12,7 @@ const { stats } = Astro.props;
   {
     stats.map((s) => (
       <div class="rail__cell" data-stat={s.key} data-value={s.value}>
-        <dt class="rail__label">{s.label}</dt>
+        <dt class="rail__label" data-decode>{s.label}</dt>
         <dd class="rail__num mono">
           <span class="visually-hidden">{s.value}</span>
           <span aria-hidden="true" data-count={String(s.value)}>

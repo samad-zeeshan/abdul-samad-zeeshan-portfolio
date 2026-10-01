@@ -1,28 +1,28 @@
-/* Design tokens. An olive black field with cream ink and one acid accent, and a paper
+/* Design tokens. A charcoal field with bone ink and one signal orange accent, and a paper
    theme the home page flips to on scroll. Project pages paint their body in their own
    demo's palette through --tone-*. */
 
 :root {
   color-scheme: dark;
 
-  /* Neutrals carry a green hue so neither end is pure black or white. */
-  --field: #0e100a;
-  --field-deep: #181b13;
-  --cream: #eef1e2;
-  --cream-2: #b9bcae;
-  --cream-3: #9a9d90;
-  --accent: #d6ff3f;
+  /* Neutrals carry a faint warm hue so neither end is pure black or white. */
+  --field: #121214;
+  --field-deep: #1c1c1f;
+  --cream: #f1eee6;
+  --cream-2: #b8b5ad;
+  --cream-3: #97948c;
+  --accent: #ff5c2a;
   /* Skill dots in the graph. Four hues that read on the field and stay clear of the
      accent, which belongs to the project squares. */
   --cat-ml: #8fb6ff;
-  --cat-systems: #ff9d8a;
+  --cat-systems: #ffd166;
   --cat-web: #c7a6ff;
   --cat-infra: #6fd6e0;
-  --paper: #eef1e2;
-  --paper-ink: #0e100a;
-  --paper-line: rgba(14, 16, 10, 0.18);
-  --line: rgba(244, 239, 226, 0.28);
-  --line-strong: rgba(244, 239, 226, 0.6);
+  --paper: #f1eee6;
+  --paper-ink: #121214;
+  --paper-line: rgba(18, 18, 20, 0.18);
+  --line: rgba(241, 238, 230, 0.28);
+  --line-strong: rgba(241, 238, 230, 0.6);
   --shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.85);
 
   --font-display: 'Big Shoulders Display', 'Arial Narrow', 'Roboto Condensed', sans-serif-condensed, sans-serif;
@@ -78,7 +78,7 @@
   --tone-line: var(--line);
   /* Accent text that must stay readable after a flip: accent on dark, ink on paper. */
   --hi: var(--accent);
-  --hair: rgba(238, 241, 226, 0.05);
+  --hair: rgba(241, 238, 230, 0.05);
   --pill-bg: var(--accent);
   --pill-ink: var(--field);
 }
@@ -88,9 +88,9 @@
   color-scheme: light;
   --tone-bg: var(--paper);
   --tone-ink: var(--paper-ink);
-  --tone-ink-2: rgba(14, 16, 10, 0.7);
+  --tone-ink-2: rgba(18, 18, 20, 0.7);
   --tone-accent: var(--paper-ink);
   --tone-line: var(--paper-line);
   --hi: var(--paper-ink);
-  --hair: rgba(14, 16, 10, 0.07);
+  --hair: rgba(18, 18, 20, 0.07);
 }

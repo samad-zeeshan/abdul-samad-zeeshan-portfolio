@@ -39,7 +39,7 @@ const introEnd = profile.intro.slice(at + tailText.length);
       <LitName text={profile.name} rise />
     </h1>
     <p class="hero__role" data-settle style="--i:0">
-      {roleHead} <span class="role__tail">{roleTail}</span>
+      <span data-decode="paint">{roleHead}</span> <span class="role__tail">{roleTail}</span>
     </p>
     <div class="hero__rail">
       <StatRail stats={stats} />

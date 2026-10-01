@@ -9,7 +9,7 @@ interface Props {
 const { text, as: Tag = 'p', id, class: cls } = Astro.props;
 ---
 
-<Tag class:list={['eyebrow', cls]} id={id}>{text}</Tag>
+<Tag class:list={['eyebrow', cls]} id={id} data-decode>{text}</Tag>
 
 <style>
   /* Source text stays in sentence case so screen readers read words, not letters. */
