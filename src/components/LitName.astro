@@ -88,7 +88,10 @@ const words = text.split(' ');
       r = p === 1 ? to : from + (to - from) * ease(p);
       lit!.style.setProperty('--mx', `${mx}px`);
       lit!.style.setProperty('--my', `${my}px`);
-      lit!.style.setProperty('--r', `${r}px`);
+      // A radius under a pixel makes the GPU paint the mask as solid for one frame,
+      // which lit the whole name on entry. Below a pixel the patch is hidden instead.
+      lit!.style.setProperty('--r', `${r < 1 ? 0 : r}px`);
+      lit!.style.visibility = r < 1 ? 'hidden' : '';
       // Stop once the patch has caught up. The next pointer move starts it again.
       const settled = Math.abs(tx - mx) < 0.5 && Math.abs(ty - my) < 0.5 && r === to;
       raf = settled ? 0 : requestAnimationFrame(frame);
