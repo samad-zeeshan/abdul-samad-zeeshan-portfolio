@@ -23,11 +23,10 @@ const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
             <img
               class="follow__img"
               data-id={p.id}
-              src={withBase(`/posters/${p.data.poster}`)}
+              data-src={withBase(`/posters/${p.data.poster}`)}
               alt=""
               width="1600"
               height="1000"
-              loading="lazy"
               decoding="async"
             />
           ))}
@@ -52,6 +51,17 @@ const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
     });
     var scopes = document.querySelectorAll('[data-follow-scope]');
     if (!scopes.length) return;
+
+    // The frame is fixed at the top left corner, so lazy loading would count it as on
+    // screen and fetch every poster at page load. They load on the first hover instead.
+    var loaded = false;
+    function load() {
+      if (loaded) return;
+      loaded = true;
+      [].forEach.call(root.querySelectorAll('.follow__img'), function (img) {
+        img.src = img.dataset.src;
+      });
+    }
 
     // Frame lags more than the disc (1/12 against 1/7 per frame), which is what makes
     // the two read as separate objects instead of one sticker.
@@ -102,6 +112,7 @@ const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
     });
     [].forEach.call(scopes, function (scope) {
       scope.addEventListener('mouseover', function (e) {
+        load();
         var link = e.target.closest('[data-follow]');
         if (!link || !scope.contains(link)) return off();
         on(ids.indexOf(link.dataset.follow));
