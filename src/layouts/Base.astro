@@ -100,6 +100,7 @@ const ogImage = new URL(withBase(image), Astro.site).href;
   </head>
   <body>
     <Smoke />
+    <div class="progress" aria-hidden="true"></div>
     <div class="hair" aria-hidden="true">
       <div class="wrap hair__grid">
         {Array.from({ length: 12 }, (_, i) => <span style={`--n:${i}`} />)}
@@ -152,38 +153,64 @@ const ogImage = new URL(withBase(image), Astro.site).href;
       })();
     </script>
     <script is:inline>
-      // Headline numbers count up once, alongside the entrance. The final value is in
-      // the HTML, so screen readers and no-JS visitors always get the real number.
+      // Headline numbers count up from zero the first time half of one is on screen.
+      // The screen-reader copy beside each one always holds the real value, and the
+      // count ends on the exact rendered text, which the built-page check reads.
       (function () {
-        if (!document.documentElement.classList.contains('enter')) return;
-        var els = document.querySelectorAll('[data-count]');
-        els.forEach(function (el, i) {
-          var target = el.getAttribute('data-count');
-          var decimals = (target.split('.')[1] || '').length;
-          var end = parseFloat(target.replace(/,/g, ''));
-          var fmt = function (v) {
-            return v.toLocaleString('en-US', {
-              minimumFractionDigits: decimals,
-              maximumFractionDigits: decimals,
-            });
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        if (!('IntersectionObserver' in window)) return;
+        // A leading number with its separators and decimals, then whatever follows,
+        // such as " of 84" or " to 0.607". Only the leading number counts.
+        var LEAD = /^(\d[\d,]*(?:\.\d+)?)([\s\S]*)$/;
+        var jobs = new Map();
+        document.querySelectorAll('[data-count]').forEach(function (el) {
+          var raw = el.textContent;
+          var m = LEAD.exec(raw.trim());
+          if (!m) return;
+          var end = parseFloat(m[1].replace(/,/g, ''));
+          if (!(end > 0)) return;
+          var decimals = (m[1].split('.')[1] || '').length;
+          var opts = {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals,
+            useGrouping: m[1].indexOf(',') >= 0,
           };
+          var fmt = function (v) { return v.toLocaleString('en-US', opts) + m[2]; };
           // Reserve the final width so the counting digits never reflow the line.
           el.style.display = 'inline-block';
-          el.style.minWidth = target.length + 'ch';
-          var start = performance.now() + 200 + i * 60;
-          var dur = 900;
+          el.style.minWidth = raw.trim().length + 'ch';
           el.textContent = fmt(0);
-          function tick(now) {
-            var t = Math.min(1, Math.max(0, (now - start) / dur));
-            // Same critically damped curve as the card settle, so the two finish together.
-            var w = 9.2 * t;
-            var p = t >= 1 ? 1 : 1 - (1 + w) * Math.exp(-w);
-            el.textContent = fmt(end * p);
-            if (t < 1) requestAnimationFrame(tick);
-            else el.textContent = target;
-          }
-          requestAnimationFrame(tick);
+          jobs.set(el, { raw: raw, end: end, fmt: fmt });
         });
+        if (!jobs.size) return;
+        // On the first visit the rail is still settling, so its count waits for it.
+        var lag = document.documentElement.classList.contains('enter') ? 200 : 0;
+        var io = new IntersectionObserver(
+          function (entries) {
+            var k = 0;
+            entries.forEach(function (e) {
+              if (!e.isIntersecting) return;
+              io.unobserve(e.target);
+              var el = e.target, job = jobs.get(el);
+              var start = performance.now() + lag + k++ * 60;
+              function tick(now) {
+                var t = Math.min(1, Math.max(0, (now - start) / 900));
+                // Same critically damped curve as the card settle, so the two finish together.
+                var w = 9.2 * t;
+                var p = t >= 1 ? 1 : 1 - (1 + w) * Math.exp(-w);
+                if (t < 1) {
+                  el.textContent = job.fmt(job.end * p);
+                  return requestAnimationFrame(tick);
+                }
+                el.textContent = job.raw;
+                el.style.display = el.style.minWidth = '';
+              }
+              requestAnimationFrame(tick);
+            });
+          },
+          { threshold: 0.5 },
+        );
+        jobs.forEach(function (_, el) { io.observe(el); });
       })();
     </script>
     <script is:inline>
@@ -272,6 +299,53 @@ const ogImage = new URL(withBase(image), Astro.site).href;
         els.forEach(function (el) { io.observe(el); });
       })();
     </script>
+    <script>
+      // Smooth wheel scrolling on wide pointer screens. The import sits behind the same
+      // gate, so phones, touch and reduced-motion visitors never download the library.
+      const smooth = '(pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference)';
+      if (matchMedia(smooth).matches) {
+        import('lenis').then(({ default: Lenis }) => {
+          const lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1, smoothWheel: true, syncTouch: false });
+          const loop = (t: number) => {
+            lenis.raf(t);
+            requestAnimationFrame(loop);
+          };
+          requestAnimationFrame(loop);
+
+          // The header slides away on the way down and comes back on the way up.
+          // Near the top it always shows, and it only takes a fill once the page moves.
+          const head = document.querySelector<HTMLElement>('.head');
+          if (head) {
+            lenis.on('scroll', ({ scroll, direction }: { scroll: number; direction: number }) => {
+              head.classList.toggle('is-stuck', scroll > 0);
+              if (scroll <= 160 || direction === -1) head.classList.remove('is-away');
+              else if (direction === 1) head.classList.add('is-away');
+            });
+          }
+
+          // Same-page anchors go through Lenis, or the native jump cuts across its easing.
+          document.addEventListener('click', (e) => {
+            if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            const a = (e.target as Element | null)?.closest?.('a[href*="#"]') as HTMLAnchorElement | null;
+            if (!a || a.origin !== location.origin || a.pathname !== location.pathname || !a.hash) return;
+            const target = document.getElementById(decodeURIComponent(a.hash.slice(1)));
+            if (!target) return;
+            e.preventDefault();
+            lenis.scrollTo(a.hash, { offset: 0 });
+            history.pushState(null, '', a.hash);
+            // A native anchor jump also moves focus. Without this the skip link would
+            // scroll but leave the next Tab on the header.
+            if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+            target.focus({ preventScroll: true });
+          });
+
+          // Stopped while the view transition snapshots the old page, and started again
+          // if the page comes back from the back-forward cache.
+          addEventListener('pagehide', () => lenis.stop());
+          addEventListener('pageshow', () => lenis.start());
+        });
+      }
+    </script>
     <script is:inline>
       // Theme flip. The margins shrink the viewport to a line across its middle, so
       // whichever section crosses that line owns the page colour. html carries the
@@ -279,15 +353,23 @@ const ogImage = new URL(withBase(image), Astro.site).href;
       (function () {
         if (!('IntersectionObserver' in window)) return;
         var root = document.documentElement;
+        var els = [].slice.call(document.querySelectorAll('body [data-theme]'));
+        var on = new Set();
         var io = new IntersectionObserver(
           function (entries) {
             entries.forEach(function (e) {
-              if (e.isIntersecting) root.setAttribute('data-theme', e.target.getAttribute('data-theme'));
+              if (e.isIntersecting) on.add(e.target);
+              else on.delete(e.target);
             });
+            // The about section sticks, so it stays on the line under the sheet that
+            // covers it. Later sections stack on top, so the last one on the line wins.
+            for (var i = els.length - 1; i >= 0; i--) {
+              if (on.has(els[i])) return root.setAttribute('data-theme', els[i].getAttribute('data-theme'));
+            }
           },
           { rootMargin: '-50% 0px -50% 0px' },
         );
-        document.querySelectorAll('body [data-theme]').forEach(function (el) { io.observe(el); });
+        els.forEach(function (el) { io.observe(el); });
       })();
     </script>
   </body>

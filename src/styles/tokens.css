@@ -65,7 +65,8 @@
   --dur-theme: 500ms;
 
   --z-hair: -1;
-  --z-preview: 1;
+  /* Above the paper and field sheets on the home page, which stack at 2 and 3. */
+  --z-preview: 4;
   --z-header: 10;
   --z-pill: 15;
   --z-skip: 20;
@@ -83,8 +84,10 @@
   --pill-ink: var(--field);
 }
 
-/* The home page's projects section. The observer in Base writes the attribute. */
-:root[data-theme='paper'] {
+/* The home page's projects section. The observer in Base writes the attribute on html,
+   and the sheets carry the same set as a class so they keep their colours before the flip. */
+:root[data-theme='paper'],
+.on-paper {
   color-scheme: light;
   --tone-bg: var(--paper);
   --tone-ink: var(--paper-ink);
@@ -93,4 +96,14 @@
   --tone-line: var(--paper-line);
   --hi: var(--paper-ink);
   --hair: rgba(18, 18, 20, 0.07);
+}
+.on-field {
+  color-scheme: dark;
+  --tone-bg: var(--field);
+  --tone-ink: var(--cream);
+  --tone-ink-2: var(--cream-2);
+  --tone-accent: var(--cream);
+  --tone-line: var(--line);
+  --hi: var(--accent);
+  --hair: rgba(241, 238, 230, 0.05);
 }
