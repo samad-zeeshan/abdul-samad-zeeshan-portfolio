@@ -284,17 +284,36 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
     ].map(([src, type]) => Object.assign(document.createElement('source'), { src, type }));
     // An error on the last source means every format failed, so fall back to the GIF.
     sources[sources.length - 1].addEventListener('error', () => {
+      io.disconnect();
       still.src = gif!;
       still.hidden = false;
       video.remove();
       btn.hidden = true;
     });
-    video.append(...sources);
-    video.hidden = false;
-    still.hidden = true;
-    btn.hidden = false;
-    video.play().catch(() => {});
+    // Set by the Pause button, so scrolling back does not restart a video the visitor stopped.
+    let held = false;
+    // The demo sits far below the fold. Attaching the sources only as it nears the
+    // viewport keeps megabytes of video off the first load, and pausing it off screen
+    // stops decode work while the visitor reads the rest of the page.
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) {
+          if (!video.paused) video.pause();
+          return;
+        }
+        if (!video.childElementCount) {
+          video.append(...sources);
+          video.hidden = false;
+          still.hidden = true;
+          btn.hidden = false;
+        }
+        if (!held) video.play().catch(() => {});
+      },
+      { rootMargin: '400px 0px' },
+    );
+    io.observe(frame);
     btn.addEventListener('click', () => {
+      held = !video.paused;
       if (video.paused) video.play().catch(() => {});
       else video.pause();
     });
