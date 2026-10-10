@@ -2,7 +2,7 @@
 title: "Triage"
 order: 6
 tone: { scheme: "light", bg: "#e9ecef", ink: "#15181d", ink2: "#545b66", accent: "#2446b8", line: "#cfd4db" }
-problem: "It is a small offline model that sorts support emails. It sends unsure emails to a larger teacher model."
+problem: "A small offline model that sorts support emails. It sends unsure emails to a larger teacher model."
 description: "Triage is a small offline model. It reads a support email and returns its topic, urgency and account number as JSON. It learned from a larger model, the teacher. It sends unsure emails to the teacher."
 opener: "Triage reads a support email and gives back its topic, its urgency and the account number, in a fixed format that other software can read. It is a small model with 600 million parameters, and it runs on one ordinary graphics card with no internet. It learned from the answers of a much larger model, which this README calls the teacher. Before training, it sorted urgency worse than a fixed guess. After training, it matched the teacher on urgency for 87 percent of emails that it had not seen before. It also says how sure it is, so the unsure emails can go to the teacher."
 repo: "https://github.com/samad-zeeshan/Triage-0.6B"
