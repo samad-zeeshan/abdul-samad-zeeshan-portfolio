@@ -26,6 +26,7 @@ const SIBLINGS = {
   parley: ['Parley', 'Majlis'],
   tarn: ['Tarn'],
   docket: ['Docket'],
+  triage: ['Triage-0.6B'],
 };
 
 const entries = readdirSync(contentDir)
@@ -189,6 +190,15 @@ const STE_BANNED = new RegExp(
     'really|basically|actually)\\b',
   'i',
 );
+// A rough passive test: a form of "be", at most one word, then a past participle.
+// It misses some passives and flags a few adjectives, so real exceptions go below.
+const PASSIVE = new RegExp(
+  '\\b(is|are|was|were|be|been|being)\\s+(\\w+\\s+)?(\\w+ed|made|done|found|given|held|kept|left|run|seen|' +
+    'sent|shown|taken|written|built|caught)\\b',
+  'i',
+);
+// Each entry is one whole sentence that must stay passive, with the reason beside it.
+const PASSIVE_ALLOWED = new Set([]);
 function ste(where, text) {
   if (typeof text !== 'string') return;
   if (text.includes(';')) fail(`${where}: has a semicolon`);
@@ -196,6 +206,8 @@ function ste(where, text) {
   if (hit) fail(`${where}: uses filler word "${hit[0]}"`);
   for (const s of text.split(/(?<=[.!?])\s+/)) {
     if (words(s) > 25) fail(`${where}: sentence of ${words(s)} words, the cap is 25: "${s.slice(0, 60)}..."`);
+    const p = s.match(PASSIVE);
+    if (p && !PASSIVE_ALLOWED.has(s.trim())) fail(`${where}: passive voice "${p[0]}" in "${s.slice(0, 80)}"`);
   }
 }
 for (const e of entries) {
