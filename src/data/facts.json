@@ -1,8 +1,8 @@
 {
   "name": "Abdul Samad Zeeshan",
   "shortName": "Samad",
-  "role": "I build backend and data systems, some with a model inside",
-  "intro": "I finished my Computing Science degree at the University of Alberta in June 2026. I build backend services, data pipelines and systems with a language model inside. Each project below solves one real problem. Its page shows what happened when I tested it.",
+  "role": "I build backend and data systems",
+  "intro": "I finished my Computing Science degree at the University of Alberta in June 2026. I build backend services, data pipelines and systems with a language model. Each project below solves one real problem.",
   "skills": [
     "Python",
     "Java",

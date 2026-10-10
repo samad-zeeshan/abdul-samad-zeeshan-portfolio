@@ -237,7 +237,7 @@ const stats = {
 
 // The verdict face is for verdicts and two set lines only. Any other rule that sets
 // it fails, so the second face cannot creep into body text.
-const SERIF_OK = ['.verdict', '.role__tail', '.about__tail'];
+const SERIF_OK = ['.verdict'];
 for (const p of walk(join(root, 'src')).filter((f) => /\.(astro|css)$/.test(f))) {
   const rel = p.slice(root.length + 1);
   const t = readFileSync(p, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');

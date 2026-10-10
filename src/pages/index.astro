@@ -16,17 +16,6 @@ const shipped = projects.filter(hasPage);
 const stats = siteStats(projects);
 const count = inWords(shipped.length);
 
-// The role line and the intro each end in the second face. Both splits are checked
-// here so an edit to facts.json fails the build instead of dropping the styling.
-const cut = profile.role.indexOf(', ');
-if (cut < 0) throw new Error('facts.json role needs a comma before its second half');
-const roleHead = profile.role.slice(0, cut + 1);
-const roleTail = profile.role.slice(cut + 2);
-const tailText = 'what happened when I tested it';
-const at = profile.intro.lastIndexOf(tailText);
-if (at < 0) throw new Error(`facts.json intro must end with "${tailText}"`);
-const introHead = profile.intro.slice(0, at);
-const introEnd = profile.intro.slice(at + tailText.length);
 ---
 
 <Base
@@ -39,7 +28,7 @@ const introEnd = profile.intro.slice(at + tailText.length);
       <LitName text={profile.name} rise />
     </h1>
     <p class="hero__role" data-settle data-drift style="--i:0">
-      <span data-decode="paint">{roleHead}</span> <span class="role__tail">{roleTail}</span>
+      <span data-decode="paint">{profile.role}</span>
     </p>
     <div class="hero__rail">
       <StatRail stats={stats} />
@@ -53,7 +42,7 @@ const introEnd = profile.intro.slice(at + tailText.length);
     <div class="about__body" data-reveal>
       <Eyebrow as="h2" id="about-h" text={copy.eyebrows.about} />
       <p class="about__text">
-        {introHead}<span class="about__tail">{tailText}</span>{introEnd}
+        {profile.intro}
       </p>
     </div>
   </section>
@@ -126,11 +115,6 @@ const introEnd = profile.intro.slice(at + tailText.length);
     font-size: var(--step-2);
     line-height: 1.25;
   }
-  .role__tail {
-    font-family: var(--font-verdict);
-    font-style: italic;
-    font-size: 1.08em;
-  }
   .hero__rail {
     margin-top: var(--space-4);
   }
@@ -151,13 +135,6 @@ const introEnd = profile.intro.slice(at + tailText.length);
     font-size: var(--step-2);
     line-height: 1.35;
     letter-spacing: -0.01em;
-  }
-  .about__tail {
-    font-family: var(--font-verdict);
-    font-style: italic;
-    font-size: 1.08em;
-    letter-spacing: 0;
-    color: var(--hi);
   }
 
   /* The paper section is an opaque sheet laid over the field. Each sheet carries its
