@@ -36,15 +36,10 @@ export interface Stat {
 // recounts them from the frontmatter and checks the built page against its own count.
 export function siteStats(projects: Project[]): Stat[] {
   const shipped = projects.filter(hasPage);
-  const numbers = shipped.flatMap((p) => p.data.numbers);
-  const stats: Stat[] = [
+  return [
     { key: 'projects', value: shipped.length, label: copy.stats.projects },
     { key: 'demos', value: shipped.filter((p) => p.data.demo).length, label: copy.stats.demos },
-    { key: 'numbers', value: numbers.length, label: copy.stats.numbers },
-    { key: 'bad', value: numbers.filter((n) => n.tone === 'bad').length, label: copy.stats.bad },
   ];
-  // A zero here would read as a boast, so the cell goes rather than showing 0.
-  return stats.filter((s) => s.key !== 'bad' || s.value > 0);
 }
 
 const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];

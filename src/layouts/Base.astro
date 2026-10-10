@@ -51,6 +51,28 @@ const ogImage = new URL(withBase(image), Astro.site).href;
     {/* The new page is shown at its first paint, which can come before the parser reaches
         the heading. Holding that paint for the heading keeps the name morph from dropping. */}
     {current && <link rel="expect" href="#project-name" blocking="render" />}
+    {/* A project page starts rendering in the background once the pointer rests on its
+        link, so the click swaps to a page that is already laid out. */}
+    <script
+      type="speculationrules"
+      is:inline
+      set:html={JSON.stringify({ prerender: [{ where: { href_matches: withBase('/projects/*') }, eagerness: 'moderate' }] })}
+    />
+    <script is:inline>
+      // Resolves once the page is on screen and any transition into it has ended. Work
+      // that changes text waits on it, so it does not take frames from the transition.
+      window.__settled = new Promise(function (done) {
+        if (!('onpagereveal' in window)) return done();
+        addEventListener(
+          'pagereveal',
+          function (e) {
+            if (e.viewTransition) e.viewTransition.finished.then(done, done);
+            else done();
+          },
+          { once: true },
+        );
+      });
+    </script>
     <script is:inline define:vars={{ fonts: [displayFont, textFont, verdictFont] }}>
       // Preload the fonts on the first page of a visit only. On later pages Chrome serves
       // them from memory, never claims the preload, and warns that it went unused.
@@ -210,7 +232,9 @@ const ogImage = new URL(withBase(image), Astro.site).href;
           },
           { threshold: 0.5 },
         );
-        jobs.forEach(function (_, el) { io.observe(el); });
+        window.__settled.then(function () {
+          jobs.forEach(function (_, el) { io.observe(el); });
+        });
       })();
     </script>
     <script is:inline>
@@ -300,7 +324,9 @@ const ogImage = new URL(withBase(image), Astro.site).href;
           },
           { threshold: 0.5 },
         );
-        els.forEach(function (el) { io.observe(el); });
+        window.__settled.then(function () {
+          els.forEach(function (el) { io.observe(el); });
+        });
       })();
     </script>
     <script>
@@ -308,7 +334,7 @@ const ogImage = new URL(withBase(image), Astro.site).href;
       // gate, so phones, touch and reduced-motion visitors never download the library.
       const smooth = '(pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference)';
       if (matchMedia(smooth).matches) {
-        import('lenis').then(({ default: Lenis }) => {
+        (window as unknown as { __settled: Promise<void> }).__settled.then(() => import('lenis')).then(({ default: Lenis }) => {
           const lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1, smoothWheel: true, syncTouch: false });
           const loop = (t: number) => {
             lenis.raf(t);

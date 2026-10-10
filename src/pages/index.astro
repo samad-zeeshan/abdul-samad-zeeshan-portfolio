@@ -1,5 +1,5 @@
 ---
-// Home, laid out as a test report: the name and counted results, the skills graph
+// Home, laid out as a test report: the name and two counts, the skills graph
 // beside the rule the work follows, the project index on paper, and the tools line.
 // The footer carries the email.
 import Base from '../layouts/Base.astro';
@@ -242,14 +242,16 @@ const count = inWords(shipped.length);
     }
     .hero {
       align-items: end;
-      padding-block: var(--space-7) var(--space-8);
+      padding-block: var(--space-7);
     }
     .hero :global(.hero__eyebrow),
-    .hero__name,
-    .hero__rail {
+    .hero__name {
       grid-column: 1 / -1;
     }
-    .hero__role {
+    /* Two counts across the full width left a wide empty run beside each number, so
+       the rail sits under the role line and each count takes three columns. */
+    .hero__role,
+    .hero__rail {
       grid-column: 1 / 7;
     }
     .about {
@@ -276,13 +278,16 @@ const count = inWords(shipped.length);
   }
 
   /* The about section holds still while the paper sheet scrolls up over it. A full
-     screen tall, so the sheet always starts from below the fold. */
+     screen tall, so the sheet always starts from below the fold. The content sits at
+     the top rather than the middle, since centring it in a full screen left a gap of
+     about 340px under the hero on a 900px tall window. */
   @media (min-width: 60rem) and (prefers-reduced-motion: no-preference) {
     .about {
       position: sticky;
       top: 0;
       min-height: 100svh;
-      align-content: center;
+      align-content: start;
+      padding-top: var(--space-9);
     }
   }
 </style>

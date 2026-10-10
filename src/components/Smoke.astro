@@ -94,6 +94,14 @@
     tint();
     canvas.style.visibility = 'hidden';
     addEventListener('resize', size);
+    // Cleared before the old page is captured for the transition. A frozen puff would
+    // ride along in the snapshot, and the loop would resume mid-fade after going back.
+    addEventListener('pageswap', function () {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      ctx.clearRect(0, 0, w, h);
+      canvas.style.visibility = 'hidden';
+    });
     new MutationObserver(tint).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     addEventListener(
       'pointermove',

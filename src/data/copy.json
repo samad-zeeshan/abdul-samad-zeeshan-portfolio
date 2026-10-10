@@ -1,9 +1,7 @@
 {
   "stats": {
     "projects": "projects",
-    "demos": "demos, no login",
-    "numbers": "results",
-    "bad": "are not good enough"
+    "demos": "demos, no login"
   },
   "eyebrows": {
     "hero": "Report / 2026 / {count} systems",

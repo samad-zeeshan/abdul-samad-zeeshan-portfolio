@@ -227,12 +227,9 @@ ste('footer note', copy.footer.note);
 
 // The hero rail, counted the same way src/lib/site.ts counts it.
 const shippedEntries = entries.filter((e) => e.data && (e.data.status ?? 'shipped') === 'shipped');
-const allNumbers = shippedEntries.flatMap((e) => e.data.numbers ?? []);
 const stats = {
   projects: shippedEntries.length,
   demos: shippedEntries.filter((e) => e.data.demo).length,
-  numbers: allNumbers.length,
-  bad: allNumbers.filter((n) => n.tone === 'bad').length,
 };
 
 // The verdict face is for verdicts and two set lines only. Any other rule that sets
@@ -263,10 +260,8 @@ if (process.argv.includes('--built')) {
   const shown = Object.fromEntries(
     [...html.matchAll(/data-stat="(\w+)"[^>]*data-value="(\d+)"/g)].map((m) => [m[1], Number(m[2])]),
   );
-  const want = { ...stats };
-  if (want.bad === 0) delete want.bad;
-  if (JSON.stringify(shown) !== JSON.stringify(want)) {
-    fail(`home stat rail shows ${JSON.stringify(shown)}, content counts ${JSON.stringify(want)}`);
+  if (JSON.stringify(shown) !== JSON.stringify(stats)) {
+    fail(`home stat rail shows ${JSON.stringify(shown)}, content counts ${JSON.stringify(stats)}`);
   }
 
   // Strings typed straight into pages and components only show up in the built HTML.

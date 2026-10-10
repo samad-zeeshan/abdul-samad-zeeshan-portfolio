@@ -58,8 +58,11 @@ const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
     function load() {
       if (loaded) return;
       loaded = true;
+      // Decoding all of them now, off the main thread, keeps the first switch to a
+      // new poster from stalling on a decode mid-slide.
       [].forEach.call(root.querySelectorAll('.follow__img'), function (img) {
         img.src = img.dataset.src;
+        img.decode().catch(function () {});
       });
     }
 
@@ -70,7 +73,7 @@ const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
     var raf = 0, active = false, current = -1;
 
     function place(el, p) {
-      el.style.transform = 'translate3d(' + p.x + 'px,' + p.y + 'px,0) translate(-50%,-50%)';
+      el.style.translate = p.x + 'px ' + p.y + 'px';
     }
     function tick() {
       f.x += (px - f.x) / 12;
@@ -105,7 +108,7 @@ const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
     addEventListener('mousemove', function (e) { px = e.clientX; py = e.clientY; }, { passive: true });
     // The loop keeps running through the shrink and stops once the disc reaches zero.
     disc.addEventListener('transitionend', function (e) {
-      if (e.propertyName === 'width' && !active) {
+      if (e.propertyName === 'scale' && !active) {
         cancelAnimationFrame(raf);
         raf = 0;
       }
@@ -143,20 +146,30 @@ const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
     z-index: var(--z-preview);
     pointer-events: none;
     overflow: hidden;
+    /* The script moves them with translate. Scale and the centring both work from the
+       top left corner, so the box stays centred on the pointer at any scale. */
     transform: translate(-50%, -50%);
-    will-change: transform;
+    transform-origin: 0 0;
+    will-change: translate, scale;
+    transition: scale 0.4s cubic-bezier(0.36, 0, 0.66, 0);
   }
-  /* Grow with a slight overshoot, shrink with a slow start, as on the site this copies. */
+  /* Kept in its own rule. In the same rule as transform, the minifier folds it into
+     transform and the active scale can no longer undo it. */
+  .follow__frame:not(.active),
+  .follow__disc:not(.active) {
+    scale: 0;
+  }
+  /* Grow with a slight overshoot, shrink with a slow start, as on the site this copies.
+     Scale rather than width, so the grow never lays out or repaints the poster. */
   .follow__frame {
-    width: 0;
+    width: clamp(14rem, 30vw, 28rem);
     /* Posters are 16:10 or 16:9, so a 16:10 frame shows them whole or nearly. */
     aspect-ratio: 16 / 10;
     border-radius: var(--radius);
     background: var(--field-deep);
-    transition: width 0.4s cubic-bezier(0.36, 0, 0.66, 0);
   }
-  .follow__frame.active {
-    width: clamp(14rem, 30vw, 28rem);
+  .follow__frame.active,
+  .follow__disc.active {
     transition-timing-function: cubic-bezier(0.34, 1, 0.64, 1);
   }
   .follow__stack {
@@ -175,8 +188,8 @@ const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
 
   .follow__disc {
     --size: clamp(3.75rem, 5.5vw, 5rem);
-    width: 0;
-    height: 0;
+    width: var(--size);
+    height: var(--size);
     display: grid;
     place-items: center;
     border-radius: 50%;
@@ -186,20 +199,12 @@ const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
     font-size: var(--step--1);
     text-transform: uppercase;
     white-space: nowrap;
-    transition:
-      width 0.4s cubic-bezier(0.36, 0, 0.66, 0),
-      height 0.4s cubic-bezier(0.36, 0, 0.66, 0),
-      scale 0.3s var(--ease-out);
   }
   .follow--big .follow__disc {
     --size: calc(clamp(3.75rem, 5.5vw, 5rem) * 1.66);
   }
-  .follow__disc.active {
-    width: var(--size);
-    height: var(--size);
-    transition-timing-function: cubic-bezier(0.34, 1, 0.64, 1), cubic-bezier(0.34, 1, 0.64, 1), var(--ease-out);
-  }
   .follow__disc.pressed {
     scale: 1.4;
+    transition: scale 0.3s var(--ease-out);
   }
 </style>

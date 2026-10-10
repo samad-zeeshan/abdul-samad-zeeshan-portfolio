@@ -6,9 +6,10 @@
 @view-transition {
   navigation: auto;
 }
+/* A soft start and a long settle, so the name leaves its row without a jolt. */
 ::view-transition-group(*) {
-  animation-duration: 460ms;
-  animation-timing-function: var(--ease-out);
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -26,7 +27,7 @@
     mix-blend-mode: normal;
   }
   ::view-transition-new(root) {
-    animation: curtain-in 700ms cubic-bezier(0.84, 0, 0.16, 1) both;
+    animation: curtain-in 600ms cubic-bezier(0.7, 0, 0.3, 1) both;
     mix-blend-mode: normal;
   }
 }
