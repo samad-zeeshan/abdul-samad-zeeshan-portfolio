@@ -180,6 +180,39 @@ copy.footer.nav.forEach((t, i) => plain(`footer nav ${i + 1}`, t, 4));
 Object.entries(copy.pill).forEach(([k, t]) => plain(`pill ${k}`, t, 4));
 plain('follower disc', copy.follower.disc, 3);
 
+// Simplified Technical English on every sentence a stranger reads: at most 25 words,
+// no filler word, no semicolon. Openers quote a README word for word, so they are
+// left to that README. Paper titles and number sources are names, not prose.
+const STE_BANNED = new RegExp(
+  '\\b(comprehensive|robust|seamless\\w*|cutting-edge|state-of-the-art|powerful|leverag\\w*|' +
+    'utili[sz](e|es|ed|ing)|ensur\\w*|delv\\w*|showcas\\w*|crucial|various|numerous|simply|just|' +
+    'really|basically|actually)\\b',
+  'i',
+);
+function ste(where, text) {
+  if (typeof text !== 'string') return;
+  if (text.includes(';')) fail(`${where}: has a semicolon`);
+  const hit = text.match(STE_BANNED);
+  if (hit) fail(`${where}: uses filler word "${hit[0]}"`);
+  for (const s of text.split(/(?<=[.!?])\s+/)) {
+    if (words(s) > 25) fail(`${where}: sentence of ${words(s)} words, the cap is 25: "${s.slice(0, 60)}..."`);
+  }
+}
+for (const e of entries) {
+  const d = e.data;
+  if (!d || d.status === 'hidden') continue;
+  for (const k of ['problem', 'description', 'demoNote']) ste(`${e.id} ${k}`, d[k]);
+  ste(`${e.id} gif alt`, d.gif?.alt);
+  (d.numbers ?? []).forEach((n, i) => ste(`${e.id} number ${i + 1}`, `${n.label} ${n.verdict ?? ''}`));
+  (d.decisions ?? []).forEach((s, i) => ste(`${e.id} decision ${i + 1}`, s));
+  (d.papers ?? []).forEach((p, i) => ste(`${e.id} paper ${i + 1}`, p.change));
+}
+ste('role', facts.role);
+ste('intro', facts.intro);
+for (const edge of graph.edges) ste(`graph ${edge.skill} to ${edge.project}`, edge.evidence);
+for (const [k, t] of Object.entries(copy.eyebrows)) ste(`eyebrow ${k}`, t);
+ste('footer note', copy.footer.note);
+
 // The hero rail, counted the same way src/lib/site.ts counts it.
 const shippedEntries = entries.filter((e) => e.data && (e.data.status ?? 'shipped') === 'shipped');
 const allNumbers = shippedEntries.flatMap((e) => e.data.numbers ?? []);
@@ -222,6 +255,22 @@ if (process.argv.includes('--built')) {
   if (want.bad === 0) delete want.bad;
   if (JSON.stringify(shown) !== JSON.stringify(want)) {
     fail(`home stat rail shows ${JSON.stringify(shown)}, content counts ${JSON.stringify(want)}`);
+  }
+
+  // Strings typed straight into pages and components only show up in the built HTML.
+  // Each text node and each alt, title, aria-label or description is checked alone.
+  const openers = entries.map((e) => e.data?.opener).filter(Boolean);
+  const pages = walk(join(root, 'dist')).filter((p) => p.endsWith('.html'));
+  for (const p of pages) {
+    const rel = p.slice(root.length + 1);
+    const html = readFileSync(p, 'utf8').replace(/<(script|style|svg)[\s\S]*?<\/\1>/g, ' ');
+    const attrs = [...html.matchAll(/\s(?:alt|title|aria-label|content)="([^"]*)"/g)].map((m) => m[1]);
+    const nodes = html.split(/<[^>]+>/);
+    for (const raw of [...nodes, ...attrs]) {
+      const t = raw.replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim();
+      if (!/[a-z]/i.test(t) || openers.includes(t)) continue;
+      ste(rel, t);
+    }
   }
 }
 
