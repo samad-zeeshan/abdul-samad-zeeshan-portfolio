@@ -121,6 +121,10 @@
     transform: none;
   }
 }
+.evmap__cap,
+.eg__now {
+  padding-inline: var(--hair-inset);
+}
 .evmap__cap {
   color: var(--cream-2);
 }

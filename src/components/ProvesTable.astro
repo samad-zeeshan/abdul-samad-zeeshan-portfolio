@@ -46,6 +46,10 @@ const groups = provesFor(Astro.props.projectId);
   .proves__row:last-child {
     border-bottom: 1px solid var(--tone-line);
   }
+  .proves__skill,
+  .proves__ev {
+    padding-inline: var(--hair-inset);
+  }
   .proves__skill {
     font-family: var(--font-display);
     font-weight: 800;
@@ -60,10 +64,17 @@ const groups = provesFor(Astro.props.projectId);
     line-height: 1.55;
   }
   @media (min-width: 60rem) {
+    /* Same nine columns as the body, so the evidence starts on a background line. */
     .proves__row {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+      grid-template-columns: repeat(9, minmax(0, 1fr));
       column-gap: var(--space-6);
-      align-items: baseline;
+    }
+    .proves__skill {
+      grid-column: 1 / 4;
+      align-self: center;
+    }
+    .proves__ev {
+      grid-column: 4 / 10;
     }
   }
 </style>

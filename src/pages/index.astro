@@ -109,7 +109,13 @@ const count = inWords(shipped.length);
     font-size: var(--step-giant);
     line-height: 0.82;
     letter-spacing: -0.015em;
-    margin-left: -0.04em;
+    /* Margin, not padding: the lit copy inside is laid over the padding box. */
+    margin-left: var(--hair-inset);
+  }
+  .hero__role,
+  .about__text,
+  .tools__line {
+    padding-inline: var(--hair-inset);
   }
   .hero__role {
     font-size: var(--step-2);

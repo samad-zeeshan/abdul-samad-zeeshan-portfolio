@@ -336,13 +336,25 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
   .p__name {
     font-size: var(--step-giant);
     line-height: 0.82;
-    margin-left: -0.04em;
+    /* Margin, not padding: the lit copy inside is laid over the padding box. */
+    margin-left: var(--hair-inset);
     width: fit-content;
     --name-lit: var(--tone-accent);
   }
   .p__lead {
     display: grid;
     gap: var(--space-5);
+  }
+  /* Text starts a little in from the hairline it would otherwise sit on. Rules and
+     row borders stay on the line, since padding sits inside them. */
+  .p__problem,
+  .p__opener-text,
+  .p__num,
+  .p__tcell,
+  .p__caption,
+  .p__paper-list,
+  .p__rail {
+    padding-inline: var(--hair-inset);
   }
   .p__problem {
     max-width: 30ch;
@@ -426,7 +438,10 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
   .p__trow:last-child {
     border-bottom: 1px solid var(--tone-line);
   }
+  /* Centred in the first hairline band: one of four columns plus its gap. */
   .p__tidx {
+    width: calc((100% - 3 * var(--space-6)) / 4 + var(--space-6));
+    text-align: center;
     font-size: var(--step--1);
     color: var(--tone-ink-2);
   }
@@ -522,6 +537,7 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
     text-transform: uppercase;
     background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 0.05em;
     padding-bottom: 0.06em;
+    margin-left: var(--hair-inset);
     transition: background-size var(--dur-hover) var(--ease-out);
   }
   .p__next:hover .p__next-name,
@@ -612,14 +628,23 @@ const proves = provesFor(entry.id).reduce((n, g) => n + g.rows.length, 0);
       grid-template-columns: repeat(2, minmax(0, 1fr));
       column-gap: var(--space-6);
     }
-    .p__table.p__body {
+    /* Needs the section prefix to outrank the body rule above, or the first row
+       rule doubles it. */
+    .p__sec > .p__table.p__body {
       border-top: 0;
       padding-top: 0;
     }
+    /* The index column is one hairline column of the nine the body spans, and the
+       index centres across it and the gap after, up to the next line. */
     .p__trow {
-      grid-template-columns: 5rem minmax(0, 1fr);
+      grid-template-columns: calc((100% - 8 * var(--space-6)) / 9) minmax(0, 1fr);
       column-gap: var(--space-6);
       align-items: baseline;
+    }
+    .p__tidx {
+      width: auto;
+      margin-right: calc(var(--space-6) * -1);
+      align-self: center;
     }
   }
 </style>

@@ -51,6 +51,8 @@
   --space-9: 8rem;
 
   --gutter: clamp(1rem, 0.3rem + 3.2vw, 3.5rem);
+  /* Gap between a hairline and the text beside it, so no letter sits on a line. */
+  --hair-inset: clamp(0.625rem, 0.3rem + 0.8vw, 1rem);
   --page: 96rem;
   --measure: 62ch;
   --radius: 3px;

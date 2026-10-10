@@ -69,9 +69,17 @@ const Tag = linked ? 'a' : 'div';
     color: var(--tone-ink);
     transition: opacity 0.4s var(--ease-out);
   }
+  /* The number is centred in the first hairline band: one of four columns plus its gap. */
   .row__index {
+    width: calc((100% - 3 * var(--space-6)) / 4 + var(--space-6));
+    text-align: center;
     font-size: var(--step-1);
     opacity: 0.6;
+  }
+  .row__name,
+  .row__problem,
+  .row__num {
+    padding-inline: var(--hair-inset);
   }
   .row__name {
     font-size: var(--step-index);
@@ -134,21 +142,25 @@ const Tag = linked ? 'a' : 'div';
       padding-inline: 0;
       margin-inline: 0;
     }
+    /* The band runs on past the column into the gap, up to the next line. */
     .row__index {
       grid-column: 1 / 2;
-      align-self: start;
-      padding-top: 0.3em;
+      align-self: first baseline;
+      width: auto;
+      margin-right: calc(var(--space-6) * -1);
     }
     .row__name {
       grid-column: 2 / 7;
     }
+    /* Index and result label share one baseline. The description sits in the
+       middle of the row, which fills the gap under it. */
     .row__problem {
       grid-column: 7 / 10;
-      padding-bottom: 0.35em;
+      align-self: center;
     }
     .row__num {
       grid-column: 10 / 13;
-      padding-bottom: 0.35em;
+      align-self: first baseline;
     }
   }
 
