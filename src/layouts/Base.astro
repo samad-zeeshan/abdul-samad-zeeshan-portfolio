@@ -241,7 +241,7 @@ const ogImage = new URL(withBase(image), Astro.site).href;
       (function () {
         if (!matchMedia('(hover: hover) and (pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference)').matches) return;
         var GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/';
-        function decode(el, delay) {
+        function decode(el, delay, keep) {
           var text = el.textContent;
           var n = text.replace(/\s/g, '').length;
           // 25ms a letter, squeezed on long lines so every line lands inside 900ms.
@@ -274,7 +274,11 @@ const ogImage = new URL(withBase(image), Astro.site).href;
             } else done = false;
             if (!done) return requestAnimationFrame(frame);
             el.textContent = text;
-            if (inline) el.removeAttribute('style');
+            if (keep) {
+              // The role line stays a block. Turning it back inline hands its text to the
+              // paragraph, which Chrome counts as a new largest paint and so delays LCP.
+              el.style.width = el.style.whiteSpace = el.style.clipPath = '';
+            } else if (inline) el.removeAttribute('style');
           }
           requestAnimationFrame(frame);
         }
@@ -282,7 +286,7 @@ const ogImage = new URL(withBase(image), Astro.site).href;
         // 700ms into the first visit. Later pages decode it straight away.
         var first = document.documentElement.classList.contains('enter');
         document.querySelectorAll('[data-decode="paint"]').forEach(function (el) {
-          decode(el, first ? 700 : 0);
+          decode(el, first ? 700 : 0, true);
         });
         var els = document.querySelectorAll('[data-decode]:not([data-decode="paint"])');
         if (!('IntersectionObserver' in window)) return;
