@@ -81,6 +81,9 @@
         // Six percent a frame leaves a faint residue that 8 bit alpha never rounds
         // away, so after 90 frames the canvas is cleared and the loop stops.
         ctx.clearRect(0, 0, w, h);
+        // An empty canvas still costs a full screen blend on every scrolled frame,
+        // so it leaves the page until the pointer moves again.
+        canvas.style.visibility = 'hidden';
         raf = 0;
         return;
       }
@@ -89,6 +92,7 @@
 
     size();
     tint();
+    canvas.style.visibility = 'hidden';
     addEventListener('resize', size);
     new MutationObserver(tint).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     addEventListener(
@@ -99,6 +103,7 @@
         py = e.clientY;
         rest = 0;
         if (!raf) {
+          canvas.style.visibility = '';
           if (performance.now() - moved > 1500) {
             puffs.forEach(function (p) { p.x = px; p.y = py; });
           }
