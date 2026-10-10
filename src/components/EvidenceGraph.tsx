@@ -301,6 +301,13 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
       .stop();
     simRef.current = sim;
 
+    let visible = false;
+    let started = false;
+    const loop = () => {
+      sim.tick();
+      drawRef.current();
+      if (sim.alpha() > sim.alphaMin() && visible) rafRef.current = requestAnimationFrame(loop);
+    };
     const run = () => {
       cancelAnimationFrame(rafRef.current);
       // d3 caches the corner targets until the accessor is set again. The first version
@@ -313,18 +320,33 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
         drawRef.current();
         return;
       }
-      const loop = () => {
-        sim.tick();
-        drawRef.current();
-        if (sim.alpha() > sim.alphaMin()) rafRef.current = requestAnimationFrame(loop);
-      };
       rafRef.current = requestAnimationFrame(loop);
     };
     runRef.current = run;
-    run();
+    // The graph sits below the hero. Blooming it at load spent a long task nobody saw
+    // and competed with the entrance, so it waits for the visitor to reach it. A bloom
+    // cut short by scrolling away picks up where it stopped on the way back.
+    const io = new IntersectionObserver(
+      ([e]) => {
+        visible = e.isIntersecting;
+        if (!visible) return cancelAnimationFrame(rafRef.current);
+        // The observer also reports the first visible pixel, so the bloom waits for 20 percent.
+        if (!started) {
+          if (e.intersectionRatio < 0.2) return;
+          started = true;
+          run();
+        } else if (sim.alpha() > sim.alphaMin()) {
+          cancelAnimationFrame(rafRef.current);
+          rafRef.current = requestAnimationFrame(loop);
+        }
+      },
+      { threshold: 0.2 },
+    );
+    if (wrapRef.current) io.observe(wrapRef.current);
     // Canvas text falls back to a system face until the web fonts land.
     document.fonts?.ready.then(() => drawRef.current());
     return () => {
+      io.disconnect();
       cancelAnimationFrame(rafRef.current);
       sim.stop();
     };
