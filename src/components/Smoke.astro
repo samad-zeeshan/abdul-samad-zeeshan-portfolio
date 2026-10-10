@@ -144,6 +144,13 @@
          gradient into a fine dot grid. A small blur melts the dots without changing the shape. */
       filter: blur(3px);
     }
+    /* Safari redraws a blurred, blended full screen layer on every frame, which stalls
+       scrolling and the page wipe. Faint dithering is the smaller cost. */
+    @supports (font: -apple-system-body) {
+      .smoke {
+        filter: none;
+      }
+    }
     :global(body) {
       cursor: crosshair;
     }

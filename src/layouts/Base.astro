@@ -365,7 +365,10 @@ const ogImage = new URL(withBase(image), Astro.site).href;
       // Smooth wheel scrolling on wide pointer screens. The import sits behind the same
       // gate, so phones, touch and reduced-motion visitors never download the library.
       const smooth = '(pointer: fine) and (min-width: 60rem) and (prefers-reduced-motion: no-preference)';
-      if (matchMedia(smooth).matches) {
+      // Safari runs animation frames at 60fps even on 120Hz screens, so Lenis there
+      // scrolls at half the rate of native trackpad scrolling and feels choppy.
+      const safari = /Safari\//.test(navigator.userAgent) && !/Chrome|Chromium|Edg\//.test(navigator.userAgent);
+      if (matchMedia(smooth).matches && !safari) {
         (window as unknown as { __settled: Promise<void> }).__settled.then(() => import('lenis')).then(({ default: Lenis }) => {
           const lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1, smoothWheel: true, syncTouch: false });
           const loop = (t: number) => {
