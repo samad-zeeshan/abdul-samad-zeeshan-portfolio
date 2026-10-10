@@ -140,6 +140,9 @@
       z-index: 2;
       pointer-events: none;
       mix-blend-mode: screen;
+      /* Puffs this faint land on only a few 8 bit steps, and the browser dithers each
+         gradient into a fine dot grid. A small blur melts the dots without changing the shape. */
+      filter: blur(3px);
     }
     :global(body) {
       cursor: crosshair;
