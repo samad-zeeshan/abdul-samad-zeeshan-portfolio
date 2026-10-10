@@ -70,7 +70,6 @@ const words = text.split(' ');
     let r = 0, from = 0, to = 0, t0 = 0, raf = 0;
 
     const aim = (e: PointerEvent) => {
-      // Measured on the lit layer, since it starts above the block.
       const b = lit.getBoundingClientRect();
       tx = e.clientX - b.left;
       ty = e.clientY - b.top;
@@ -117,19 +116,22 @@ const words = text.split(' ');
 </script>
 
 <style>
+  /* At a line height of 0.82 the letters stand taller than their line box. A mask
+     clips to the box, so the block reaches 0.2em higher and pads it back. Both copies
+     share that box exactly, so the masked layer cannot land a pixel off the outline. */
   .name {
     position: relative;
     display: block;
+    margin-top: -0.2em;
   }
   .name__outline {
     display: block;
     visibility: hidden;
+    padding-top: 0.2em;
   }
-  /* At a line height of 0.82 the letters stand taller than their line box. A mask
-     clips to the box, so both clipping boxes reach 0.2em higher and pad it back. */
   .name__lit {
     position: absolute;
-    inset: -0.2em 0 0;
+    inset: 0;
     padding-top: 0.2em;
     pointer-events: none;
   }
