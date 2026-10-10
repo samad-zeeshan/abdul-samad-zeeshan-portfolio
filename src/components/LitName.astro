@@ -163,7 +163,16 @@ const words = text.split(' ');
     :global(html.js) .name__outline {
       visibility: visible;
       color: transparent;
-      -webkit-text-stroke: 1px color-mix(in srgb, var(--tone-ink) 45%, transparent);
+      -webkit-text-stroke: 1px color-mix(in srgb, var(--tone-ink) 45%, var(--tone-bg));
+    }
+    /* On 1x and 1.25x screens, which most Windows laptops use, any thin outline steps
+       visibly along the slanted strokes. Solid dim letters keep smooth edges there, and
+       the lit layer above still glows through them. Retina keeps the hairline. */
+    @media (max-resolution: 1.99dppx) {
+      :global(html.js) .name__outline {
+        color: color-mix(in srgb, var(--tone-ink) 16%, var(--tone-bg));
+        -webkit-text-stroke: 0;
+      }
     }
     /* The mask is solid out to 40 percent of the radius, then feathers, so the lit
        strokes have a soft edge instead of a hard circle. */
