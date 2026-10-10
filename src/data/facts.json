@@ -66,7 +66,7 @@
       {"skill": "ci", "project": "proving", "evidence": "A run recorded with a local model replays in automated tests with no model at all."},
       {"skill": "java", "project": "tally", "evidence": "The service is plain Java on the built-in web server, with lightweight threads and hand-written JSON."},
       {"skill": "postgresql", "project": "tally", "evidence": "Database rules support the ledger rules. Each payment key is unique, ordinary balances cannot go below zero, and no entry is zero."},
-      {"skill": "idempotency", "project": "tally", "evidence": "Tally applies a repeated payment only once, even after a lost reply. It applied none of about 1,600 repeats twice."},
+      {"skill": "idempotency", "project": "tally", "evidence": "Tally applies a retried payment only once, even after a lost reply. It applied none of about 1,600 retries twice."},
       {"skill": "concurrency", "project": "tally", "evidence": "Tally locks account rows in one fixed order, so two crossing transfers can never block each other forever."},
       {"skill": "formal-methods", "project": "tally", "evidence": "A TLA+ model follows the transfer code line by line. A proof tool checked about 390,000 different situations and found no error."},
       {"skill": "fault-injection", "project": "tally", "evidence": "I made the network and database fail while transfers continued. In about 11,000 transfers, Tally did not lose or double one cent."},

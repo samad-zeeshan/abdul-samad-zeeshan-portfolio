@@ -8,7 +8,7 @@ opener: "Tarn asks one question: could software catch a real attacker in about a
 repo: "https://github.com/samad-zeeshan/Tarn"
 demo: "https://samad-zeeshan.github.io/Tarn/"
 demoNote: "The page replays recorded runs. Its SQL box runs live in your browser when you scroll to it."
-gif: { file: "tarn.gif", width: 1280, height: 800, alt: "The demo draws one day of logins as a graph. Alerts arrive with verdicts from the AI analyst, which reads each alert before a person does." }
+gif: { file: "tarn.gif", width: 1280, height: 800, alt: "The demo draws one day of logins as a map. Alerts arrive with verdicts from the AI analyst, which reads each alert before a person does." }
 poster: "tarn.webp"
 numbers:
   - value: "29 of 181"
@@ -23,7 +23,7 @@ numbers:
     source: "Tarn README, point-in-time check table, row v2 feature engine"
 decisions:
   - "The detectors learn only from the first day. The code refuses any fit that reads past that day, so the test days stay unseen."
-  - "Later I found that the old night rule ranked ordinary night logins too high. Without it, the detector caught the attacker on 71 of 181 days, not 29."
+  - "Later I found that the old quiet-hours rule ranked ordinary night logins too high. Without it, the detector caught the attacker on 71 of 181 days, not 29."
   - "The analyst test stopped early because another job used the graphics card of the laptop. So the test scored only 49 of 600 alerts."
 papers:
   - { id: "2607.29390", title: "Fair evaluation of graph-based lateral movement detectors", change: "Every detector learns only from the first day. Each gets the same 100 alerts a day, so the comparison is fair." }

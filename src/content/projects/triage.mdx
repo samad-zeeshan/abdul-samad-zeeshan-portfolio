@@ -2,13 +2,13 @@
 title: "Triage"
 order: 6
 tone: { scheme: "light", bg: "#e9ecef", ink: "#15181d", ink2: "#545b66", accent: "#2446b8", line: "#cfd4db" }
-problem: "It is a small offline model. It sorts support emails, says how sure it is, and sends unsure ones to a bigger model."
-description: "Triage is a small offline model. It reads a support email and returns its topic, urgency and account number as JSON. It sends unsure emails to a bigger model."
-opener: "Triage reads a support email and returns its topic, urgency and account number as clean JSON. It is a 600-million-parameter model, small enough to run on one ordinary graphics card with no internet, trained to copy a much larger model's judgement. It went from worse than guessing to 87 percent on emails it had never seen, and it says how sure it is so the unsure ones can go to a bigger model."
+problem: "It is a small offline model that sorts support emails. It sends unsure emails to a larger teacher model."
+description: "Triage is a small offline model. It reads a support email and returns its topic, urgency and account number as JSON. It learned from a larger model, the teacher. It sends unsure emails to the teacher."
+opener: "Triage reads a support email and gives back its topic, its urgency and the account number, in a fixed format that other software can read. It is a small model with 600 million parameters, and it runs on one ordinary graphics card with no internet. It learned from the answers of a much larger model, which this README calls the teacher. Before training, it sorted urgency worse than a fixed guess. After training, it matched the teacher on urgency for 87 percent of emails that it had not seen before. It also says how sure it is, so the unsure emails can go to the teacher."
 repo: "https://github.com/samad-zeeshan/Triage-0.6B"
 demo: "https://samad-zeeshan.github.io/Triage-0.6B/"
-demoNote: "Four buttons replay recorded runs. They show an easy ticket and an unclear ticket that goes to the bigger model. They also show a ticket that Triage escalates and an input that is not a support email."
-gif: { file: "triage.gif", width: 1280, height: 800, alt: "In the Triage demo, a ticket arrives and confidence bars fill. Unsure tickets go to the bigger model." }
+demoNote: "Four buttons replay recorded runs. They show an easy ticket and an unclear ticket that goes to the teacher. They also show a ticket that Triage escalates and an input that is not a support email."
+gif: { file: "triage.gif", width: 1280, height: 800, alt: "In the Triage demo, a ticket arrives and confidence bars fill. Unsure tickets go to the teacher." }
 poster: "triage.webp"
 numbers:
   - value: "87.2%"
@@ -28,5 +28,5 @@ decisions:
 papers:
   - { id: "2609.23742", title: "Constrained decoding fixes structure but leaves a semantic gap", change: "A forced output format fixed the layout of the untrained model but not its answers. So the trained model runs without it." }
   - { id: "2609.25014", title: "Not all 4-bit quantizers are equal", change: "I tested each compressed size of the model for leaks of account numbers from its training data. Then I chose the smallest safe size." }
-  - { id: "2609.26550", title: "JEV-as-a-Judge", change: "The model keeps the emails it is sure of and sends the rest to a bigger model." }
+  - { id: "2609.26550", title: "JEV-as-a-Judge", change: "The model keeps the emails it is sure of and sends the rest to the teacher. The route is small model first, teacher second." }
 ---

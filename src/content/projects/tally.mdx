@@ -3,16 +3,16 @@ title: "Tally"
 order: 1
 tone: { scheme: "light", bg: "#eef1e6", ink: "#1d2a30", ink2: "#4b5a55", accent: "#2c6849", line: "#c4d3c2" }
 problem: "It is a small bank that never loses or doubles a cent, even when the network fails during a payment."
-description: "Tally is a small bank on a double-entry ledger. A repeated payment counts only once. Tally can rebuild every balance from zero, and it flags suspicious transfers with the evidence."
+description: "Tally is a small bank on a double-entry ledger. A retried payment counts only once. Tally can rebuild every balance from zero, and it flags suspicious transfers with the evidence."
 opener: "Tally is a small bank that never loses or doubles a cent. The bank writes each transfer as two entries that cancel out. If a connection drops and an app sends a transfer again, the bank applies it only once. The bank can total every balance again from the start to prove that no money leaked. A fraud check looks at each transfer after the bank saves it, and each alert keeps its evidence."
 repo: "https://github.com/samad-zeeshan/Tally"
 demo: "https://samad-zeeshan.github.io/Tally/"
-demoNote: "The demo replays five runs that I recorded from the real service. They show a transfer, a repeat after a lost reply, and a balance check. They also show a forced failure and a chain of accounts that pass on stolen money."
-gif: { file: "tally.gif", width: 1280, height: 800, alt: "The Tally demo shows a transfer, a repeated payment and a balance check. Then it shows a forced failure and a fraud flag." }
+demoNote: "The demo replays five runs that I recorded from the real service. They show a transfer, a retry after a lost reply, and a recount of the books. They also show a crash test and a fraud alert for a chain of accounts that pass on stolen money."
+gif: { file: "tally.gif", width: 1280, height: 800, alt: "The Tally demo shows a transfer, a retry and a recount of the books. Then it shows a crash test and a fraud alert." }
 poster: "tally.webp"
 numbers:
   - value: "11,054"
-    label: "Tally moved about 11,000 transfers while I made the network and database fail in 7 runs. It lost or doubled no cent."
+    label: "Tally moved about 11,000 transfers in 7 crash tests that broke the network and database. It lost or doubled no cent."
     verdict: "none lost"
     tone: "good"
     source: "Tally README, fault runs summary line (7 runs, 11,054 transfers and 1,580 retries, 0 violations)"
