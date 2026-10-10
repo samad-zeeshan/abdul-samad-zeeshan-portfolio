@@ -76,9 +76,9 @@ html {
   -webkit-tap-highlight-color: transparent;
   background: var(--tone-bg);
   color: var(--tone-ink);
-  transition:
-    background-color var(--dur-theme) ease,
-    color var(--dur-theme) ease;
+  /* Background only. Tweening color repaints every line of inherited text on each
+     frame of a theme flip, which dropped frames on phones. */
+  transition: background-color var(--dur-theme) ease;
 }
 /* Anchor links glide for everyone. Lenis adds html.lenis on wide pointer screens and
    eases the scroll itself, so the native smoothing steps aside there. */
