@@ -72,6 +72,35 @@ const ogImage = new URL(withBase(image), Astro.site).href;
           { once: true },
         );
       });
+      // Only the row being opened, or the one being returned to, carries the shared name.
+      // A named element is lifted above the page in the snapshot, so naming all seven
+      // made every dimmed name jump to full ink at the click.
+      (function () {
+        var root = document.documentElement;
+        function tag(url) {
+          var path = url ? new URL(url).pathname : '';
+          document.querySelectorAll('[data-vt-name]').forEach(function (el) {
+            var a = el.closest('a');
+            el.style.viewTransitionName = a && a.pathname === path ? el.dataset.vtName : '';
+          });
+        }
+        addEventListener('pageswap', function (e) {
+          if (e.viewTransition && e.activation) tag(e.activation.entry.url);
+        });
+        addEventListener('pagereveal', function (e) {
+          var from = e.viewTransition && window.navigation && navigation.activation && navigation.activation.from;
+          tag(from ? from.url : '');
+          if (!e.viewTransition) return;
+          // The accent columns show until the last one has slid off, which can be after
+          // the transition itself has finished.
+          root.classList.add('is-wiping');
+          addEventListener('animationend', function end(ev) {
+            if (!ev.target.matches || !ev.target.matches('.wipe span:last-child')) return;
+            root.classList.remove('is-wiping');
+            removeEventListener('animationend', end);
+          });
+        });
+      })();
     </script>
     <script is:inline define:vars={{ fonts: [displayFont, textFont, verdictFont] }}>
       // Preload the fonts on the first page of a visit only. On later pages Chrome serves
@@ -121,6 +150,9 @@ const ogImage = new URL(withBase(image), Astro.site).href;
     </script>
   </head>
   <body>
+    <div class="wipe" aria-hidden="true">
+      {Array.from({ length: 6 }, (_, i) => <span style={`--n:${i}`} />)}
+    </div>
     <Smoke />
     <div class="progress" aria-hidden="true"></div>
     <div class="hair" aria-hidden="true">

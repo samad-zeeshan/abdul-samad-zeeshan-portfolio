@@ -66,58 +66,85 @@ const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
       });
     }
 
-    // Frame lags more than the disc (1/12 against 1/7 per frame), which is what makes
-    // the two read as separate objects instead of one sticker.
+    // Frame lags more than the disc, which is what makes the two read as separate
+    // objects instead of one sticker. The lag is a time constant in ms, not a fraction per
+    // frame, so the trail feels the same on a 60 Hz and a 144 Hz screen.
+    var FRAME_MS = 150, DISC_MS = 80;
     var px = 0, py = 0;
     var f = { x: 0, y: 0 }, d = { x: 0, y: 0 };
-    var raf = 0, active = false, current = -1;
+    var raf = 0, last = 0, active = false, hidden = true, current = -1, leave = 0;
 
     function place(el, p) {
       el.style.translate = p.x + 'px ' + p.y + 'px';
     }
-    function tick() {
-      f.x += (px - f.x) / 12;
-      f.y += (py - f.y) / 12;
-      d.x += (px - d.x) / 7;
-      d.y += (py - d.y) / 7;
+    function tick(now) {
+      // Capped so a frame after a stall does not jump the whole distance.
+      var dt = last ? Math.min(now - last, 50) : 16.7;
+      last = now;
+      var kf = 1 - Math.exp(-dt / FRAME_MS), kd = 1 - Math.exp(-dt / DISC_MS);
+      f.x += (px - f.x) * kf;
+      f.y += (py - f.y) * kf;
+      d.x += (px - d.x) * kd;
+      d.y += (py - d.y) * kd;
       if (frame) place(frame, f);
       place(disc, d);
+      // Both have caught up, so stop until the pointer moves again.
+      if (Math.abs(px - f.x) + Math.abs(py - f.y) + Math.abs(px - d.x) + Math.abs(py - d.y) < 0.2) {
+        raf = last = 0;
+        return;
+      }
       raf = requestAnimationFrame(tick);
     }
+    function run() {
+      if (!raf) raf = requestAnimationFrame(tick);
+    }
     function on(i) {
+      clearTimeout(leave);
       if (i !== current && stack && i >= 0) {
         stack.style.setProperty('--i', i);
         current = i;
       }
       if (active) return;
-      // Coming back from rest, start under the pointer so nothing flies in from a corner.
-      if (!raf) {
+      // Coming back from fully shrunk, start under the pointer so nothing flies in from a corner.
+      if (hidden) {
         f.x = d.x = px;
         f.y = d.y = py;
-        raf = requestAnimationFrame(tick);
+        hidden = false;
       }
+      run();
       active = true;
       parts.forEach(function (el) { el.classList.add('active'); });
     }
     function off() {
+      clearTimeout(leave);
       if (!active) return;
       active = false;
       parts.forEach(function (el) { el.classList.remove('active', 'pressed'); });
     }
 
-    addEventListener('mousemove', function (e) { px = e.clientX; py = e.clientY; }, { passive: true });
-    // The loop keeps running through the shrink and stops once the disc reaches zero.
+    addEventListener('mousemove', function (e) {
+      px = e.clientX;
+      py = e.clientY;
+      if (!hidden) run();
+    }, { passive: true });
     disc.addEventListener('transitionend', function (e) {
       if (e.propertyName === 'scale' && !active) {
+        hidden = true;
         cancelAnimationFrame(raf);
-        raf = 0;
+        raf = last = 0;
       }
     });
     [].forEach.call(scopes, function (scope) {
       scope.addEventListener('mouseover', function (e) {
         load();
         var link = e.target.closest('[data-follow]');
-        if (!link || !scope.contains(link)) return off();
+        // The pointer crosses a 1px row border between two links. A short grace keeps
+        // the disc from starting to shrink and regrow on every border.
+        if (!link || !scope.contains(link)) {
+          clearTimeout(leave);
+          leave = setTimeout(off, 80);
+          return;
+        }
         on(ids.indexOf(link.dataset.follow));
       });
       scope.addEventListener('mouseleave', off);
@@ -151,7 +178,7 @@ const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
     transform: translate(-50%, -50%);
     transform-origin: 0 0;
     will-change: translate, scale;
-    transition: scale 0.4s cubic-bezier(0.36, 0, 0.66, 0);
+    transition: scale 0.3s var(--ease-out);
   }
   /* Kept in its own rule. In the same rule as transform, the minifier folds it into
      transform and the active scale can no longer undo it. */
@@ -159,7 +186,7 @@ const posters = discOnly ? [] : projects.filter((p) => p.data.poster);
   .follow__disc:not(.active) {
     scale: 0;
   }
-  /* Grow with a slight overshoot, shrink with a slow start, as on the site this copies.
+  /* Grow with a soft settle and shrink with an ease out, so neither end pops.
      Scale rather than width, so the grow never lays out or repaints the poster. */
   .follow__frame {
     width: clamp(14rem, 30vw, 28rem);

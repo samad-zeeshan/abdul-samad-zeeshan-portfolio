@@ -23,7 +23,7 @@ const Tag = linked ? 'a' : 'div';
     data-follow={linked ? project.id : undefined}
   >
     <span class="row__index mono" aria-hidden="true">{pad2(index + 1)}</span>
-    <h3 class="row__name" translate="no" style={`view-transition-name: name-${project.id}`}>{d.title}</h3>
+    <h3 class="row__name" translate="no" data-vt-name={`name-${project.id}`}>{d.title}</h3>
     <p class="row__problem">{d.problem}</p>
     {
       lead ? (

@@ -106,7 +106,8 @@
     addEventListener(
       'pointermove',
       function (e) {
-        if (e.pointerType !== 'mouse') return;
+        // Held while the page wipe runs, so the smoke does not draw into the new page under it.
+        if (e.pointerType !== 'mouse' || root.classList.contains('is-wiping')) return;
         px = e.clientX;
         py = e.clientY;
         rest = 0;
