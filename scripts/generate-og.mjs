@@ -85,7 +85,7 @@ await write(
   'home',
   card({
     title: 'Abdul Samad',
-    sub: facts.role + '. Seven projects, each with a demo and its own numbers.',
+    sub: facts.role + '. Each of the seven projects has a demo and its own numbers.',
     bg: FIELD,
     ink: CREAM,
     titleInk: ACCENT,

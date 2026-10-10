@@ -2,31 +2,31 @@
 title: "Parley"
 order: 5
 tone: { scheme: "dark", bg: "#15110e", ink: "#f1e8da", ink2: "#bcae9b", accent: "#5cc8b0", line: "#342b24" }
-problem: "Answers the phone for a property agency in English and Gulf Arabic, books viewings, and only states facts the listings database returned."
-description: "Parley answers the phone for a property agency in English, Gulf Arabic or both, books viewings, and only says facts the booking API returned."
-opener: "Parley answers the phone for a property agency, in English, Gulf Arabic or both in one sentence. It books a viewing, only ever says prices and addresses the listings database returned, and works with no internet connection."
+problem: "It answers calls for a property agency in English and Gulf Arabic. It books viewings and says only facts from the booking system."
+description: "Parley answers calls for a property agency in English, Gulf Arabic or a mix of both. It books viewings and says only facts from the booking system."
+opener: "Parley answers the phone for a property agency in English, Gulf Arabic or both in one sentence. It books a viewing. It only says prices and addresses that came from the listings database. It works with no internet connection."
 repo: "https://github.com/samad-zeeshan/Parley"
 demo: "https://samad-zeeshan.github.io/Parley/"
-demoNote: "Replays recorded calls in English, Arabic and a mix of both, plus one where the booking system fails mid-call. Each fact Parley speaks is marked with the booking API call it came from."
-gif: { file: "parley.gif", width: 1280, height: 800, alt: "An Arabic call in the demo, with the booking confirmed" }
+demoNote: "The demo replays recorded calls in English, Arabic and a mix of both. In one call, the booking system fails. The page marks each fact that Parley speaks with its source in the booking system."
+gif: { file: "parley.gif", width: 1280, height: 800, alt: "The demo plays an Arabic call, and Parley confirms the booking." }
 poster: "parley.webp"
 numbers:
   - value: "232 of 232"
-    label: "Every time the booking system failed mid-call, all 232 times, Parley said so and offered a callback instead of inventing a price or address."
+    label: "The booking system failed during 232 calls. Each time, Parley told the caller and offered a callback. It never invented a price or address."
     verdict: "never invented a fact"
     tone: "good"
     source: "Parley README, booking API faults paragraph"
   - value: "17 of 40"
-    label: "Scripted calls booked start to finish by voice with no internet. Not good enough yet. Calls mixing English and Arabic fail most."
+    label: "Offline, Parley completed 17 of 40 test bookings by voice. That is not good enough yet. Calls in mixed English and Arabic fail most."
     verdict: "not good enough yet"
     tone: "bad"
     source: "Parley README, calls booked table, row All, column local"
 decisions:
-  - "No model decides the next step. Replies are fixed templates, and any model rewording that adds an unknown fact is thrown away."
-  - "When the booking system is slow or down, Parley says it cannot confirm anything and books a callback instead of guessing."
-  - "A speech prompt for mixed English and Arabic kept the English words but lost the Arabic ones, so the original prompt stayed."
+  - "No model decides the next step. Replies come from fixed templates. Parley drops any model rewrite that adds an unknown fact."
+  - "When the booking system is slow or down, Parley says that it cannot confirm anything. It books a callback and does not guess."
+  - "A speech prompt for mixed English and Arabic kept the English words but lost the Arabic ones. So I kept the original prompt."
 papers:
-  - { id: "2606.31307", title: "Safe recovery when the database fails", change: "When the booking system fails mid-call, Parley confirms nothing, claims neither success nor failure, and books a callback." }
-  - { id: "2609.03321", title: "Finite-state turn taking", change: "Who holds the floor is tracked by a small set of fixed states, so a caller can talk over Parley and it stops." }
-  - { id: "2605.19069", title: "Code-switching speech recognition", change: "Calls that mix English and Arabic are scored one language at a time, which showed the Arabic words are where recognition fails." }
+  - { id: "2606.31307", title: "Safe recovery when the database fails", change: "When the booking system fails during a call, Parley confirms nothing. It claims neither success nor failure, and it books a callback." }
+  - { id: "2609.03321", title: "Finite-state turn taking", change: "A small set of fixed states tracks who is speaking. So a caller can interrupt Parley, and Parley stops." }
+  - { id: "2605.19069", title: "Code-switching speech recognition", change: "I score calls that mix English and Arabic one language at a time. This showed that speech recognition fails on the Arabic words." }
 ---

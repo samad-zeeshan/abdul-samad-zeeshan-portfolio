@@ -2,31 +2,31 @@
 title: "Proving"
 order: 4
 tone: { scheme: "dark", bg: "#0d1012", ink: "#e4e8e3", ink2: "#939ca1", accent: "#62d6b0", line: "#2a3238" }
-problem: "Tests each new version of an AI agent on thousands of made-up customers, then says ship or hold."
-description: "Proving runs thousands of simulated customers against two versions of an AI agent and says ship or hold, with the numbers behind it."
-opener: "Proving lets you test an AI agent on thousands of made-up customers before it ever meets a real one. The customers have goals, details they only give when asked, and patience that runs out. The agent's tools are recorded or faked, so nothing real is touched. At the end you get one answer, ship or hold, with the numbers behind it. It is tried here on two agents from this portfolio: Warden, which approves changes to live software, and Parley, which books property viewings by phone in English and Gulf Arabic."
+problem: "It tests each new version of an AI agent on thousands of made-up customers. Then it says ship or hold."
+description: "Proving tests two versions of an AI agent on thousands of made-up customers. It then says ship or hold and shows the numbers."
+opener: "Proving tests an AI agent on thousands of made-up customers before the agent meets a real one. Each customer has a goal, some details that it gives only when asked, and patience that runs out. Proving records or fakes the agent's tools, so the test touches nothing real. At the end, Proving gives one answer, ship or hold, with the numbers behind it. The two test agents are Warden, which approves changes to live software, and Parley, which books property viewings by phone."
 repo: "https://github.com/samad-zeeshan/Proving"
 demo: "https://samad-zeeshan.github.io/Proving/"
-demoNote: "Pick an agent and two versions, watch a grid of customers run, then read the report. The last button shows hostile customers and what they got past."
-gif: { file: "proving.gif", width: 1280, height: 800, alt: "Simulated customers running against two versions of an agent" }
+demoNote: "Pick an agent and two versions. Watch a grid of customers run. Then read the report. The last button shows what hostile customers made the agent do."
+gif: { file: "proving.gif", width: 1280, height: 800, alt: "Made-up customers talk to two versions of an agent." }
 poster: "proving.webp"
 numbers:
   - value: "1.301 to 0.607"
-    label: "Hostile fake customers got the old Warden to make 1.3 unwanted server calls per conversation. The new one made 0.6. Verdict: ship."
+    label: "Hostile made-up customers made the old Warden send about 1.3 unwanted server calls per conversation. The new Warden sent 0.6. The verdict was ship."
     verdict: "ship"
     tone: "good"
     source: "Proving README, results table, row Warden, resolver off to Warden as shipped"
   - value: "505 of 505"
-    label: "Parley's new way of reading requests matched the old one on all 505 ordinary conversations. No gain, so the verdict was hold."
+    label: "The new Parley understood requests exactly like the old one in all 505 ordinary calls. It gained nothing, so the verdict was hold."
     verdict: "hold"
     tone: "neutral"
     source: "Proving README, results table row Parley and the paragraph under the second table"
 decisions:
-  - "A test passes only on what actually changed in the agent's systems, never on what the agent says it did."
-  - "Judges that read only the transcript scored barely better than a coin, because a booking under the wrong phone number sounds like a success."
-  - "Warden's server already refused every bad call, so its ship verdict rests on fewer bad calls sent, not on harm prevented."
+  - "A test passes only on what changed in the systems of the agent. What the agent says it did never counts."
+  - "Judges that read only the transcript did almost no better than a coin toss. A booking under the wrong phone number sounds like a success."
+  - "Warden's server already refused every bad call. So its ship verdict comes from fewer bad calls, not from less harm."
 papers:
-  - { id: "2609.00982", title: "Disclosure-gated user simulation", change: "Fake customers give a detail only when the agent asks for it, and some only when asked twice." }
-  - { id: "2609.21841", title: "EnterpriseVal", change: "How much the agent acts alone and how costly its mistakes are decide how much evidence a ship verdict needs." }
-  - { id: "2609.22512", title: "Agreement overstates evidence", change: "It showed that judges who agree are not independent, so Proving measures how much the three judges share their mistakes." }
+  - { id: "2609.00982", title: "Disclosure-gated user simulation", change: "Made-up customers give a detail only when the agent asks for it. Some give it only when the agent asks twice." }
+  - { id: "2609.21841", title: "EnterpriseVal", change: "A ship verdict needs more evidence when the agent acts more on its own. It also needs more when its mistakes cost more." }
+  - { id: "2609.22512", title: "Agreement overstates evidence", change: "It showed that judges who agree are not independent. So Proving measures how often the three judges make the same mistakes." }
 ---

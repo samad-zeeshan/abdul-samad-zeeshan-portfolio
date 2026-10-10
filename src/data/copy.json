@@ -8,22 +8,22 @@
   "eyebrows": {
     "hero": "Report / 2026 / {count} systems",
     "about": "The rule",
-    "projects": "Projects / 01 to {last} / my top pick first",
-    "tools": "Tools / {n} / used in the {count}",
+    "projects": "Projects / 01 to {last} / top pick first",
+    "tools": "Tools / {n} / in {count} projects",
     "project": "Project {index} / {total} / shipped",
     "opener": "From the write-up",
-    "numbers": "Headline numbers / {n}",
-    "decisions": "Decisions I made and things that broke",
-    "proves": "What this proves / {n} skills",
-    "demo": "The demo, recorded",
-    "demoTimed": "The demo, recorded / {duration}",
+    "numbers": "Main results / {n}",
+    "decisions": "Decisions and failures",
+    "proves": "Skills shown / {n}",
+    "demo": "Recorded demo",
+    "demoTimed": "Recorded demo / {duration}",
     "papers": "Papers / {n}",
     "next": "Next / {index} / {total}",
     "lost": "Page not found"
   },
   "footer": {
     "nav": ["Projects", "Resume", "GitHub"],
-    "note": "Every result on this site is copied from the project's own write-up. The counts above are worked out from those results."
+    "note": "Every result on this site comes from the write-up of its project. The site calculates the counts above from those results."
   },
   "follower": {
     "disc": "Open"

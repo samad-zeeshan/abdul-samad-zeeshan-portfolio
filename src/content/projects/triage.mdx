@@ -2,31 +2,31 @@
 title: "Triage"
 order: 6
 tone: { scheme: "light", bg: "#e9ecef", ink: "#15181d", ink2: "#545b66", accent: "#2446b8", line: "#cfd4db" }
-problem: "A small offline model that sorts support emails, says how sure it is, and sends only the unsure ones to a bigger model."
-description: "Triage is a 600-million-parameter model that reads a support email and returns topic, urgency and account number as JSON, offline, and escalates only when unsure."
+problem: "It is a small offline model. It sorts support emails, says how sure it is, and sends unsure ones to a bigger model."
+description: "Triage is a small offline model. It reads a support email and returns its topic, urgency and account number as JSON. It sends unsure emails to a bigger model."
 opener: "Triage reads a support email and returns its topic, urgency and account number as clean JSON. It is a 600-million-parameter model, small enough to run on one ordinary graphics card with no internet, trained to copy a much larger model's judgement. It went from worse than guessing to 87 percent on emails it had never seen, and it says how sure it is so the unsure ones can go to a bigger model."
 repo: "https://github.com/samad-zeeshan/Triage-0.6B"
 demo: "https://samad-zeeshan.github.io/Triage-0.6B/"
-demoNote: "Four buttons replay recorded runs: an easy ticket, an ambiguous one that the cascade sends to the bigger model, an escalated one, and an off-task input."
-gif: { file: "triage.gif", width: 1280, height: 800, alt: "Triage demo: a ticket slides in, confidence bars fill, and unsure ones peel off to the teacher" }
+demoNote: "Four buttons replay recorded runs. They show an easy ticket and an unclear ticket that goes to the bigger model. They also show a ticket that Triage escalates and an input that is not a support email."
+gif: { file: "triage.gif", width: 1280, height: 800, alt: "In the Triage demo, a ticket arrives and confidence bars fill. Unsure tickets go to the bigger model." }
 poster: "triage.webp"
 numbers:
   - value: "87.2%"
-    label: "Support emails given the right urgency, out of 1,200 it had never seen. The same model before training: 38.3%. Always guessing high: 42.4%."
-    verdict: "up from 38.3%"
+    label: "The trained model gave the right urgency to 87% of 1,200 new emails. Untrained, it got 38%. A fixed guess of high gets 42%."
+    verdict: "up from 38%"
     tone: "good"
     source: "Triage README, headline table, row Priority"
   - value: "0 of 50"
-    label: "Card, phone or social security numbers hidden in emails that the trained model repeated back. The untrained model leaked 16."
+    label: "I hid 50 card, phone or social security numbers in test emails. The trained model repeated none of them. The untrained model leaked 16."
     verdict: "none leaked"
     tone: "good"
     source: "Triage README, trust table, row Planted card, phone or SSN echoed in the output"
 decisions:
-  - "The confidence cutoff of 0.885 turned out costly, but moving it after seeing test results would mean tuning on the test, so it stayed."
-  - "The model ignored requests to state its own confidence, so confidence comes from scoring every allowed answer instead."
-  - "Training made it answer most off-topic text as a support email, and one injected line pushed 29 of 40 low-urgency emails to high."
+  - "The confidence cutoff of 0.885 cost a lot. A change after I saw the test results would tune the model on the test. So the cutoff stayed."
+  - "The model ignored requests to state its own confidence. So Triage scores every allowed answer and takes the confidence from those scores."
+  - "After training, the model treated most off-topic text as a support email. One injected line also pushed 29 of 40 low-urgency emails to high."
 papers:
-  - { id: "2609.23742", title: "Constrained decoding fixes structure but leaves a semantic gap", change: "Forcing the output format fixed the untrained model's layout but not its answers, so the trained model runs without it." }
-  - { id: "2609.25014", title: "Not all 4-bit quantizers are equal", change: "Each compressed size of the model was tested for repeating account numbers it saw in training before the smallest safe one was chosen." }
-  - { id: "2609.26550", title: "JEV-as-a-Judge", change: "The model keeps the emails it is sure of and hands the rest to a bigger model." }
+  - { id: "2609.23742", title: "Constrained decoding fixes structure but leaves a semantic gap", change: "A forced output format fixed the layout of the untrained model but not its answers. So the trained model runs without it." }
+  - { id: "2609.25014", title: "Not all 4-bit quantizers are equal", change: "I tested each compressed size of the model for leaks of account numbers from its training data. Then I chose the smallest safe size." }
+  - { id: "2609.26550", title: "JEV-as-a-Judge", change: "The model keeps the emails it is sure of and sends the rest to a bigger model." }
 ---

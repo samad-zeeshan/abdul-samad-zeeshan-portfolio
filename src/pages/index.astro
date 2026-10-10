@@ -22,7 +22,7 @@ const cut = profile.role.indexOf(', ');
 if (cut < 0) throw new Error('facts.json role needs a comma before its second half');
 const roleHead = profile.role.slice(0, cut + 1);
 const roleTail = profile.role.slice(cut + 2);
-const tailText = 'what actually happened when I tested it';
+const tailText = 'what happened when I tested it';
 const at = profile.intro.lastIndexOf(tailText);
 if (at < 0) throw new Error(`facts.json intro must end with "${tailText}"`);
 const introHead = profile.intro.slice(0, at);
@@ -31,7 +31,7 @@ const introEnd = profile.intro.slice(at + tailText.length);
 
 <Base
   title={`${profile.name}. ${profile.role}`}
-  description="Seven projects in backend and data systems. Each one has a demo you can open and numbers copied from its own write-up."
+  description="This site shows seven projects in backend and data systems. Each one has a demo that you can open and numbers from its own write-up."
 >
   <section class="hero wrap on-field" data-theme="field" aria-labelledby="hero-name">
     <Eyebrow text={fill(copy.eyebrows.hero, { count })} class="hero__eyebrow" />

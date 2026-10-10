@@ -2,27 +2,27 @@
 title: "Docket"
 order: 7
 tone: { scheme: "light", bg: "#f6f6f1", ink: "#1f2224", ink2: "#474c50", accent: "#b3372b", line: "#c4c6bf" }
-problem: "Reads receipt photos into checked data and says which receipts can skip a person at a 1 percent error budget."
-description: "Docket turns receipt photos and PDFs into schema-checked data, scores every field, and sends doubtful receipts to a person."
+problem: "It reads receipt photos into checked data. It says which receipts can skip a person with a 1 percent error budget."
+description: "Docket turns receipt photos and PDFs into data that passes a strict format check. It scores every field and sends doubtful receipts to a person."
 opener: "Docket reads a photo or PDF of a receipt and turns it into clean, checked data. It refuses to save anything that fails a strict format check, because a model will happily invent a field, and a retry can never create a duplicate. Every field also gets a confidence score, and a receipt goes to a person whenever one of its fields looks doubtful."
 repo: "https://github.com/samad-zeeshan/Docket"
 demo: "https://samad-zeeshan.github.io/Docket/"
-demoNote: "It replays recorded results: no login, no waiting, no model behind it."
-gif: { file: "docket.gif", width: 1280, height: 800, alt: "Docket demo: dragging the confidence threshold moves receipts between straight through and to a person" }
+demoNote: "The demo replays recorded results. You need no login and you do not wait. No model works behind the page."
+gif: { file: "docket.gif", width: 1280, height: 800, alt: "In the Docket demo, a confidence slider moves receipts between automatic handling and a person." }
 poster: "docket.webp"
 numbers:
   - value: "11 of 149"
-    label: "Test receipts the system trusted enough to skip a person, at a 1% error budget. Of their 32 fields, none were wrong."
+    label: "With a 1% error budget, Docket trusted 11 of 149 test receipts enough to skip a person. None of their 32 fields was wrong."
     verdict: "none wrong"
     tone: "good"
     source: "Docket README, straight-through processing section, paragraph under the table"
   - value: "20 of 20"
-    label: "Photo receipts read into valid JSON when the model is forced to follow the output format. Without that, 17 of 20."
+    label: "When I forced the model to follow the output format, all 20 photo receipts became valid JSON. Without it, only 17 of 20 did."
     verdict: "all valid"
     tone: "good"
     source: "Docket README, routing and cost table, public photos rows (100.0% and 85.0%) and the note under it"
 decisions:
-  - "Alarms went quiet after a security setting silently removed their right to publish. The fix grants that right in writing."
+  - "The alarms stopped because a security setting removed their right to publish, with no warning. The fix gives that right in writing."
   - "Each record's id comes from the file itself, so a repeated delivery or replay never creates a second record."
-  - "Reading stopped at a time limit because the graphics card is shared, so only 606 of 1,987 receipts were read."
+  - "The test reached a time limit because other jobs share the graphics card. So Docket read only 606 of 1,987 receipts."
 ---

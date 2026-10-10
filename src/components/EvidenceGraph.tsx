@@ -475,11 +475,11 @@ export default function EvidenceGraph({ skills, projects, edges }: Props) {
             </>
           ) : (
             <>
-              <span className="eg__now-name">{active.label}</span> {activeProjects.length} skills. Click to open.
+              <span className="eg__now-name">{active.label}</span> shows {activeProjects.length} skills. Click to open it.
             </>
           )
         ) : (
-          'Skills, linked to the project that proves each one.'
+          'Each skill links to the projects that prove it.'
         )}
       </p>
     </div>
