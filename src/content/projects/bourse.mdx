@@ -1,7 +1,32 @@
 ---
 title: "Bourse"
 order: 8
-status: "hidden"
-problem: "An exchange that matches orders fast and never loses one, and a market maker that has to prove its profit is not luck."
-description: "Bourse is an order matching engine and market maker. It is still in progress."
+tone: { scheme: "dark", bg: "#0a0a0a", ink: "#e8e6e1", ink2: "#8b8984", accent: "#e8ff47", line: "#262626" }
+problem: "A small stock exchange that never loses an order, and a trading robot that must prove its profit is not luck."
+description: "Bourse is a small stock exchange with a trading robot. Tests check that the exchange never loses an order. Strict tests treat every robot profit as luck or a cheat."
+opener: "Bourse is a small stock exchange and a robot that trades on it. Tests check both, so nobody has to trust them. The exchange matches buyers and sellers first by price and then by arrival time. It never loses an order, and it gives the same answer every time it gets the same orders. The robot tries to earn the gap between the buy price and the sell price. Strict tests treat every profit as luck or a cheat, and none of the honest robots made money."
+repo: "https://github.com/samad-zeeshan/Bourse"
+demo: "https://samad-zeeshan.github.io/Bourse/"
+demoNote: "The demo runs the exchange in your browser on three minutes of real orders from Binance. You need no login and you do not wait. The speed and robot results come from saved test runs."
+gif: { file: "bourse.gif", width: 1280, height: 800, alt: "The Bourse demo replays real orders through the exchange and times each one. Then the tests catch a robot that cheats." }
+poster: "bourse.webp"
+numbers:
+  - value: "42 million"
+    label: "The exchange matched about 42 million orders a second on one processor core. The goal was one million, so this is well above it."
+    verdict: "well above goal"
+    tone: "good"
+    source: "Bourse README, Speed section, row Bourse, matcher alone (42 million orders per second) and the paragraph under the table"
+  - value: "0 of 3"
+    label: "None of the three honest trading robots made money in the strict test. The trained robot lost more than the simple one."
+    verdict: "none made money"
+    tone: "bad"
+    source: "Bourse README, Robots section, strategies table (Avellaneda-Stoikov, Multi-level, RL candidate) and the Result line"
+decisions:
+  - "I store every price and size as a whole number, so the exchange never has to round a value."
+  - "I built one robot that cheats by peeking at future prices. It made money, but a separate check caught the peek and refused it."
+  - "I sent about 1.5 billion random orders to the exchange and to a copy in Python. They never disagreed, but the run stopped after 5.5 of 24 planned hours."
+papers:
+  - { id: "2607.05076", title: "Can Code Specify a System Precisely Enough to Formally Verify It?", change: "It warned that a model written from the code can share its mistakes. So random tests also check the parts the model skips." }
+  - { id: "2608.27734", title: "What survives honest evaluation?", change: "It gave the split between tuning days and test days. It also gave the robot that cheats on purpose." }
+  - { id: "2607.04280", title: "Order Splitting and Liquidity Replenishment and the square-root law", change: "It explains why big orders here move the price more than a known rule predicts. New orders do not rush in after a price move." }
 ---

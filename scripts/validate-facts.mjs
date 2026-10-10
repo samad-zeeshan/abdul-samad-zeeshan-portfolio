@@ -27,6 +27,7 @@ const SIBLINGS = {
   tarn: ['Tarn'],
   docket: ['Docket'],
   triage: ['Triage-0.6B'],
+  bourse: ['Bourse'],
 };
 
 const entries = readdirSync(contentDir)

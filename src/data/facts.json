@@ -104,7 +104,11 @@
       {"skill": "amazon-bedrock", "project": "docket", "evidence": "Claude Haiku on Amazon Bedrock got almost every field right on 42 receipts that I checked by hand. It used saved answers."},
       {"skill": "calibration", "project": "docket", "evidence": "With a 1% error budget, Docket let 11 of 149 test receipts skip a person. None of their 32 fields was wrong."},
       {"skill": "idempotency", "project": "docket", "evidence": "Each record's id comes from the file itself, so a repeated delivery never makes a second record."},
-      {"skill": "observability", "project": "docket", "evidence": "The alarms stopped because a security setting removed their right to publish, with no warning. The alarm topic now grants it in writing."}
+      {"skill": "observability", "project": "docket", "evidence": "The alarms stopped because a security setting removed their right to publish, with no warning. The alarm topic now grants it in writing."},
+      {"skill": "python", "project": "bourse", "evidence": "I wrote a second copy of the exchange in Python. Random tests check that both copies give the same answer."},
+      {"skill": "concurrency", "project": "bourse", "evidence": "One thread owns the order book, and queues pass orders in and out. Four replays of 5 million orders gave the same bytes."},
+      {"skill": "formal-methods", "project": "bourse", "evidence": "A TLA+ model checked about 540,000 situations of the exchange and found no broken rule. It caught both bugs I added on purpose."},
+      {"skill": "model-evaluation", "project": "bourse", "evidence": "I tune each trading robot on earlier days and test it once on the next day. None of the honest robots made money."}
     ]
   },
   "email": "samad.z@outlook.com",
